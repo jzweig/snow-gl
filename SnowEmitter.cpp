@@ -63,8 +63,8 @@ void SnowEmitter::tick()
         if( m_snowflakes[i].active )
         {
             // TODO: Do physics updates
-            m_snowflakes[i].pos = .01f * m_snowflakes[i].speed * m_snowflakes[i].dir + m_snowflakes[i].pos;
-            if( m_snowflakes[i].pos.y < -3 )
+            m_snowflakes[i].pos = BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * m_snowflakes[i].dir + m_snowflakes[i].pos;
+            if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF )
             {
                 m_snowflakes[i].active = false;
                 m_activeSnowflakes--;
@@ -73,7 +73,7 @@ void SnowEmitter::tick()
         else
         {
             int inactiveCount = m_snowflakeCount - m_activeSnowflakes;
-            if( (qrand() % 1000 ) < inactiveCount * .01 )
+            if( (qrand() % 1000 ) < inactiveCount * SNOWFLAKE_DROP_PROBABILITY )
             {
                 // Activate this snowflake
                 dropSnowflake(i);
