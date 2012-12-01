@@ -26,9 +26,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
     m_camera->angle = 45.0f, m_camera->near = .1f, m_camera->far = 1000.0f;
 
-    // Load the texture we're going to use
-    GLuint textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
-    m_snowEmitter.setTextureId( textureId );
+
 }
 
 View::~View()
@@ -91,6 +89,10 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glEnable(GL_BLEND);
 
+    // Load the texture
+    m_textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
+    m_snowEmitter.setTextureId( m_textureId );
+
     updateCamera();
     setupLights();
 
@@ -136,7 +138,7 @@ void View::updateCamera()
 
 void View::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -152,15 +154,10 @@ void View::paintGL()
     glVertex3f(-10, 10, -50);
     glEnd();
 
-/*
-    glAccum(GL_MULT, 0.9f);
-    glAccum(GL_ACCUM, 1.0f);
-    glAccum(GL_RETURN, 1.0f);
-*/
     glPopMatrix();
 
+    // Display the frame
     glFlush();
-
     swapBuffers();
 }
 

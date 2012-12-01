@@ -51,6 +51,8 @@ protected:
      //! The camera settings
      Camera *m_camera;
 
+     GLuint m_textureId;
+
 };
 
 #endif // VIEW_H
