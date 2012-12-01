@@ -45,6 +45,8 @@ protected:
      void updateCamera();
      void setupLights();
 
+     void paintSky();
+
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
 

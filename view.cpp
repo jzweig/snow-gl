@@ -156,6 +156,8 @@ void View::paintGL()
     // TODO: Paint scene
 
     glDisable(GL_LIGHTING);
+
+    paintSky();
     /*
     glBegin(GL_QUADS);
     glNormal3f(0, 0, 1.0);
@@ -175,6 +177,22 @@ void View::paintGL()
     // Display the frame
     glFlush();
     swapBuffers();
+}
+
+void View::paintSky()
+{
+    glBegin(GL_QUADS);
+    glColor3f(.2, .2, .2);
+    glVertex3f(-1000, 3.0f, 1000);
+    glVertex3f(-1000, 3, -1000);
+    glVertex3f(1000, 3, -1000);
+    glVertex3f(1000, 3, 1000);
+    glColor3f(0.25f, .5f, 0.35f);
+    glVertex3f(-1000, -3, 1000);
+    glVertex3f(-1000, -3, -1000);
+    glVertex3f(1000, -3, -1000);
+    glVertex3f(1000, -3, 1000);
+    glEnd();
 }
 
 void View::resizeGL(int w, int h)
