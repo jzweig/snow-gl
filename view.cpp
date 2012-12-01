@@ -24,7 +24,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->eye.x = 0.0f, m_camera->eye.y = 0.0f, m_camera->eye.z = 3.0f;
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
-    m_camera->angle = 45.0f, m_camera->near = .1f, m_camera->far = 1000.0f;
+    m_camera->angle = 45.0f, m_camera->near = .25f, m_camera->far = 1000.0f;
 
 
 }
