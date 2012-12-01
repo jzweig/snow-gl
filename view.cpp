@@ -89,6 +89,9 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glEnable(GL_BLEND);
 
+    // Enable alpha
+    glEnable(GL_ALPHA_TEST);
+
     // Load the texture
     GLuint textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
@@ -143,8 +146,8 @@ void View::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    // Render dem snowflakes
-    m_snowEmitter.drawSnowflakes();
+    // NOTE: Opaque objects must be rendered before transparent. This means
+    //       objects before snowflakes.
 
     glBegin(GL_QUADS);
     glColor3f(0.25, 0.25, 0.25);
@@ -153,6 +156,9 @@ void View::paintGL()
     glVertex3f(10, 10, -50);
     glVertex3f(-10, 10, -50);
     glEnd();
+
+    // Render dem snowflakes
+    m_snowEmitter.drawSnowflakes();
 
     glPopMatrix();
 
