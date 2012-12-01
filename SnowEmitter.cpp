@@ -53,8 +53,8 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
 
     m_snowflakes[snowflakeIndex].active = true;
     m_snowflakes[snowflakeIndex].pos.y = 3.0 + (float)rand()/((float)RAND_MAX/(10.0)) ;
-    m_snowflakes[snowflakeIndex].pos.x = camera_x - 5.0 + (float)rand()/((float)RAND_MAX/(10.0));
-    m_snowflakes[snowflakeIndex].pos.z = camera_z - 5.0 + (float)rand()/((float)RAND_MAX/(10.0));
+    m_snowflakes[snowflakeIndex].pos.x = camera_x - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
+    m_snowflakes[snowflakeIndex].pos.z = camera_z - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
     m_snowflakes[snowflakeIndex].dir.x = 0;
     m_snowflakes[snowflakeIndex].dir.y = -1;
     m_snowflakes[snowflakeIndex].dir.z = 0;
