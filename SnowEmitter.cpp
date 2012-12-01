@@ -16,6 +16,11 @@ void SnowEmitter::setTextureId(GLuint textureId)
     std::cout << "Set a texture id of " << textureId << std::endl;
 }
 
+void SnowEmitter::setCamera(Camera *camera)
+{
+    m_camera = camera;
+}
+
 void SnowEmitter::initializeSnowflakes(int flakeCount)
 {
     if( m_snowflakes != NULL )
@@ -90,12 +95,14 @@ void SnowEmitter::drawSnowflakes()
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
 
-    glNormal3f(0, 0, 1.0f);
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
         if( m_snowflakes[i].active )
         {
+
+            float3 normal = m_camera->eye - m_snowflakes[i].pos;
+            glNormal3fv(normal.data);
 
             float size = m_snowflakes[i].size;
 

@@ -65,6 +65,11 @@ class SnowEmitter
           */
         void setTextureId(GLuint textureId);
 
+        /**
+          * Sets the camera being used with this snow emitter.
+          */
+        void setCamera(Camera *camera);
+
     protected:
 
         /**
@@ -87,6 +92,9 @@ class SnowEmitter
 
         //! The GL texture id for the snowflake texture
         GLuint m_textureId;
+
+        //! Pointer to the camera
+        Camera *m_camera;
 };
 
 #endif // SNOWEMITTER_H
