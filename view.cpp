@@ -151,13 +151,21 @@ void View::paintGL()
     // NOTE: Opaque objects must be rendered before transparent. This means
     //       objects before snowflakes.
 
+    glEnable(GL_LIGHTING);
+
+    // TODO: Paint scene
+
+    glDisable(GL_LIGHTING);
+    /*
     glBegin(GL_QUADS);
-    glColor3f(0.25, 0.25, 0.25);
+    glNormal3f(0, 0, 1.0);
+    glColor3f(0.1, 0.1, 0.1);
     glVertex3f(-10, -10, -50);
     glVertex3f(10, -10, -50);
     glVertex3f(10, 10, -50);
     glVertex3f(-10, 10, -50);
     glEnd();
+    */
 
     // Render dem snowflakes
     m_snowEmitter.drawSnowflakes();

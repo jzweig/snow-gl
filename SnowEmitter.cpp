@@ -92,6 +92,7 @@ void SnowEmitter::tick()
 
 void SnowEmitter::drawSnowflakes()
 {
+    glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
 
@@ -119,4 +120,5 @@ void SnowEmitter::drawSnowflakes()
     }
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
+    glEnable(GL_LIGHTING);
 }
