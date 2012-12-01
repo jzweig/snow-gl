@@ -2,12 +2,13 @@
 #define SNOWEMITTER_H
 
 #define INITIAL_SNOWFLAKE_COUNT 10000
-#define INITIAL_FLAKES_PER_TICK 1
 #define SNOWFLAKE_CUTOFF -3
 #define BASE_FLAKE_SPEED_FACTOR .01f
 #define SNOWFLAKE_DROP_PROBABILITY .01f
 
 #include "common.h"
+#include <QtOpenGL>
+
 
 /**
  * The declaration for a snowflake.
@@ -59,6 +60,11 @@ class SnowEmitter
           */
         void tick();
 
+        /**
+          * Sets the texture id to use for snowflakes.
+          */
+        void setTextureId(GLuint textureId);
+
     protected:
 
         /**
@@ -75,10 +81,12 @@ class SnowEmitter
         Snowflake *m_snowflakes;
         int m_snowflakeCount;
         int m_activeSnowflakes;
-        int m_flakesPerTick;
 
         //! The width of a snowflake
         float m_scale;
+
+        //! The GL texture id for the snowflake texture
+        GLuint m_textureId;
 };
 
 #endif // SNOWEMITTER_H

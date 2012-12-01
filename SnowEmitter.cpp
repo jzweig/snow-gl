@@ -1,5 +1,4 @@
 #include "SnowEmitter.h"
-#include <QtOpenGL>
 
 SnowEmitter::SnowEmitter()
 {
@@ -7,10 +6,14 @@ SnowEmitter::SnowEmitter()
     m_activeSnowflakes = 0;
     m_snowflakes = NULL;
 
-    m_flakesPerTick = INITIAL_FLAKES_PER_TICK;
-
     // Initialize the snow flakes
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
+}
+
+void SnowEmitter::setTextureId(GLuint textureId)
+{
+    m_textureId = textureId;
+    std::cout << "Set a texture id of " << textureId << std::endl;
 }
 
 void SnowEmitter::initializeSnowflakes(int flakeCount)
@@ -84,10 +87,7 @@ void SnowEmitter::tick()
 
 void SnowEmitter::drawSnowflakes()
 {
-    // TODO: Bind dat texture
-    //glBindTexture(GL_TEXTURE_2D, m_textureID);
-
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
 
     glNormal3f(0, 0, 1.0f);
@@ -99,9 +99,13 @@ void SnowEmitter::drawSnowflakes()
 
             float size = m_snowflakes[i].size;
 
+            glTexCoord2f(0.0, 1.0);
             glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
+            glTexCoord2f(0.0, 0.0);
             glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
+            glTexCoord2f(1.0, 0.0);
             glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
+            glTexCoord2f(1.0, 1.0);
             glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
 
         }

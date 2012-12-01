@@ -25,6 +25,10 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
     m_camera->angle = 45.0f, m_camera->near = .1f, m_camera->far = 1000.0f;
+
+    // Load the texture we're going to use
+    GLuint textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
+    m_snowEmitter.setTextureId( textureId );
 }
 
 View::~View()
@@ -37,7 +41,10 @@ GLuint View::loadTexture(const QString &path)
     QFile file(path);
 
     QImage image, texture;
-    if(!file.exists()) return -1;
+    if(!file.exists()) {
+        std::cout << "Texture file " << path.toStdString() << " does not exist" << std::endl;
+        return -1;
+    }
     image.load(file.fileName());
     texture = QGLWidget::convertToGLFormat(image);
 
@@ -79,6 +86,10 @@ void View::initializeGL()
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
     glEnable(GL_DEPTH_TEST);
+
+    // Setup blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glEnable(GL_BLEND);
 
     updateCamera();
     setupLights();
