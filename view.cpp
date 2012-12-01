@@ -90,8 +90,8 @@ void View::initializeGL()
     glEnable(GL_BLEND);
 
     // Load the texture
-    m_textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
-    m_snowEmitter.setTextureId( m_textureId );
+    GLuint textureId = loadTexture( "/home/jbowens/course/cs123/snow-gl/textures/snowflake_design.png" );
+    m_snowEmitter.setTextureId( textureId );
 
     updateCamera();
     setupLights();
