@@ -32,6 +32,28 @@ View::~View()
     SAFE_DELETE(m_camera);
 }
 
+GLuint View::loadTexture(const QString &path)
+{
+    QFile file(path);
+
+    QImage image, texture;
+    if(!file.exists()) return -1;
+    image.load(file.fileName());
+    texture = QGLWidget::convertToGLFormat(image);
+
+    glEnable(GL_TEXTURE_2D);
+    GLuint textureid;
+    glGenTextures(1, &textureid);
+    glBindTexture(GL_TEXTURE_2D, textureid);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureid;
+}
+
 void View::initializeGL()
 {
     // All OpenGL initialization *MUST* be done during or after this
@@ -66,7 +88,7 @@ void View::initializeGL()
 
 void View::setupLights()
 {
-    // TODO: Update to directional light for moonlight
+    // TODO: Update to directional light for sunlight/moonlight
 
     // Set up GL_LIGHT0 with a position and lighting properties
     GLfloat ambientLight[] = {0.1f, 0.1f, 0.1f, 1.0f};

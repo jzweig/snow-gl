@@ -5,6 +5,9 @@
 #include <QTime>
 #include <QTimer>
 #include <QtOpenGL>
+#include <QString>
+#include <QImage>
+#include <QFile>
 #include "GL/gl.h"
 #include "SnowEmitter.h"
 #include "common.h"
@@ -24,6 +27,9 @@ private:
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
+
+    //! Loads the texture at the given location, returning the GL texture id
+    GLuint loadTexture(const QString &path);
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);

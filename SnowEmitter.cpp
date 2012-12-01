@@ -51,7 +51,7 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
     m_snowflakes[snowflakeIndex].dir.y = -1;
     m_snowflakes[snowflakeIndex].dir.z = 0;
     m_snowflakes[snowflakeIndex].speed = 0.5;
-    m_snowflakes[snowflakeIndex].size = 0.01;
+    m_snowflakes[snowflakeIndex].size = 0.005;
 }
 
 void SnowEmitter::tick()
