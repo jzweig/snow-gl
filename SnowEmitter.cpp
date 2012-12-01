@@ -85,7 +85,6 @@ void SnowEmitter::tick()
 void SnowEmitter::drawSnowflakes()
 {
     // TODO: Bind dat texture
-    float halfScale = m_scale / 2.0f;
     //glBindTexture(GL_TEXTURE_2D, m_textureID);
 
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -93,7 +92,7 @@ void SnowEmitter::drawSnowflakes()
 
     glNormal3f(0, 0, 1.0f);
     glColor3f(1.0f, 1.0f, 1.0f);
-    for(unsigned i = 0; i < m_snowflakeCount; i++)
+    for(int i = 0; i < m_snowflakeCount; i++)
     {
         if( m_snowflakes[i].active )
         {
@@ -104,17 +103,6 @@ void SnowEmitter::drawSnowflakes()
             glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
             glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
             glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
-
-            /*
-            //glTexCoord2f(0.0f, 1.0f);
-            glVertex3f(m_snowflakes[i].pos.x - halfScale, m_snowflakes[i].pos.y + halfScale, -2 );
-            //glTexCoord2f(0.0f, 0.0f);
-            glVertex3f(m_snowflakes[i].pos.x - halfScale, m_snowflakes[i].pos.y - halfScale, -2 );
-            //glTexCoord2f(1.0f, 0.0f);
-            glVertex3f(m_snowflakes[i].pos.x + halfScale, m_snowflakes[i].pos.y - halfScale, -2 );
-            //glTexCoord2f(1.0f, 1.0f);
-            glVertex3f(m_snowflakes[i].pos.x + halfScale, m_snowflakes[i].pos.y + halfScale, -2 );
-            */
 
         }
     }
