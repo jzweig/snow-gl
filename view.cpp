@@ -1,6 +1,7 @@
 #include "view.h"
 #include <QApplication>
 #include <QKeyEvent>
+#include <ctime>
 
 View::View(QWidget *parent) : QGLWidget(parent)
 {
@@ -13,12 +14,22 @@ View::View(QWidget *parent) : QGLWidget(parent)
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
 
+    // TODO: Seed the random number generator
+
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    // Setup the camera
+    m_camera = new Camera();
+    m_camera->eye.x = 0.0f, m_camera->eye.y = 0.0f, m_camera->eye.z = 3.0f;
+    m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
+    m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
+    m_camera->angle = 45.0f, m_camera->near = .1f, m_camera->far = 1000.0f;
 }
 
 View::~View()
 {
+    SAFE_DELETE(m_camera);
 }
 
 void View::initializeGL()
@@ -38,13 +49,86 @@ void View::initializeGL()
     // events. This occurs if there are two monitors and the mouse is on the
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+
+    glClearColor(0.0f,0.0f,0.0f,0.0f);
+
+    // Start with flat shading
+    glShadeModel(GL_FLAT);
+
+    // Enable depth testing, so that objects are occluded based on depth instead of drawing order
+    glEnable(GL_DEPTH_TEST);
+
+    updateCamera();
+    setupLights();
+
+    paintGL();
+}
+
+void View::setupLights()
+{
+    // TODO: Update to directional light for moonlight
+
+    // Set up GL_LIGHT0 with a position and lighting properties
+    GLfloat ambientLight[] = {0.1f, 0.1f, 0.1f, 1.0f};
+    GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat position[] = { 2.0f, 2.0f, 2.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glEnable(GL_LIGHT0);
+}
+
+/**
+  * Applied the current camera position and orientation to the OpenGL modelview and projection matrices.
+  */
+void View::updateCamera()
+{
+    float w = width(), h = height();
+    float ratio = w / h;
+
+    // Reset the coordinate system before modifying
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(m_camera->angle, ratio, m_camera->near, m_camera->far);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(m_camera->eye.x, m_camera->eye.y, m_camera->eye.z,
+              m_camera->center.x, m_camera->center.y, m_camera->center.z,
+              m_camera->up.x, m_camera->up.y, m_camera->up.z);
 }
 
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // TODO: Implement the demo rendering here
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // Render dem snowflakes
+    m_snowEmitter.drawSnowflakes();
+
+    glBegin(GL_QUADS);
+    glColor3f(0.25, 0.25, 0.25);
+    glVertex3f(-10, -10, -50);
+    glVertex3f(10, -10, -50);
+    glVertex3f(10, 10, -50);
+    glVertex3f(-10, 10, -50);
+    glEnd();
+
+/*
+    glAccum(GL_MULT, 0.9f);
+    glAccum(GL_ACCUM, 1.0f);
+    glAccum(GL_RETURN, 1.0f);
+*/
+    glPopMatrix();
+
+    glFlush();
+
+    swapBuffers();
 }
 
 void View::resizeGL(int w, int h)
@@ -94,6 +178,7 @@ void View::tick()
     float seconds = time.restart() * 0.001f;
 
     // TODO: Implement the demo update here
+    m_snowEmitter.tick();
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
     update();

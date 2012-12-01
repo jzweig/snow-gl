@@ -4,6 +4,10 @@
 #include <qgl.h>
 #include <QTime>
 #include <QTimer>
+#include <QtOpenGL>
+#include "GL/gl.h"
+#include "SnowEmitter.h"
+#include "common.h"
 
 class View : public QGLWidget
 {
@@ -30,6 +34,17 @@ private:
 
 private slots:
     void tick();
+
+protected:
+     void updateCamera();
+     void setupLights();
+
+     //! The snow emitter responsible for tracking snowflakes
+     SnowEmitter m_snowEmitter;
+
+     //! The camera settings
+     Camera *m_camera;
+
 };
 
 #endif // VIEW_H

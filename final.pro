@@ -14,9 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     mainwindow.cpp \
-    view.cpp
+    view.cpp \
+    SnowEmitter.cpp
 
 HEADERS += mainwindow.h \
-    view.h
+    view.h \
+    SnowEmitter.h \
+    common.h
 
 FORMS += mainwindow.ui
