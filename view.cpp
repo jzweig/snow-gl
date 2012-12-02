@@ -219,6 +219,9 @@ void View::mouseMoveEvent(QMouseEvent *event)
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     // TODO: Handle mouse movements here
+
+    updateCamera();
+
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
@@ -228,6 +231,14 @@ void View::mouseReleaseEvent(QMouseEvent *event)
 void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
+
+    if(event->key() == Qt::Key_W)
+        m_camera->eye = m_camera->eye + .02 * m_camera->center;
+    else if(event->key() == Qt::Key_S)
+        m_camera->eye = m_camera->eye - .02 * m_camera->center;
+
+    updateCamera();
+    // TODO: Handle A and D keys
 
     // TODO: Handle keyboard presses here
 }
