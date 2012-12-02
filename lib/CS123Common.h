@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 #include <QMessageBox>
+#include "CS123Algebra.h"
 
 // from http://en.wikipedia.org/wiki/Assertion_(computing)
 #define COMPILE_TIME_ASSERT(pred) switch(0){case 0:case pred:;}
@@ -46,6 +47,11 @@ struct BGRA
 
 };
 
+struct Camera
+{
+    Vector4 eye, center, up;
+    float angle, near, far;
+};
 //! A structure to store a rectangle on the screen.
 struct CS123Rectangle {
    int minX;

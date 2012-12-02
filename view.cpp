@@ -233,19 +233,19 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
     if(event->key() == Qt::Key_W) {
-        float3 translationVec = m_camera->center;
+        Vector4 translationVec = m_camera->center;
         translationVec.y = 0;
         translationVec.normalize();
         m_camera->eye = m_camera->eye + .01 * translationVec;
         updateCamera();
     } else if(event->key() == Qt::Key_S) {
-        float3 translationVec = m_camera->center;
+        Vector4 translationVec = m_camera->center;
         translationVec.y = 0;
         translationVec.normalize();
         m_camera->eye = m_camera->eye - .01 * translationVec;
         updateCamera();
     } else if(event->key() == Qt::Key_A) {
-        float3 translationVec;
+        Vector4 translationVec;
         float cosVal = cos(-PI/2.0);
         float sinVal = sin(-PI/2.0);
         translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
@@ -255,7 +255,7 @@ void View::keyPressEvent(QKeyEvent *event)
         m_camera->eye = m_camera->eye + .01 * translationVec;
         updateCamera();
     } else if( event->key() == Qt::Key_D) {
-        float3 translationVec;
+        Vector4 translationVec;
         float cosVal = cos(PI/2.0);
         float sinVal = sin(PI/2.0);
         translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;

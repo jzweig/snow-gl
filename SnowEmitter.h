@@ -6,7 +6,9 @@
 #define BASE_FLAKE_SPEED_FACTOR .005f
 #define SNOWFLAKE_DROP_PROBABILITY .01f
 
-#include "common.h"
+//#include "common.h"
+#include "CS123Common.h"
+#include "CS123Algebra.h"
 #include <QtOpenGL>
 
 
@@ -28,7 +30,7 @@ struct Snowflake
       * The particle's current position in 3D space. Updated every step based on
       * the particle's velocity.
       */
-    float3 pos;
+    Vector4 pos;
     /**
       * The speed at which the snowflake is travelling
       */
@@ -37,12 +39,12 @@ struct Snowflake
       * The direction this particle is currently moving. The velocity of any particle
       * in the system is: velocity = ParticleEmitter.m_speed * Particle.dir
       */
-    float3 dir;
+    Vector4 dir;
     /**
       * The force acting on this particle (e.g. from gravity). At each update step,
       * Particle.dir += Particle.force.
       */
-    float3 force;
+    Vector4 force;
 };
 
 class SnowEmitter

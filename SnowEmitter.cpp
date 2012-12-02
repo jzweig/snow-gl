@@ -75,7 +75,7 @@ void SnowEmitter::tick()
         if( m_snowflakes[i].active )
         {
             // TODO: Do physics updates
-            m_snowflakes[i].pos = BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * m_snowflakes[i].dir + m_snowflakes[i].pos;
+            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed)) + m_snowflakes[i].pos;
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF )
             {
                 m_snowflakes[i].active = false;
@@ -99,17 +99,17 @@ void SnowEmitter::drawSnowflakes()
     glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
-    //float3 camUp = m_camera->up;
-    //float3 camLook = m_camera->center;
-    //float3 camRight = (camUp*camLook).getNormalized();
+    Vector4 camUp = m_camera->up;
+    Vector4 camLook = m_camera->center;
+    Vector4 camRight = (camUp*camLook).getNormalized();
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
         if( m_snowflakes[i].active )
         {
 
-            float3 normal = m_camera->eye - m_snowflakes[i].pos;
-            glNormal3fv(normal.data);
+            Vector4 normal = m_camera->eye - m_snowflakes[i].pos;
+            glNormal3dv(normal.data);
 
             float size = m_snowflakes[i].size;
 
