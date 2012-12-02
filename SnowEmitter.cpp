@@ -42,11 +42,8 @@ void SnowEmitter::initializeSnowflakes(int flakeCount)
 
 void SnowEmitter::dropSnowflake(int snowflakeIndex)
 {
-    // TODO: Update to drop around the camera, if we're going to
-    // allow moving around, panning, etc.
-
-    float camera_x = 0.0;
-    float camera_z = 0.0;
+    float camera_x = m_camera->eye.x;
+    float camera_z = m_camera->eye.z;
 
     // One more active snowflake falling
     m_activeSnowflakes++;
