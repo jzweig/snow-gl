@@ -24,7 +24,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->eye.x = 0.0f, m_camera->eye.y = 0.0f, m_camera->eye.z = 3.0f;
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
-    m_camera->angle = 45.0f, m_camera->near = .25f, m_camera->far = 1000.0f;
+    m_camera->angle = 45.0f, m_camera->near = .05f, m_camera->far = 1000.0f;
 
     m_snowEmitter.setCamera(m_camera);
 
@@ -232,15 +232,31 @@ void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
-    if(event->key() == Qt::Key_W)
+    if(event->key() == Qt::Key_W) {
         m_camera->eye = m_camera->eye + .02 * m_camera->center;
-    else if(event->key() == Qt::Key_S)
+    } else if(event->key() == Qt::Key_S) {
         m_camera->eye = m_camera->eye - .02 * m_camera->center;
+    } else if(event->key() == Qt::Key_A) {
+        float3 translationVec;
+        float cosVal = cos(-PI/2.0);
+        float sinVal = sin(-PI/2.0);
+        translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
+        translationVec.y = 0;
+        translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
+        translationVec.normalize();
+        m_camera->eye = m_camera->eye + .02 * translationVec;
+    } else if( event->key() == Qt::Key_D) {
+        float3 translationVec;
+        float cosVal = cos(PI/2.0);
+        float sinVal = sin(PI/2.0);
+        translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
+        translationVec.y = 0;
+        translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
+        translationVec.normalize();
+        m_camera->eye = m_camera->eye + .02 * translationVec;
+    }
 
     updateCamera();
-    // TODO: Handle A and D keys
-
-    // TODO: Handle keyboard presses here
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
