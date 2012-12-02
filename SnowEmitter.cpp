@@ -99,7 +99,9 @@ void SnowEmitter::drawSnowflakes()
     glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
-
+    //float3 camUp = m_camera->up;
+    //float3 camLook = m_camera->center;
+    //float3 camRight = (camUp*camLook).getNormalized();
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {

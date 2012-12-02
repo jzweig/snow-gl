@@ -8,7 +8,9 @@
 #include <QString>
 #include <QImage>
 #include <QFile>
-#include "glut/glut.h"
+#ifdef __APPLE__
+    #include "glut/glut.h"
+#endif
 #include "SnowEmitter.h"
 #include "common.h"
 
