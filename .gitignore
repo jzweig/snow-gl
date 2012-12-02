@@ -2,3 +2,5 @@
 ui_mainwindow.h
 Makefile
 final.pro.user
+Info.plist
+final.xcodeproj

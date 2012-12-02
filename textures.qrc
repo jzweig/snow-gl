@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/textures">
+        <file>textures/snowflake_design.png</file>
+    </qresource>
+</RCC>

@@ -8,7 +8,7 @@
 #include <QString>
 #include <QImage>
 #include <QFile>
-#include "GL/gl.h"
+#include "glut/glut.h"
 #include "SnowEmitter.h"
 #include "common.h"
 
