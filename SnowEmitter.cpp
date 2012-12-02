@@ -23,7 +23,6 @@ SnowEmitter::~SnowEmitter()
 void SnowEmitter::setTextureId(GLuint textureId)
 {
     m_textureId = textureId;
-    std::cout << "Set a texture id of " << textureId << std::endl;
 }
 
 void SnowEmitter::setCamera(Camera *camera)
