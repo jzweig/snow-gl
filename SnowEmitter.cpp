@@ -10,6 +10,16 @@ SnowEmitter::SnowEmitter()
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
 }
 
+SnowEmitter::~SnowEmitter()
+{
+    if( m_snowflakes != NULL )
+    {
+        delete m_snowflakes;
+        m_snowflakes = NULL;
+        m_snowflakeCount = 0;
+    }
+}
+
 void SnowEmitter::setTextureId(GLuint textureId)
 {
     m_textureId = textureId;
@@ -61,8 +71,6 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
 
 void SnowEmitter::tick()
 {
-
-
     for(int i = 0; i < m_snowflakeCount; i++)
     {
         if( m_snowflakes[i].active )

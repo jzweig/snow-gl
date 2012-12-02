@@ -49,6 +49,7 @@ class SnowEmitter
 {
     public:
         SnowEmitter();
+        virtual ~SnowEmitter();
 
         /**
           * Draws all the active snowflakes.
