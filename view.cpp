@@ -233,9 +233,17 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
     if(event->key() == Qt::Key_W) {
-        m_camera->eye = m_camera->eye + .02 * m_camera->center;
+        float3 translationVec = m_camera->center;
+        translationVec.y = 0;
+        translationVec.normalize();
+        m_camera->eye = m_camera->eye + .01 * translationVec;
+        updateCamera();
     } else if(event->key() == Qt::Key_S) {
-        m_camera->eye = m_camera->eye - .02 * m_camera->center;
+        float3 translationVec = m_camera->center;
+        translationVec.y = 0;
+        translationVec.normalize();
+        m_camera->eye = m_camera->eye - .01 * translationVec;
+        updateCamera();
     } else if(event->key() == Qt::Key_A) {
         float3 translationVec;
         float cosVal = cos(-PI/2.0);
@@ -244,7 +252,8 @@ void View::keyPressEvent(QKeyEvent *event)
         translationVec.y = 0;
         translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
         translationVec.normalize();
-        m_camera->eye = m_camera->eye + .02 * translationVec;
+        m_camera->eye = m_camera->eye + .01 * translationVec;
+        updateCamera();
     } else if( event->key() == Qt::Key_D) {
         float3 translationVec;
         float cosVal = cos(PI/2.0);
@@ -253,10 +262,9 @@ void View::keyPressEvent(QKeyEvent *event)
         translationVec.y = 0;
         translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
         translationVec.normalize();
-        m_camera->eye = m_camera->eye + .02 * translationVec;
+        m_camera->eye = m_camera->eye + .01 * translationVec;
+        updateCamera();
     }
-
-    updateCamera();
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
