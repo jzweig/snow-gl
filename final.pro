@@ -17,14 +17,16 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     math/CS123Matrix.cpp \
-    SnowEmitter.cpp
+    SnowEmitter.cpp \
+    camera.cpp
 
 HEADERS += mainwindow.h \
     view.h \
     SnowEmitter.h \
     lib/CS123SceneData.h \
     lib/CS123Common.h \
-    math/CS123Algebra.h
+    math/CS123Algebra.h \
+    camera.h
 
 FORMS += mainwindow.ui
 

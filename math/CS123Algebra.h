@@ -247,6 +247,26 @@ struct vec4 {
                        data[0] * rhs.data[1] - data[1] * rhs.data[0], 0);
     }
 
+
+
+
+    // Returns two angles in the range [-pi, pi] and [-pi/2, pi/2], respectively
+    inline vec2<T> toAngles() {
+        return vec2<T>(atan2f(z, x), asinf(y / getMagnitude()));
+    }
+
+    // Returns a unit vector from the spherical coordinates (1, phi, theta) (assumes +y is up)
+    static inline vec4<T> fromAngles(float theta, float phi) {
+        return vec4<T>(cosf(theta) * cosf(phi), sinf(phi), sinf(theta) * cosf(phi),0);
+    }
+    static inline vec4<T> fromAngles(const vec2<T> &angles) {
+        return fromAngles(angles.x, angles.y);
+    }
+
+    // Returns a uniformly-random unit vector
+    //static Vector3 randomDirection() { return fromAngles(frand() * 2 * M_PI, asinf(frand() * 2 - 1)); }
+
+
 //@}-----------------------------------------------------------------
 
     union {

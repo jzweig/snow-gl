@@ -2,14 +2,15 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include <ctime>
-
+#include <CS123Common.h>
+#include "camera.h"
 View::View(QWidget *parent) : QGLWidget(parent)
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
     // Hide the cursor since this is a fullscreen app
-    setCursor(Qt::BlankCursor);
+    //setCursor(Qt::BlankCursor);
 
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
@@ -20,12 +21,16 @@ View::View(QWidget *parent) : QGLWidget(parent)
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 
     // Setup the camera
-    m_camera = new Camera();
+    m_camera = new OrbitCamera();
     m_camera->eye.x = 0.0f, m_camera->eye.y = 0.0f, m_camera->eye.z = 3.0f;
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
     m_camera->angle = 45.0f, m_camera->near = .05f, m_camera->far = 1000.0f;
 
+    //added for orbit
+    m_camera->zoom = 3.5f;
+    m_camera->theta = M_PI * 1.5f, m_camera->phi = -0.2f;
+    m_camera->fovy = 60.f;
     m_snowEmitter.setCamera(m_camera);
 
 
@@ -33,7 +38,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
 View::~View()
 {
-    SAFE_DELETE(m_camera);
+    safeDelete(m_camera);
 }
 
 GLuint View::loadTexture(const QString &path)
@@ -127,7 +132,7 @@ void View::setupLights()
 void View::updateCamera()
 {
     float w = width(), h = height();
-    float ratio = w / h;
+    /*float ratio = w / h;
 
     // Reset the coordinate system before modifying
     glMatrixMode(GL_PROJECTION);
@@ -139,6 +144,25 @@ void View::updateCamera()
     gluLookAt(m_camera->eye.x, m_camera->eye.y, m_camera->eye.z,
               m_camera->center.x, m_camera->center.y, m_camera->center.z,
               m_camera->up.x, m_camera->up.y, m_camera->up.z);
+
+
+
+    */
+
+
+
+
+    float ratio = ((float) w) / h;
+    Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
+    Vector4 eye = m_camera->eye;//(m_camera->center - dir * m_camera->zoom);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(m_camera->fovy, ratio, 0.1f, 100000.f);
+    gluLookAt(eye.x, eye.y, eye.z, eye.x + dir.x, eye.y + dir.y, eye.z + dir.z,
+              m_camera->up.x, m_camera->up.y, m_camera->up.z);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void View::paintGL()
@@ -202,6 +226,9 @@ void View::resizeGL(int w, int h)
 
 void View::mousePressEvent(QMouseEvent *event)
 {
+    m_prevMousePos.x = event->x();
+    m_prevMousePos.y = event->y();
+    cout<<"pressed"<<endl;
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -213,12 +240,20 @@ void View::mouseMoveEvent(QMouseEvent *event)
     // in that direction. Note that it is important to check that deltaX and
     // deltaY are not zero before recentering the mouse, otherwise there will
     // be an infinite loop of mouse move events.
-    int deltaX = event->x() - width() / 2;
-    int deltaY = event->y() - height() / 2;
-    if (!deltaX && !deltaY) return;
-    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+    //int deltaX = event->x() - width() / 2;
+    //int deltaY = event->y() - height() / 2;
+    //if (!deltaX && !deltaY) return;
+    //QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     // TODO: Handle mouse movements here
+
+    Vector2 pos(event->x(), event->y());
+    if (event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton)
+    {
+        m_camera->mouseMove(pos - m_prevMousePos);
+        cout<<"moved"<<endl;
+    }
+    m_prevMousePos = pos;
 
     updateCamera();
 
@@ -226,6 +261,20 @@ void View::mouseMoveEvent(QMouseEvent *event)
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
+    cout<<"released"<<endl;
+}
+
+
+
+/**
+  Called when the mouse wheel is turned.  Zooms the camera in and out.
+**/
+void View::wheelEvent(QWheelEvent *event)
+{
+    if (event->orientation() == Qt::Vertical)
+    {
+        m_camera->mouseWheel(event->delta());
+    }
 }
 
 void View::keyPressEvent(QKeyEvent *event)
@@ -246,8 +295,8 @@ void View::keyPressEvent(QKeyEvent *event)
         updateCamera();
     } else if(event->key() == Qt::Key_A) {
         Vector4 translationVec;
-        float cosVal = cos(-PI/2.0);
-        float sinVal = sin(-PI/2.0);
+        float cosVal = cos(-M_PI/2.0);
+        float sinVal = sin(-M_PI/2.0);
         translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
         translationVec.y = 0;
         translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
@@ -256,8 +305,8 @@ void View::keyPressEvent(QKeyEvent *event)
         updateCamera();
     } else if( event->key() == Qt::Key_D) {
         Vector4 translationVec;
-        float cosVal = cos(PI/2.0);
-        float sinVal = sin(PI/2.0);
+        float cosVal = cos(M_PI/2.0);
+        float sinVal = sin(M_PI/2.0);
         translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
         translationVec.y = 0;
         translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;

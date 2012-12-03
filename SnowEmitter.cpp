@@ -25,7 +25,7 @@ void SnowEmitter::setTextureId(GLuint textureId)
     m_textureId = textureId;
 }
 
-void SnowEmitter::setCamera(Camera *camera)
+void SnowEmitter::setCamera(OrbitCamera *camera)
 {
     m_camera = camera;
 }
@@ -102,12 +102,20 @@ void SnowEmitter::drawSnowflakes()
     Vector4 camUp = m_camera->up;
     Vector4 camLook = m_camera->center;
     Vector4 camRight = (camUp*camLook).getNormalized();
+    Matrix4x4 billboardMat = Matrix4x4(
+            camRight.x,camRight.y,camRight.z,0,
+            camUp.x,camUp.y,camUp.z,0,
+            camLook.x,camLook.y,camLook.z,0,
+            0,0,0,0
+            );
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
         if( m_snowflakes[i].active )
         {
+            glPushMatrix();
 
+            glMultMatrixd(billboardMat.data);
             Vector4 normal = m_camera->eye - m_snowflakes[i].pos;
             glNormal3dv(normal.data);
 
@@ -122,6 +130,7 @@ void SnowEmitter::drawSnowflakes()
             glTexCoord2f(1.0, 1.0);
             glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
 
+            glPopMatrix();
         }
     }
     glEnd();

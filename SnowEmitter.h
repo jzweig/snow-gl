@@ -10,6 +10,7 @@
 #include "CS123Common.h"
 #include "CS123Algebra.h"
 #include <QtOpenGL>
+#include "camera.h"
 
 
 /**
@@ -71,7 +72,7 @@ class SnowEmitter
         /**
           * Sets the camera being used with this snow emitter.
           */
-        void setCamera(Camera *camera);
+        void setCamera(OrbitCamera *camera);
 
     protected:
 
@@ -97,7 +98,7 @@ class SnowEmitter
         GLuint m_textureId;
 
         //! Pointer to the camera
-        Camera *m_camera;
+        OrbitCamera *m_camera;
 };
 
 #endif // SNOWEMITTER_H

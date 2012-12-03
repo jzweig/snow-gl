@@ -12,7 +12,8 @@
     #include "glut/glut.h"
 #endif
 #include "SnowEmitter.h"
-#include "common.h"
+#include "camera.h"
+//#include "common.h"
 
 class View : public QGLWidget
 {
@@ -36,9 +37,11 @@ private:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
 
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    Vector2 m_prevMousePos;
 
 private slots:
     void tick();
@@ -51,9 +54,8 @@ protected:
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
-
      //! The camera settings
-     Camera *m_camera;
+     OrbitCamera *m_camera;
 
 };
 
