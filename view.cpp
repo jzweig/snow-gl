@@ -4,6 +4,7 @@
 #include <ctime>
 #include <CS123Common.h>
 #include "camera.h"
+#include "GL/glut.h"
 View::View(QWidget *parent) : QGLWidget(parent)
 {
     // View needs all mouse move events, not just mouse drag events
@@ -165,6 +166,43 @@ void View::updateCamera()
     glLoadIdentity();
 }
 
+
+void View::createPlane(float color[], float translate[])
+{
+    glColor3f(color[0],color[1],color[2]);
+    glPushMatrix();
+    glTranslatef(translate[0],translate[1],translate[2]);
+
+    glBegin(GL_QUADS);
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(0.0f, 1.0f, 1.0f);
+    glEnd();
+
+    glPopMatrix();
+}
+
+void View::createPlane(float color[], float translate[], float scale[], float rotate[],int angle)
+{
+    glColor3f(color[0],color[1],color[2]);
+    glPushMatrix();
+    glTranslatef(translate[0],translate[1],translate[2]);
+    glScalef(scale[0],scale[1],scale[2]);
+    glRotatef(angle,rotate[0],rotate[1],rotate[2]);
+
+    glBegin(GL_QUADS);
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(0.0f, 1.0f, 1.0f);
+    glEnd();
+
+    glPopMatrix();
+}
+
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -192,6 +230,11 @@ void View::paintGL()
     glVertex3f(-10, 10, -50);
     glEnd();
     */
+    float col[3] = {0.0f, 0.7f, 0.93f};
+    float pos[3] = {-5.0f, -1.0f, 5.0f};
+    float scale[3] = {10.0f, 10.0f, 10.0f};
+    float rot[3] ={0.0f, 1.0f, 0.0f};
+    createPlane(col,pos,scale,rot,90);
 
     // Render dem snowflakes
     m_snowEmitter.drawSnowflakes();
@@ -217,6 +260,17 @@ void View::paintSky()
     glVertex3f(1000, -3, -1000);
     glVertex3f(1000, -3, 1000);
     glEnd();
+    glBegin(GL_LINES);
+    glColor3f(1,0,0); // x - red
+    glVertex3f(0,0,0);
+    glVertex3f(1,0,0 );
+    glColor3f(0,1,0); // y - green
+    glVertex3f(0,0,0);
+    glVertex3f(0,1,0);
+    glColor3f(0,0,1); // z - blue
+    glVertex3f(0,0,0);
+    glVertex3f(0,0,1);
+    glEnd();
 }
 
 void View::resizeGL(int w, int h)
@@ -228,7 +282,7 @@ void View::mousePressEvent(QMouseEvent *event)
 {
     m_prevMousePos.x = event->x();
     m_prevMousePos.y = event->y();
-    cout<<"pressed"<<endl;
+    //cout<<"pressed"<<endl;
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -251,7 +305,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton)
     {
         m_camera->mouseMove(pos - m_prevMousePos);
-        cout<<"moved"<<endl;
+        //cout<<"moved"<<endl;
     }
     m_prevMousePos = pos;
 
@@ -261,7 +315,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
-    cout<<"released"<<endl;
+    //cout<<"released"<<endl;
 }
 
 

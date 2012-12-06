@@ -26,6 +26,7 @@ public:
 private:
     QTime time;
     QTimer timer;
+    Vector2 m_prevMousePos;
 
     void initializeGL();
     void paintGL();
@@ -41,8 +42,9 @@ private:
 
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    Vector2 m_prevMousePos;
 
+    void createPlane(float color[], float translate[]);
+    void createPlane(float color[], float translate[], float scale[], float rotate[],int angle);
 private slots:
     void tick();
 
