@@ -4,3 +4,7 @@ Makefile
 final.pro.user
 Info.plist
 final.xcodeproj
+final
+moc_mainwindow.cpp
+moc_view.cpp
+qrc_textures.cpp
