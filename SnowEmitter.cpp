@@ -122,15 +122,10 @@ void SnowEmitter::drawSnowflakes()
     glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
-    Vector4 camUp = m_camera->up;
-    Vector4 camLook = m_camera->center;
-    Vector4 camRight = (camUp*camLook).getNormalized();
-    Matrix4x4 billboardMat = Matrix4x4(
-            camRight.x,camRight.y,camRight.z,0,
-            camUp.x,camUp.y,camUp.z,0,
-            camLook.x,camLook.y,camLook.z,0,
-            0,0,0,0
-            );
+
+    Vector4 up = Vector4(0, 1.0, 0, 0);
+    Vector4 right = m_camera->getDirection().cross(up);
+
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
@@ -138,20 +133,24 @@ void SnowEmitter::drawSnowflakes()
         {
             glPushMatrix();
 
-            glMultMatrixd(billboardMat.data);
             Vector4 normal = m_camera->eye - m_snowflakes[i].pos;
             glNormal3dv(normal.data);
 
             float size = m_snowflakes[i].size;
 
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
+            Vector4 a = m_snowflakes[i].pos - (right + up) * size;
+            Vector4 b = m_snowflakes[i].pos + (right - up) * size;
+            Vector4 c = m_snowflakes[i].pos + (right + up) * size;
+            Vector4 d = m_snowflakes[i].pos - (right - up) * size;
+
+            glTexCoord2f(0, 1.0);
+            glVertex3f(d.x, d.y, d.z);
+            glTexCoord2f(0, 0);
+            glVertex3f(a.x, a.y, a.z);
+            glTexCoord2f(1.0, 0);
+            glVertex3f(b.x, b.y, b.z);
             glTexCoord2f(1.0, 1.0);
-            glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
+            glVertex3f(c.x, c.y, c.z);
 
             glPopMatrix();
         }

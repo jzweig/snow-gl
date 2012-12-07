@@ -13,7 +13,6 @@
 #endif
 #include "SnowEmitter.h"
 #include "camera.h"
-//#include "common.h"
 
 // Speeds affecting the speed of snow simulation. Fast speed occurs when holding down
 // the down arrow.
