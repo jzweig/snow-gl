@@ -206,18 +206,18 @@ void View::drawWireframeGrid()
 
 
         glVertex3i(i-pMax2, 0, -pMax2);
-        glVertex3i(i-pMax2, pMax, -pMax2);
+        glVertex3i(i-pMax2, 5.9, -pMax2);
 
 
         glVertex3i(i-pMax2, 0, pMax2);
-        glVertex3i(i-pMax2, pMax, pMax2);
+        glVertex3i(i-pMax2, 5.9, pMax2);
 
 
         glVertex3i(pMax2, 0, i-pMax2);
-        glVertex3i(pMax2, pMax, i-pMax2);
+        glVertex3i(pMax2, 5.9, i-pMax2);
 
         glVertex3i(-pMax2, 0, i-pMax2);
-        glVertex3i(-pMax2, pMax, i-pMax2);
+        glVertex3i(-pMax2, 5.9, i-pMax2);
     }
 
     glEnd();
@@ -272,15 +272,15 @@ void View::paintSky()
 {
     glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
-    glVertex3f(-1000, 3.0f, 1000);
-    glVertex3f(-1000, 3, -1000);
-    glVertex3f(1000, 3, -1000);
-    glVertex3f(1000, 3, 1000);
+    glVertex3f(-1000, 6, 1000);
+    glVertex3f(-1000, 6, -1000);
+    glVertex3f(1000, 6, -1000);
+    glVertex3f(1000, 6, 1000);
     glColor3f(0.25f, .5f, 0.35f);
-    glVertex3f(-1000, -3, 1000);
-    glVertex3f(-1000, -3, -1000);
-    glVertex3f(1000, -3, -1000);
-    glVertex3f(1000, -3, 1000);
+    glVertex3f(-1000, 0, 1000);
+    glVertex3f(-1000, 0, -1000);
+    glVertex3f(1000, 0, -1000);
+    glVertex3f(1000, 0, 1000);
     glEnd();
     glBegin(GL_LINES);
     glColor3f(1,0,0); // x - red
@@ -352,12 +352,14 @@ void View::wheelEvent(QWheelEvent *event)
 void View::keyPressEvent(QKeyEvent *event)
 {
     Vector4 dirVec = m_camera->getDirection();
+
+
     if (event->key() == Qt::Key_Escape){
         QApplication::quit();
-    }else{
-
+    } else {
         dirVec.y = 0;
         dirVec.normalize();
+
         if(event->key() == Qt::Key_W) {
             m_camera->eye = m_camera->eye + .01 * dirVec;
         } else if(event->key() == Qt::Key_S) {
@@ -365,19 +367,21 @@ void View::keyPressEvent(QKeyEvent *event)
         } else if(event->key() == Qt::Key_A) {
             float cosVal = cos(-M_PI/2.0);
             float sinVal = sin(-M_PI/2.0);
-            dirVec.x = dirVec.x * cosVal -dirVec.z * sinVal;
-            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
-            dirVec.y = 0;
-            dirVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * dirVec;
+            Vector4 translationVec;
+            translationVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
+            translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            translationVec.y = 0;
+            translationVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * translationVec;
         } else if( event->key() == Qt::Key_D) {
             float cosVal = cos(M_PI/2.0);
             float sinVal = sin(M_PI/2.0);
-            dirVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
-            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
-            dirVec.y = 0;
-            dirVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * dirVec;
+            Vector4 translationVec;
+            translationVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
+            translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            translationVec.y = 0;
+            translationVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * translationVec;
         }
         updateCamera();
     }
