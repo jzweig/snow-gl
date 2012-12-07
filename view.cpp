@@ -16,7 +16,11 @@ View::View(QWidget *parent) : QGLWidget(parent)
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
 
-    // TODO: Seed the random number generator
+    // Set the starting speed
+    m_speed = DEFAULT_SPEED;
+
+    // Seed the random number generator
+    srand(QTime::currentTime().msec());
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -33,7 +37,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->theta = M_PI * 1.5f, m_camera->phi = -0.2f;
     m_camera->fovy = 60.f;
     m_snowEmitter.setCamera(m_camera);
-
+    m_snowEmitter.setSpeed(&m_speed);
 
 }
 
@@ -147,25 +151,6 @@ void View::setupLights()
 void View::updateCamera()
 {
     float w = width(), h = height();
-    /*float ratio = w / h;
-
-    // Reset the coordinate system before modifying
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(m_camera->angle, ratio, m_camera->near, m_camera->far);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(m_camera->eye.x, m_camera->eye.y, m_camera->eye.z,
-              m_camera->center.x, m_camera->center.y, m_camera->center.z,
-              m_camera->up.x, m_camera->up.y, m_camera->up.z);
-
-
-
-    */
-
-
-
 
     float ratio = ((float) w) / h;
     Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
@@ -238,18 +223,18 @@ void View::drawWireframeGrid()
 
 
         glVertex3i(i-pMax2, 0, -pMax2);
-        glVertex3i(i-pMax2, pMax, -pMax2);
+        glVertex3i(i-pMax2, 5.9, -pMax2);
 
 
         glVertex3i(i-pMax2, 0, pMax2);
-        glVertex3i(i-pMax2, pMax, pMax2);
+        glVertex3i(i-pMax2, 5.9, pMax2);
 
 
         glVertex3i(pMax2, 0, i-pMax2);
-        glVertex3i(pMax2, pMax, i-pMax2);
+        glVertex3i(pMax2, 5.9, i-pMax2);
 
         glVertex3i(-pMax2, 0, i-pMax2);
-        glVertex3i(-pMax2, pMax, i-pMax2);
+        glVertex3i(-pMax2, 5.9, i-pMax2);
     }
 
     glEnd();
@@ -279,16 +264,7 @@ void View::paintGL()
     glDisable(GL_LIGHTING);
 
     paintSky();
-    /*
-    glBegin(GL_QUADS);
-    glNormal3f(0, 0, 1.0);
-    glColor3f(0.1, 0.1, 0.1);
-    glVertex3f(-10, -10, -50);
-    glVertex3f(10, -10, -50);
-    glVertex3f(10, 10, -50);
-    glVertex3f(-10, 10, -50);
-    glEnd();
-    */
+
     float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {5.0f, 0.0f, 0.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
@@ -317,15 +293,15 @@ void View::paintSky()
 {
     glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
-    glVertex3f(-1000, 3.0f, 1000);
-    glVertex3f(-1000, 3, -1000);
-    glVertex3f(1000, 3, -1000);
-    glVertex3f(1000, 3, 1000);
+    glVertex3f(-1000, 6, 1000);
+    glVertex3f(-1000, 6, -1000);
+    glVertex3f(1000, 6, -1000);
+    glVertex3f(1000, 6, 1000);
     glColor3f(0.25f, .5f, 0.35f);
-    glVertex3f(-1000, -3, 1000);
-    glVertex3f(-1000, -3, -1000);
-    glVertex3f(1000, -3, -1000);
-    glVertex3f(1000, -3, 1000);
+    glVertex3f(-1000, 0, 1000);
+    glVertex3f(-1000, 0, -1000);
+    glVertex3f(1000, 0, -1000);
+    glVertex3f(1000, 0, 1000);
     glEnd();
     glBegin(GL_LINES);
     glColor3f(1,0,0); // x - red
@@ -349,7 +325,6 @@ void View::mousePressEvent(QMouseEvent *event)
 {
     m_prevMousePos.x = event->x();
     m_prevMousePos.y = event->y();
-    //cout<<"pressed"<<endl;
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -372,7 +347,6 @@ void View::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton)
     {
         m_camera->mouseMove(pos - m_prevMousePos);
-        //cout<<"moved"<<endl;
     }
     m_prevMousePos = pos;
 
@@ -382,10 +356,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
-    //cout<<"released"<<endl;
 }
-
-
 
 /**
   Called when the mouse wheel is turned.  Zooms the camera in and out.
@@ -400,13 +371,16 @@ void View::wheelEvent(QWheelEvent *event)
 
 void View::keyPressEvent(QKeyEvent *event)
 {
-    Vector4 dirVec = m_camera->getDirection();
+
     if (event->key() == Qt::Key_Escape){
         QApplication::quit();
-    }else{
-
+    } else if(event->key() == Qt::Key_Down) {
+        m_speed = FAST_SPEED;
+    } else {
+        Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
         dirVec.normalize();
+
         if(event->key() == Qt::Key_W) {
             m_camera->eye = m_camera->eye + .01 * dirVec;
         } else if(event->key() == Qt::Key_S) {
@@ -414,19 +388,21 @@ void View::keyPressEvent(QKeyEvent *event)
         } else if(event->key() == Qt::Key_A) {
             float cosVal = cos(-M_PI/2.0);
             float sinVal = sin(-M_PI/2.0);
-            dirVec.x = dirVec.x * cosVal -dirVec.z * sinVal;
-            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
-            dirVec.y = 0;
-            dirVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * dirVec;
+            Vector4 translationVec;
+            translationVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
+            translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            translationVec.y = 0;
+            translationVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * translationVec;
         } else if( event->key() == Qt::Key_D) {
             float cosVal = cos(M_PI/2.0);
             float sinVal = sin(M_PI/2.0);
-            dirVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
-            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
-            dirVec.y = 0;
-            dirVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * dirVec;
+            Vector4 translationVec;
+            translationVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
+            translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            translationVec.y = 0;
+            translationVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * translationVec;
         }
         updateCamera();
     }
@@ -434,6 +410,8 @@ void View::keyPressEvent(QKeyEvent *event)
 
 void View::keyReleaseEvent(QKeyEvent *event)
 {
+    if( event->key() == Qt::Key_Down )
+        m_speed = DEFAULT_SPEED;
 }
 
 void View::tick()

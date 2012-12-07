@@ -2,10 +2,15 @@
 #define SNOWEMITTER_H
 
 #define INITIAL_SNOWFLAKE_COUNT 10000
-#define INITIAL_SNOWFLAKE_HEIGHT 1.0f
+#define INITIAL_SNOWFLAKE_HEIGHT 6.0f
 #define SNOWFLAKE_CUTOFF -3
 #define BASE_FLAKE_SPEED_FACTOR .005f
 #define SNOWFLAKE_DROP_PROBABILITY .01f
+#define MAX_WIND_EXPIRE 50
+#define MIN_WIND_EXPIRE 5
+#define MAX_WIND_SPEED 0.001
+#define WIND_DOWNWARD_BIAS 0
+#define GRAVITY_Y_CHANGE -0.0001
 
 //#include "common.h"
 #include "CS123Common.h"
@@ -43,10 +48,13 @@ struct Snowflake
       */
     Vector4 dir;
     /**
-      * The force acting on this particle (e.g. from gravity). At each update step,
-      * Particle.dir += Particle.force.
+      * The force acting on this particle from wind
       */
-    Vector4 force;
+    Vector4 windForce;
+    /**
+      * The time remaining on this this snowflake's wind force.
+      */
+    int windExpire;
 };
 
 class SnowEmitter
@@ -75,12 +83,23 @@ class SnowEmitter
           */
         void setCamera(OrbitCamera *camera);
 
+        /**
+          * Sets a pointer to where the snow emitter can find the overall
+          * speed of the environment.
+          */
+        void setSpeed(float *speed);
+
     protected:
 
         /**
           * Resets all the snowflakes, using the given number of snowflakes.
           */
         void initializeSnowflakes(int flakeCount);
+
+        /**
+          * Reset the wind vector on the snowflake at the given index.
+          */
+        void resetWind(int snowflake);
 
         /**
           * Resets a snowflake to fall from the sky at a random location.
@@ -94,6 +113,9 @@ class SnowEmitter
 
         //! The width of a snowflake
         float m_scale;
+
+        //! A pointer to the overall speed of the environment
+        float *m_speed;
 
         //! The GL texture id for the snowflake texture
         GLuint m_textureId;

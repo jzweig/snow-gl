@@ -30,6 +30,11 @@ void SnowEmitter::setCamera(OrbitCamera *camera)
     m_camera = camera;
 }
 
+void SnowEmitter::setSpeed(float *speed)
+{
+    m_speed = speed;
+}
+
 void SnowEmitter::initializeSnowflakes(int flakeCount)
 {
     if( m_snowflakes != NULL )
@@ -61,11 +66,23 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
     m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0)) ;
     m_snowflakes[snowflakeIndex].pos.x = camera_x - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
     m_snowflakes[snowflakeIndex].pos.z = camera_z - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
+    m_snowflakes[snowflakeIndex].pos.w = 0;
     m_snowflakes[snowflakeIndex].dir.x = 0;
     m_snowflakes[snowflakeIndex].dir.y = -1;
     m_snowflakes[snowflakeIndex].dir.z = 0;
+    m_snowflakes[snowflakeIndex].dir.w = 0;
     m_snowflakes[snowflakeIndex].speed = 0.5;
     m_snowflakes[snowflakeIndex].size = 0.004 + (float)rand()/((float)RAND_MAX/(0.002));
+    resetWind(snowflakeIndex);
+}
+
+void SnowEmitter::resetWind(int snowflakeIndex)
+{
+    m_snowflakes[snowflakeIndex].windForce.x = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/(2.0 * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.y = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/((2.0-WIND_DOWNWARD_BIAS) * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.z = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/(2.0 * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.w = 0;
+    m_snowflakes[snowflakeIndex].windExpire = rand() % (MAX_WIND_EXPIRE - MIN_WIND_EXPIRE)/(*m_speed) + MIN_WIND_EXPIRE/(*m_speed);
 }
 
 void SnowEmitter::tick()
@@ -74,8 +91,14 @@ void SnowEmitter::tick()
     {
         if( m_snowflakes[i].active )
         {
-            // TODO: Do physics updates
-            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed)) + m_snowflakes[i].pos;
+            m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
+            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * (*m_speed))) + m_snowflakes[i].pos;
+
+            if( m_snowflakes[i].windExpire == 0 )
+                resetWind(i);
+            else
+                m_snowflakes[i].windExpire--;
+
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF )
             {
                 m_snowflakes[i].active = false;
@@ -99,15 +122,10 @@ void SnowEmitter::drawSnowflakes()
     glDisable(GL_LIGHTING);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
-    Vector4 camUp = m_camera->up;
-    Vector4 camLook = m_camera->center;
-    Vector4 camRight = (camUp*camLook).getNormalized();
-    Matrix4x4 billboardMat = Matrix4x4(
-            camRight.x,camRight.y,camRight.z,0,
-            camUp.x,camUp.y,camUp.z,0,
-            camLook.x,camLook.y,camLook.z,0,
-            0,0,0,0
-            );
+
+    Vector4 up = Vector4(0, 1.0, 0, 0);
+    Vector4 right = m_camera->getDirection().cross(up);
+
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
@@ -115,20 +133,24 @@ void SnowEmitter::drawSnowflakes()
         {
             glPushMatrix();
 
-            glMultMatrixd(billboardMat.data);
             Vector4 normal = m_camera->eye - m_snowflakes[i].pos;
             glNormal3dv(normal.data);
 
             float size = m_snowflakes[i].size;
 
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(m_snowflakes[i].pos.x - size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y - size, m_snowflakes[i].pos.z );
+            Vector4 a = m_snowflakes[i].pos - (right + up) * size;
+            Vector4 b = m_snowflakes[i].pos + (right - up) * size;
+            Vector4 c = m_snowflakes[i].pos + (right + up) * size;
+            Vector4 d = m_snowflakes[i].pos - (right - up) * size;
+
+            glTexCoord2f(0, 1.0);
+            glVertex3f(d.x, d.y, d.z);
+            glTexCoord2f(0, 0);
+            glVertex3f(a.x, a.y, a.z);
+            glTexCoord2f(1.0, 0);
+            glVertex3f(b.x, b.y, b.z);
             glTexCoord2f(1.0, 1.0);
-            glVertex3f(m_snowflakes[i].pos.x + size, m_snowflakes[i].pos.y + size, m_snowflakes[i].pos.z );
+            glVertex3f(c.x, c.y, c.z);
 
             glPopMatrix();
         }
