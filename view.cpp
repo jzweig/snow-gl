@@ -48,10 +48,10 @@ View::~View()
 void View::createShaderPrograms()
 {
     const QGLContext *ctx = context();
-    m_shaderPrograms["reflect"] = ResourceLoader::newShaderProgram(ctx, "shaders/reflect.vert", "shaders/reflect.frag");
-    m_shaderPrograms["refract"] = ResourceLoader::newShaderProgram(ctx, "shaders/refract.vert", "shaders/refract.frag");
-    m_shaderPrograms["brightpass"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/brightpass.frag");
-    m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
+    //m_shaderPrograms["terrain"] = ResourceLoader::newShaderProgram(ctx, ":/shaders/shaders/terrain.vert", ":/shaders/shaders/terrain.frag");
+    m_shaderPrograms["pulse"] = ResourceLoader::newShaderProgram(ctx, ":/shaders/shaders/pulse.vert", ":/shaders/shaders/pulse.frag");
+  //  m_shaderPrograms["brightpass"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/brightpass.frag");
+   // m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
 }
 
 GLuint View::loadTexture(const QString &path)
@@ -228,7 +228,7 @@ void View::drawWireframeGrid()
     glColor3f(.6, .6, .6);
     glBegin(GL_LINES);
     int pMax = 20;
-    int pMax2 = 10;
+    int pMax2 = pMax/2;
     for (int i=0; i<=pMax; i++)
     {
         glVertex3i(i-pMax2, 0, -pMax2);
@@ -293,10 +293,11 @@ void View::paintGL()
     float pos[3] = {5.0f, 0.0f, 0.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 0.0f, 1.0f};
-
-    m_shaderPrograms["brightpass"]->bind();
+    m_shaderPrograms["pulse"]->setUniformValue("time",665.712f);
+    m_shaderPrograms["pulse"]->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
+    m_shaderPrograms["pulse"]->bind();
     drawPlane(col,pos,scale,rot,90);
-    m_shaderPrograms["brightpass"]->release();
+    m_shaderPrograms["pulse"]->release();
     drawWireframeGrid();
     // Render dem snowflakes
     glEnable(GL_BLEND);
