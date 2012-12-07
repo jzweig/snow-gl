@@ -23,7 +23,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     // Setup the camera
     m_camera = new OrbitCamera();
-    m_camera->eye.x = 0.0f, m_camera->eye.y = 0.0f, m_camera->eye.z = 3.0f;
+    m_camera->eye.x = 0.0f, m_camera->eye.y = 1.0f, m_camera->eye.z = 0.0f;
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
     m_camera->angle = 45.0f, m_camera->near = .05f, m_camera->far = 1000.0f;
@@ -167,24 +167,25 @@ void View::updateCamera()
 }
 
 
-void View::createPlane(float color[], float translate[])
+void View::drawPlane(float color[], float translate[])
 {
     glColor3f(color[0],color[1],color[2]);
     glPushMatrix();
     glTranslatef(translate[0],translate[1],translate[2]);
 
     glBegin(GL_QUADS);
-    glNormal3f(1.0f, 0.0f, 0.0f);
+    //XY axis
+    glNormal3f(0.0f, 0.0f, 1.0f);
     glVertex3f(0.0f, 1.0f, 0.0f);
     glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 1.0f);
+    glVertex3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
     glEnd();
 
     glPopMatrix();
 }
 
-void View::createPlane(float color[], float translate[], float scale[], float rotate[],int angle)
+void View::drawPlane(float color[], float translate[], float scale[], float rotate[],int angle)
 {
     glColor3f(color[0],color[1],color[2]);
     glPushMatrix();
@@ -201,6 +202,50 @@ void View::createPlane(float color[], float translate[], float scale[], float ro
     glEnd();
 
     glPopMatrix();
+}
+
+void View::drawWireframeGrid()
+{
+    glLineWidth(1.5);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor3f(.6, .6, .6);
+    glBegin(GL_LINES);
+    int pMax = 20;
+    int pMax2 = 10;
+    for (int i=0; i<=pMax; i++)
+    {
+        glVertex3i(i-pMax2, 0, -pMax2);
+        glVertex3i(i-pMax2, 0, pMax2);
+        glVertex3i(-pMax2, 0, i-pMax2);
+        glVertex3i(pMax2, 0, i-pMax2);
+
+
+        glVertex3i(i-pMax2, 0, -pMax2);
+        glVertex3i(i-pMax2, pMax, -pMax2);
+
+
+        glVertex3i(i-pMax2, 0, pMax2);
+        glVertex3i(i-pMax2, pMax, pMax2);
+
+
+        glVertex3i(pMax2, 0, i-pMax2);
+        glVertex3i(pMax2, pMax, i-pMax2);
+
+        glVertex3i(-pMax2, 0, i-pMax2);
+        glVertex3i(-pMax2, pMax, i-pMax2);
+    }
+
+    glEnd();
+    glDisable(GL_BLEND);
+    glDisable(GL_LINE_SMOOTH);
+    glDepthMask(GL_TRUE);
+}
+
+void View::drawUnitAxis(float x, float y, float z){
+
 }
 
 void View::paintGL()
@@ -230,14 +275,16 @@ void View::paintGL()
     glVertex3f(-10, 10, -50);
     glEnd();
     */
-    float col[3] = {0.0f, 0.7f, 0.93f};
+    float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {-5.0f, -1.0f, 5.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 1.0f, 0.0f};
-    createPlane(col,pos,scale,rot,90);
-
+    drawPlane(col,pos,scale,rot,90);
+    drawWireframeGrid();
     // Render dem snowflakes
+    glEnable(GL_BLEND);
     m_snowEmitter.drawSnowflakes();
+    glDisable(GL_BLEND);
 
     glPopMatrix();
 
@@ -245,6 +292,8 @@ void View::paintGL()
     glFlush();
     swapBuffers();
 }
+
+
 
 void View::paintSky()
 {
@@ -333,39 +382,34 @@ void View::wheelEvent(QWheelEvent *event)
 
 void View::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Escape) QApplication::quit();
+    Vector4 dirVec = m_camera->getDirection();
+    if (event->key() == Qt::Key_Escape){
+        QApplication::quit();
+    }else{
 
-    if(event->key() == Qt::Key_W) {
-        Vector4 translationVec = m_camera->center;
-        translationVec.y = 0;
-        translationVec.normalize();
-        m_camera->eye = m_camera->eye + .01 * translationVec;
-        updateCamera();
-    } else if(event->key() == Qt::Key_S) {
-        Vector4 translationVec = m_camera->center;
-        translationVec.y = 0;
-        translationVec.normalize();
-        m_camera->eye = m_camera->eye - .01 * translationVec;
-        updateCamera();
-    } else if(event->key() == Qt::Key_A) {
-        Vector4 translationVec;
-        float cosVal = cos(-M_PI/2.0);
-        float sinVal = sin(-M_PI/2.0);
-        translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
-        translationVec.y = 0;
-        translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
-        translationVec.normalize();
-        m_camera->eye = m_camera->eye + .01 * translationVec;
-        updateCamera();
-    } else if( event->key() == Qt::Key_D) {
-        Vector4 translationVec;
-        float cosVal = cos(M_PI/2.0);
-        float sinVal = sin(M_PI/2.0);
-        translationVec.x = m_camera->center.x * cosVal - m_camera->center.z * sinVal;
-        translationVec.y = 0;
-        translationVec.z = m_camera->center.z * cosVal + m_camera->center.x * sinVal;
-        translationVec.normalize();
-        m_camera->eye = m_camera->eye + .01 * translationVec;
+        dirVec.y = 0;
+        dirVec.normalize();
+        if(event->key() == Qt::Key_W) {
+            m_camera->eye = m_camera->eye + .01 * dirVec;
+        } else if(event->key() == Qt::Key_S) {
+            m_camera->eye = m_camera->eye - .01 * dirVec;
+        } else if(event->key() == Qt::Key_A) {
+            float cosVal = cos(-M_PI/2.0);
+            float sinVal = sin(-M_PI/2.0);
+            dirVec.x = dirVec.x * cosVal -dirVec.z * sinVal;
+            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            dirVec.y = 0;
+            dirVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * dirVec;
+        } else if( event->key() == Qt::Key_D) {
+            float cosVal = cos(M_PI/2.0);
+            float sinVal = sin(M_PI/2.0);
+            dirVec.x = dirVec.x * cosVal - dirVec.z * sinVal;
+            dirVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
+            dirVec.y = 0;
+            dirVec.normalize();
+            m_camera->eye = m_camera->eye + .01 * dirVec;
+        }
         updateCamera();
     }
 }

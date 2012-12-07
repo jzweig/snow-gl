@@ -28,6 +28,7 @@ struct OrbitCamera
     float fovy;
     float zoom;
 
+    const Vector4 getDirection();
     void mouseMove(const Vector2 &delta);
     void mouseWheel(float delta);
     void lookAt(const Vector4 &point);

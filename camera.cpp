@@ -20,6 +20,11 @@ void OrbitCamera::mouseWheel(float delta)
     center = center - Vector4::fromAngles(theta, phi)  * delta;
 }
 
+const Vector4 OrbitCamera::getDirection()
+{
+    return -Vector4::fromAngles(theta, phi);
+}
+
 void OrbitCamera::lookAt(const Vector4 &point)
 {
     /**

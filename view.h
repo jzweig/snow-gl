@@ -43,8 +43,10 @@ private:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
-    void createPlane(float color[], float translate[]);
-    void createPlane(float color[], float translate[], float scale[], float rotate[],int angle);
+    void drawUnitAxis(float x, float y, float z);
+    void drawWireframeGrid();
+    void drawPlane(float color[], float translate[]);
+    void drawPlane(float color[], float translate[], float scale[], float rotate[],int angle);
 private slots:
     void tick();
 
