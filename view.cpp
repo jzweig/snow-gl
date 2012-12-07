@@ -17,6 +17,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
 
     // TODO: Seed the random number generator
+    srand(QTime::currentTime().msec());
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
