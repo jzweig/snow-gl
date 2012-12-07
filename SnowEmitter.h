@@ -83,6 +83,12 @@ class SnowEmitter
           */
         void setCamera(OrbitCamera *camera);
 
+        /**
+          * Sets a pointer to where the snow emitter can find the overall
+          * speed of the environment.
+          */
+        void setSpeed(float *speed);
+
     protected:
 
         /**
@@ -107,6 +113,9 @@ class SnowEmitter
 
         //! The width of a snowflake
         float m_scale;
+
+        //! A pointer to the overall speed of the environment
+        float *m_speed;
 
         //! The GL texture id for the snowflake texture
         GLuint m_textureId;

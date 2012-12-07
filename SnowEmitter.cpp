@@ -30,6 +30,11 @@ void SnowEmitter::setCamera(OrbitCamera *camera)
     m_camera = camera;
 }
 
+void SnowEmitter::setSpeed(float *speed)
+{
+    m_speed = speed;
+}
+
 void SnowEmitter::initializeSnowflakes(int flakeCount)
 {
     if( m_snowflakes != NULL )
@@ -77,7 +82,7 @@ void SnowEmitter::resetWind(int snowflakeIndex)
     m_snowflakes[snowflakeIndex].windForce.y = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/((2.0-WIND_DOWNWARD_BIAS) * MAX_WIND_SPEED));
     m_snowflakes[snowflakeIndex].windForce.z = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/(2.0 * MAX_WIND_SPEED));
     m_snowflakes[snowflakeIndex].windForce.w = 0;
-    m_snowflakes[snowflakeIndex].windExpire = rand() % (MAX_WIND_EXPIRE - MIN_WIND_EXPIRE) + MIN_WIND_EXPIRE;
+    m_snowflakes[snowflakeIndex].windExpire = rand() % (MAX_WIND_EXPIRE - MIN_WIND_EXPIRE)/(*m_speed) + MIN_WIND_EXPIRE/(*m_speed);
 }
 
 void SnowEmitter::tick()
@@ -87,7 +92,7 @@ void SnowEmitter::tick()
         if( m_snowflakes[i].active )
         {
             m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
-            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed)) + m_snowflakes[i].pos;
+            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * (*m_speed))) + m_snowflakes[i].pos;
 
             if( m_snowflakes[i].windExpire == 0 )
                 resetWind(i);

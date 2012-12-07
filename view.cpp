@@ -16,7 +16,10 @@ View::View(QWidget *parent) : QGLWidget(parent)
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
 
-    // TODO: Seed the random number generator
+    // Set the starting speed
+    m_speed = DEFAULT_SPEED;
+
+    // Seed the random number generator
     srand(QTime::currentTime().msec());
 
     // The game loop is implemented using a timer
@@ -34,7 +37,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera->theta = M_PI * 1.5f, m_camera->phi = -0.2f;
     m_camera->fovy = 60.f;
     m_snowEmitter.setCamera(m_camera);
-
+    m_snowEmitter.setSpeed(&m_speed);
 
 }
 
@@ -304,7 +307,6 @@ void View::mousePressEvent(QMouseEvent *event)
 {
     m_prevMousePos.x = event->x();
     m_prevMousePos.y = event->y();
-    //cout<<"pressed"<<endl;
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -351,12 +353,13 @@ void View::wheelEvent(QWheelEvent *event)
 
 void View::keyPressEvent(QKeyEvent *event)
 {
-    Vector4 dirVec = m_camera->getDirection();
-
 
     if (event->key() == Qt::Key_Escape){
         QApplication::quit();
+    } else if(event->key() == Qt::Key_Down) {
+        m_speed = FAST_SPEED;
     } else {
+        Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
         dirVec.normalize();
 
@@ -389,6 +392,8 @@ void View::keyPressEvent(QKeyEvent *event)
 
 void View::keyReleaseEvent(QKeyEvent *event)
 {
+    if( event->key() == Qt::Key_Down )
+        m_speed = DEFAULT_SPEED;
 }
 
 void View::tick()

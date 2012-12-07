@@ -15,6 +15,11 @@
 #include "camera.h"
 //#include "common.h"
 
+// Speeds affecting the speed of snow simulation. Fast speed occurs when holding down
+// the down arrow.
+#define DEFAULT_SPEED 1.0
+#define FAST_SPEED 10.0
+
 class View : public QGLWidget
 {
     Q_OBJECT
@@ -60,6 +65,8 @@ protected:
      SnowEmitter m_snowEmitter;
      //! The camera settings
      OrbitCamera *m_camera;
+
+     float m_speed;
 
 };
 
