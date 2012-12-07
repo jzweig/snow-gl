@@ -10,14 +10,20 @@ TEMPLATE = app
 
 # If you add your own folders, add them to INCLUDEPATH and DEPENDPATH, e.g. folder1 folder2
 INCLUDEPATH += lib \
-    math
+    math \
+    shaders
 DEPENDPATH += lib \
-    math
+    math \
+    shaders
+
 SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     math/CS123Matrix.cpp \
     SnowEmitter.cpp \
+    lib/targa.cpp \
+    lib/glm.cpp \
+    resourceloader.cpp \
     camera.cpp
 
 HEADERS += mainwindow.h \
@@ -25,13 +31,25 @@ HEADERS += mainwindow.h \
     SnowEmitter.h \
     lib/CS123SceneData.h \
     lib/CS123Common.h \
+    lib/targa.h \
+    lib/glm.h \
     math/CS123Algebra.h \
+    resourceloader.h \
     camera.h
 
 FORMS += mainwindow.ui
 
-RESOURCES += textures.qrc
-
+RESOURCES += textures.qrc \
+    shaders.qrc
+OTHER_FILES += \
+shaders/pulse.frag \
+shaders/pulse.vars \
+shaders/pulse.vert \
+shaders/terrain.frag \
+shaders/terrain.vars \
+shaders/terrain.vert \
+shaders/reflect.frag \
+shaders/reflect.vert
 
 # Don't add the -pg flag unless you know what you are doing. It makes QThreadPool freeze on Mac OS X
 QMAKE_CXXFLAGS_RELEASE -= -O2
