@@ -34,10 +34,19 @@ private:
     QTime time;
     QTimer timer;
     Vector2 m_prevMousePos;
+    QTimer m_timer;
+    QTime m_clock;
+    int m_prevTime;
+    float m_prevFps, m_fps;
+    QFont m_font; // font for rendering text
 
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
+
+
+    void paintUI();
+    void paintSky();
 
     //! Loads the texture at the given location, returning the GL texture id
     GLuint loadTexture(const QString &path);
@@ -64,7 +73,6 @@ protected:
      void updateCamera();
      void setupLights();
 
-     void paintSky();
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;

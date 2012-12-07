@@ -5,7 +5,9 @@
 #include <CS123Common.h>
 #include "camera.h"
 #include "GL/glut.h"
-View::View(QWidget *parent) : QGLWidget(parent)
+static const int MAX_FPS = 120;
+View::View(QWidget *parent) : QGLWidget(parent),
+        m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -24,6 +26,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     // Setup the camera
     m_camera = new OrbitCamera();
@@ -93,6 +96,9 @@ void View::initializeGL()
     // frame rate depends on the operating system and other running programs)
     time.start();
     timer.start(1000 / 60);
+
+    // Start the drawing timer
+    m_timer.start(1000.0f / MAX_FPS);
 
     // Center the mouse, which is explained more in mouseMoveEvent() below.
     // This needs to be done here because the mouse may be initially outside
@@ -249,6 +255,12 @@ void View::drawUnitAxis(float x, float y, float z){
 
 void View::paintGL()
 {
+
+    // Update the fps
+    int time = m_clock.elapsed();
+    m_fps = 1000.f / (time - m_prevTime);
+    m_prevTime = time;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glMatrixMode(GL_MODELVIEW);
@@ -285,6 +297,9 @@ void View::paintGL()
     // Display the frame
     glFlush();
     swapBuffers();
+
+    // Paint GUI
+    paintUI();
 }
 
 
@@ -314,6 +329,24 @@ void View::paintSky()
     glVertex3f(0,0,0);
     glVertex3f(0,0,1);
     glEnd();
+}
+/**
+  Draws text for the FPS and screenshot prompt
+ **/
+void View::paintUI()
+{
+    glColor3f(1.f, 1.f, 1.f);
+
+    // Combine the previous and current framerate
+    if (m_fps >= 0 && m_fps < 1000)
+    {
+       m_prevFps *= 0.95f;
+       m_prevFps += m_fps * 0.05f;
+    }
+
+    // QGLWidget's renderText takes xy coordinates, a string, and a font
+    renderText(10, 20, "FPS: " + QString::number((int) (m_prevFps)), m_font);
+    renderText(10, 35, "S: Save screenshot", m_font);
 }
 
 void View::resizeGL(int w, int h)
