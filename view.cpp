@@ -212,7 +212,7 @@ void View::drawWireframeGrid()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor3f(.6, .6, .6);
-    glBegin(GL_LINES);
+    glBegin(GL_LINES)dir;
     int pMax = 20;
     int pMax2 = 10;
     for (int i=0; i<=pMax; i++)
@@ -279,8 +279,9 @@ void View::paintGL()
     float pos[3] = {-5.0f, -1.0f, 5.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 1.0f, 0.0f};
-    drawPlane(col,pos,scale,rot,90);
+    //drawPlane(col,pos,scale,rot,90);
     drawWireframeGrid();
+
     // Render dem snowflakes
     glEnable(GL_BLEND);
     m_snowEmitter.drawSnowflakes();
