@@ -409,15 +409,17 @@ void View::keyPressEvent(QKeyEvent *event)
         QApplication::quit();
     } else if(event->key() == Qt::Key_Down) {
         m_speed = FAST_SPEED;
+    } else if(event->key() == Qt::Key_Shift) {
+        m_shift = true;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
         dirVec.normalize();
 
         if(event->key() == Qt::Key_W) {
-            m_camera->eye = m_camera->eye + .01 * dirVec;
+            m_camera->eye = m_camera->eye + dirVec * getMoveFactor();
         } else if(event->key() == Qt::Key_S) {
-            m_camera->eye = m_camera->eye - .01 * dirVec;
+            m_camera->eye = m_camera->eye - dirVec * getMoveFactor();
         } else if(event->key() == Qt::Key_A) {
             float cosVal = cos(-M_PI/2.0);
             float sinVal = sin(-M_PI/2.0);
@@ -426,7 +428,7 @@ void View::keyPressEvent(QKeyEvent *event)
             translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
             translationVec.y = 0;
             translationVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * translationVec;
+            m_camera->eye = m_camera->eye + translationVec * getMoveFactor();
         } else if( event->key() == Qt::Key_D) {
             float cosVal = cos(M_PI/2.0);
             float sinVal = sin(M_PI/2.0);
@@ -435,16 +437,26 @@ void View::keyPressEvent(QKeyEvent *event)
             translationVec.z = dirVec.z * cosVal + dirVec.x * sinVal;
             translationVec.y = 0;
             translationVec.normalize();
-            m_camera->eye = m_camera->eye + .01 * translationVec;
+            m_camera->eye = m_camera->eye + translationVec * getMoveFactor();
         }
         updateCamera();
     }
+}
+
+float View::getMoveFactor()
+{
+    if( m_shift )
+        return 0.1;
+    else
+        return .01;
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
 {
     if( event->key() == Qt::Key_Down )
         m_speed = DEFAULT_SPEED;
+    else if( event->key() == Qt::Key_Shift)
+        m_shift = false;
 }
 
 void View::tick()

@@ -72,15 +72,19 @@ private slots:
 protected:
      void updateCamera();
      void setupLights();
-
+     float getMoveFactor();
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
+
      //! The camera settings
      OrbitCamera *m_camera;
 
+     //! The overall speed
      float m_speed;
 
+     //! Whether or not shift is pressed
+     bool m_shift;
 };
 
 #endif // VIEW_H
