@@ -61,11 +61,23 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
     m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0)) ;
     m_snowflakes[snowflakeIndex].pos.x = camera_x - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
     m_snowflakes[snowflakeIndex].pos.z = camera_z - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
+    m_snowflakes[snowflakeIndex].pos.w = 0;
     m_snowflakes[snowflakeIndex].dir.x = 0;
     m_snowflakes[snowflakeIndex].dir.y = -1;
     m_snowflakes[snowflakeIndex].dir.z = 0;
+    m_snowflakes[snowflakeIndex].dir.w = 0;
     m_snowflakes[snowflakeIndex].speed = 0.5;
     m_snowflakes[snowflakeIndex].size = 0.004 + (float)rand()/((float)RAND_MAX/(0.002));
+    resetWind(snowflakeIndex);
+}
+
+void SnowEmitter::resetWind(int snowflakeIndex)
+{
+    m_snowflakes[snowflakeIndex].windForce.x = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/(2.0 * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.y = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/((2.0-WIND_DOWNWARD_BIAS) * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.z = -MAX_WIND_SPEED + (float)rand()/((float)RAND_MAX/(2.0 * MAX_WIND_SPEED));
+    m_snowflakes[snowflakeIndex].windForce.w = 0;
+    m_snowflakes[snowflakeIndex].windExpire = rand() % (MAX_WIND_EXPIRE - MIN_WIND_EXPIRE) + MIN_WIND_EXPIRE;
 }
 
 void SnowEmitter::tick()
@@ -74,8 +86,14 @@ void SnowEmitter::tick()
     {
         if( m_snowflakes[i].active )
         {
-            // TODO: Do physics updates
+            m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
             m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed)) + m_snowflakes[i].pos;
+
+            if( m_snowflakes[i].windExpire == 0 )
+                resetWind(i);
+            else
+                m_snowflakes[i].windExpire--;
+
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF )
             {
                 m_snowflakes[i].active = false;

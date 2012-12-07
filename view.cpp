@@ -133,25 +133,6 @@ void View::setupLights()
 void View::updateCamera()
 {
     float w = width(), h = height();
-    /*float ratio = w / h;
-
-    // Reset the coordinate system before modifying
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(m_camera->angle, ratio, m_camera->near, m_camera->far);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(m_camera->eye.x, m_camera->eye.y, m_camera->eye.z,
-              m_camera->center.x, m_camera->center.y, m_camera->center.z,
-              m_camera->up.x, m_camera->up.y, m_camera->up.z);
-
-
-
-    */
-
-
-
 
     float ratio = ((float) w) / h;
     Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
@@ -265,21 +246,12 @@ void View::paintGL()
     glDisable(GL_LIGHTING);
 
     paintSky();
-    /*
-    glBegin(GL_QUADS);
-    glNormal3f(0, 0, 1.0);
-    glColor3f(0.1, 0.1, 0.1);
-    glVertex3f(-10, -10, -50);
-    glVertex3f(10, -10, -50);
-    glVertex3f(10, 10, -50);
-    glVertex3f(-10, 10, -50);
-    glEnd();
-    */
+
     float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {-5.0f, -1.0f, 5.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 1.0f, 0.0f};
-    drawPlane(col,pos,scale,rot,90);
+    //drawPlane(col,pos,scale,rot,90);
     drawWireframeGrid();
     // Render dem snowflakes
     glEnable(GL_BLEND);
@@ -354,7 +326,6 @@ void View::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton)
     {
         m_camera->mouseMove(pos - m_prevMousePos);
-        //cout<<"moved"<<endl;
     }
     m_prevMousePos = pos;
 
@@ -364,10 +335,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
-    //cout<<"released"<<endl;
 }
-
-
 
 /**
   Called when the mouse wheel is turned.  Zooms the camera in and out.
