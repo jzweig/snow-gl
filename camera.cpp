@@ -25,6 +25,11 @@ const Vector4 OrbitCamera::getDirection()
     return -Vector4::fromAngles(theta, phi);
 }
 
+const Vector4 OrbitCamera::getUp()
+{
+    return -Vector4::fromAngles(theta, phi+M_PI/2);
+}
+
 void OrbitCamera::lookAt(const Vector4 &point)
 {
     /**

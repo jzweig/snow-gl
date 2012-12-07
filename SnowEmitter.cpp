@@ -123,7 +123,8 @@ void SnowEmitter::drawSnowflakes()
     glBindTexture(GL_TEXTURE_2D, m_textureId);
     glBegin(GL_QUADS);
 
-    Vector4 up = Vector4(0, 1.0, 0, 0);
+    // Calculate the up and right vectors for use in billboarding
+    Vector4 up = m_camera->getUp();
     Vector4 right = m_camera->getDirection().cross(up);
 
     glColor3f(1.0f, 1.0f, 1.0f);
