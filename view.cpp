@@ -42,6 +42,18 @@ View::~View()
     safeDelete(m_camera);
 }
 
+/**
+  Create shader programs.
+ **/
+void View::createShaderPrograms()
+{
+    const QGLContext *ctx = context();
+    m_shaderPrograms["reflect"] = ResourceLoader::newShaderProgram(ctx, "shaders/reflect.vert", "shaders/reflect.frag");
+    m_shaderPrograms["refract"] = ResourceLoader::newShaderProgram(ctx, "shaders/refract.vert", "shaders/refract.frag");
+    m_shaderPrograms["brightpass"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/brightpass.frag");
+    m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
+}
+
 GLuint View::loadTexture(const QString &path)
 {
     QFile file(path);
@@ -107,6 +119,8 @@ void View::initializeGL()
     updateCamera();
     setupLights();
 
+    createShaderPrograms();
+    cout << "initialized shader programs..." << endl;
     paintGL();
 }
 
@@ -276,10 +290,13 @@ void View::paintGL()
     glEnd();
     */
     float col[3] = {0.0f, 0.2f, 0.6f};
-    float pos[3] = {-5.0f, -1.0f, 5.0f};
+    float pos[3] = {5.0f, 0.0f, 0.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
-    float rot[3] ={0.0f, 1.0f, 0.0f};
+    float rot[3] ={0.0f, 0.0f, 1.0f};
+
+    m_shaderPrograms["brightpass"]->bind();
     drawPlane(col,pos,scale,rot,90);
+    m_shaderPrograms["brightpass"]->release();
     drawWireframeGrid();
     // Render dem snowflakes
     glEnable(GL_BLEND);

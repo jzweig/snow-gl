@@ -15,6 +15,9 @@
 #include "camera.h"
 //#include "common.h"
 
+
+#include "resourceloader.h"
+#include <QHash>
 class View : public QGLWidget
 {
     Q_OBJECT
@@ -34,6 +37,7 @@ private:
 
     //! Loads the texture at the given location, returning the GL texture id
     GLuint loadTexture(const QString &path);
+    void createShaderPrograms();
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -47,6 +51,8 @@ private:
     void drawWireframeGrid();
     void drawPlane(float color[], float translate[]);
     void drawPlane(float color[], float translate[], float scale[], float rotate[],int angle);
+    // Resources
+    QHash<QString, QGLShaderProgram *> m_shaderPrograms; // hash map of all shader programs
 private slots:
     void tick();
 
