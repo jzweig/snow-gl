@@ -1,7 +1,7 @@
 #ifndef SNOWEMITTER_H
 #define SNOWEMITTER_H
 
-#define INITIAL_SNOWFLAKE_COUNT 30000
+#define INITIAL_SNOWFLAKE_COUNT 50000
 #define INITIAL_SNOWFLAKE_HEIGHT 6.0f
 #define SNOWFLAKE_CUTOFF 0
 #define BASE_FLAKE_SPEED_FACTOR .005f
@@ -11,11 +11,14 @@
 #define MAX_WIND_SPEED 0.001
 #define WIND_DOWNWARD_BIAS 0
 #define GRAVITY_Y_CHANGE -0.0001
+#define SNOWFLAKE_PROCESSING_BATCH 5000
 
 //#include "common.h"
 #include "CS123Common.h"
 #include "CS123Algebra.h"
 #include <QtOpenGL>
+#include <QtCore>
+#include <QFutureSynchronizer>
 #include "camera.h"
 
 
@@ -72,6 +75,12 @@ class SnowEmitter
           * Executes the effects of a time step.
           */
         void tick();
+
+        /**
+          * Executes the effects of a time step on particles within the
+          * given range, inclusive.
+          */
+        void rangedTick(int lowBound, int highBound);
 
         /**
           * Sets the texture id to use for snowflakes.

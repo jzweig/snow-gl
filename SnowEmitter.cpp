@@ -87,7 +87,20 @@ void SnowEmitter::resetWind(int snowflakeIndex)
 
 void SnowEmitter::tick()
 {
-    for(int i = 0; i < m_snowflakeCount; i++)
+    QFutureSynchronizer<void> sync;
+    for( int i = 0; i < m_snowflakeCount; i+= SNOWFLAKE_PROCESSING_BATCH )
+    {
+        int startIndex = i;
+        int endIndex = (i + SNOWFLAKE_PROCESSING_BATCH) - 1;
+        QFuture<void> future = QtConcurrent::run(this, &SnowEmitter::rangedTick, startIndex, endIndex);
+        sync.addFuture(future);
+    }
+    sync.waitForFinished();
+}
+
+void SnowEmitter::rangedTick(int minIndex, int maxIndex)
+{
+    for(int i = minIndex; i < maxIndex; i++)
     {
         if( m_snowflakes[i].active )
         {
