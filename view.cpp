@@ -77,6 +77,19 @@ void View::setupScene()
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
     m_objects.push_back(ground);
+
+    // Make a demo box
+    SceneObject *demoBox = m_factory.constructCube();
+    demoBox->setColor(0.25, 0.25, 0.25, 1.0);
+    demoBox->translate(-5.0, 0.5, 5.0);
+    m_objects.push_back(demoBox);
+
+    // Make a smaller box
+    /*SceneObject *smallBox = m_factory.constructCube();
+    smallBox->setColor(0.2, 0.2, 0.45, 0.75);
+    smallBox->scale(0.5, 0.5, 0.5);
+    smallBox->translate(-3.0, 0.5, 7.0);
+    m_objects.push_back(smallBox);*/
 }
 
 /**
@@ -216,46 +229,6 @@ void View::drawPlane(float color[], float translate[], float scale[], float rota
     glEnd();
 
     glPopMatrix();
-}
-
-void View::drawWireframeGrid()
-{
-    glLineWidth(1.5);
-    glDepthMask(GL_FALSE);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor3f(.6, .6, .6);
-    glBegin(GL_LINES);
-    int pMax = 20;
-    int pMax2 = pMax/2;
-    for (int i=0; i<=pMax; i++)
-    {
-        glVertex3i(i-pMax2, 0, -pMax2);
-        glVertex3i(i-pMax2, 0, pMax2);
-        glVertex3i(-pMax2, 0, i-pMax2);
-        glVertex3i(pMax2, 0, i-pMax2);
-
-
-        glVertex3i(i-pMax2, 0, -pMax2);
-        glVertex3i(i-pMax2, 5.9, -pMax2);
-
-
-        glVertex3i(i-pMax2, 0, pMax2);
-        glVertex3i(i-pMax2, 5.9, pMax2);
-
-
-        glVertex3i(pMax2, 0, i-pMax2);
-        glVertex3i(pMax2, 5.9, i-pMax2);
-
-        glVertex3i(-pMax2, 0, i-pMax2);
-        glVertex3i(-pMax2, 5.9, i-pMax2);
-    }
-
-    glEnd();
-    glDisable(GL_BLEND);
-    glDisable(GL_LINE_SMOOTH);
-    glDepthMask(GL_TRUE);
 }
 
 void View::drawUnitAxis(float x, float y, float z){

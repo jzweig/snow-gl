@@ -66,7 +66,6 @@ private:
     void keyReleaseEvent(QKeyEvent *event);
 
     void drawUnitAxis(float x, float y, float z);
-    void drawWireframeGrid();
     void drawPlane(float color[], float translate[]);
     void drawPlane(float color[], float translate[], float scale[], float rotate[],int angle);
     // Resources

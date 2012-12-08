@@ -34,9 +34,12 @@ class SceneObject
         void setColor(Vector4 color);
 
     protected:
+        void refreshMatrix();
+
         Shape *m_shape;
         vector<Transformation> m_transformations;
         Vector4 m_color;
+        Matrix4x4 m_matrix;
 
  };
 

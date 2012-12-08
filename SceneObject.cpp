@@ -2,7 +2,7 @@
 
 SceneObject::SceneObject(Shape *shape) : m_shape(shape)
 {
-
+    m_matrix = Matrix4x4::identity();
 }
 
 SceneObject::~SceneObject()
@@ -13,24 +13,8 @@ SceneObject::~SceneObject()
 void SceneObject::render() const
 {
     glPushMatrix();
-    for( std::vector<Transformation>::const_iterator it = m_transformations.begin(); it != m_transformations.end(); ++it ) {
-        Transformation t = *it;
-        switch( t.type ) {
-        case TRANSLATION:
-            glTranslatef(t.translation.x, t.translation.y, t.translation.z);
-            break;
-
-        case SCALING:
-            glScalef(t.scaling.x, t.scaling.y, t.scaling.z);
-            break;
-
-        case ROTATION:
-            glRotatef(t.angle, t.rotation.x, t.rotation.y, t.rotation.z);
-            break;
-        }
-    }
-    cout << "color = " << m_color << endl;
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
+    glMultMatrixd(m_matrix.data);
     m_shape->render();
     glPopMatrix();
 }
@@ -48,6 +32,30 @@ void SceneObject::setColor(Vector4 color)
     m_color = color;
 }
 
+void SceneObject::refreshMatrix()
+{
+    Matrix4x4 mat = Matrix4x4::identity();
+
+    for( std::vector<Transformation>::const_iterator it = m_transformations.begin(); it != m_transformations.end(); ++it ) {
+        Transformation t = *it;
+        switch( t.type ) {
+        case TRANSLATION:
+            mat = getTransMat(t.translation).getTranspose() * mat;
+            break;
+
+        case SCALING:
+            mat = getScaleMat(t.scaling).getTranspose() * mat;
+            break;
+
+        case ROTATION:
+            mat = getRotMat(Vector4(0, 0, 0, 1), t.rotation, t.angle).getTranspose() * mat;
+            break;
+        }
+    }
+
+    m_matrix = mat;
+}
+
 void SceneObject::translate(float x, float y, float z)
 {
     Vector4 translationVec = Vector4(x, y, z, 0);
@@ -56,6 +64,7 @@ void SceneObject::translate(float x, float y, float z)
     transformation.translation = translationVec;
 
     m_transformations.push_back(transformation);
+    refreshMatrix();
 }
 
 void SceneObject::scale(float x, float y, float z)
@@ -66,6 +75,7 @@ void SceneObject::scale(float x, float y, float z)
     transformation.scaling = scaleVec;
 
     m_transformations.push_back(transformation);
+    refreshMatrix();
 }
 
 void SceneObject::rotate(float angle, float x, float y, float z)
@@ -77,4 +87,5 @@ void SceneObject::rotate(float angle, float x, float y, float z)
     transformation.angle = angle;
 
     m_transformations.push_back(transformation);
+    refreshMatrix();
 }
