@@ -91,6 +91,14 @@ void SnowEmitter::tick()
     {
         if( m_snowflakes[i].active )
         {
+            if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF ||
+                (m_snowflakes[i].pos.y > INITIAL_SNOWFLAKE_HEIGHT &&
+                (fabs(m_camera->eye.x - m_snowflakes[i].pos.x) > 2 || fabs(m_camera->eye.z - m_snowflakes[i].pos.z) > 2)) ) {
+                m_snowflakes[i].active = false;
+                m_activeSnowflakes--;
+                continue;
+            }
+
             m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
             m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * (*m_speed))) + m_snowflakes[i].pos;
 
@@ -132,11 +140,6 @@ void SnowEmitter::drawSnowflakes()
     {
         if( m_snowflakes[i].active )
         {
-            glPushMatrix();
-
-            Vector4 normal = m_camera->eye - m_snowflakes[i].pos;
-            glNormal3dv(normal.data);
-
             float size = m_snowflakes[i].size;
 
             Vector4 a = m_snowflakes[i].pos - (right + up) * size;
@@ -152,8 +155,6 @@ void SnowEmitter::drawSnowflakes()
             glVertex3f(b.x, b.y, b.z);
             glTexCoord2f(1.0, 1.0);
             glVertex3f(c.x, c.y, c.z);
-
-            glPopMatrix();
         }
     }
     glEnd();
