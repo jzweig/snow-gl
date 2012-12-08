@@ -40,8 +40,7 @@ HEADERS += mainwindow.h \
 FORMS += mainwindow.ui
 
 RESOURCES += textures.qrc \
-    shaders.qrc \
-    models.qrc
+    shaders.qrc
 OTHER_FILES += \
 shaders/pulse.frag \
 shaders/pulse.vars \
