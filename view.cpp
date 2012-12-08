@@ -314,7 +314,7 @@ void View::paintGL()
 
 void View::paintSky()
 {
-    glBegin(GL_QUADS);
+    /*glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
     glVertex3f(-1000, 6, 1000);
     glVertex3f(-1000, 6, -1000);
@@ -325,7 +325,7 @@ void View::paintSky()
     glVertex3f(-1000, 0, -1000);
     glVertex3f(1000, 0, -1000);
     glVertex3f(1000, 0, 1000);
-    glEnd();
+    glEnd();*/
     glBegin(GL_LINES);
     glColor3f(1,0,0); // x - red
     glVertex3f(0,0,0);
