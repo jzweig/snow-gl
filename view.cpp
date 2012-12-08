@@ -50,6 +50,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
 View::~View()
 {
     safeDelete(m_camera);
+    glmDelete(m_dragon.model);
 }
 
 /**
