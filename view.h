@@ -4,17 +4,23 @@
 #include <qgl.h>
 #include <QTime>
 #include <QTimer>
+#include <QHash>
 #include <QtOpenGL>
 #include <QString>
 #include <QImage>
 #include <QFile>
+#include <iostream>
+
 #ifdef __APPLE__
     #include "glut/glut.h"
 #endif
 #include "SnowEmitter.h"
 #include "camera.h"
 #include "shapes/Cube.h"
-#include <iostream>
+#include "SceneObject.h"
+#include "SceneObjectFactory.h"
+#include "resourceloader.h"
+
 // Speeds affecting the speed of snow simulation. Fast speed occurs when holding down
 // the down arrow.
 #define DEFAULT_SPEED 1.0
@@ -22,9 +28,6 @@
 #define SPRINT_FACTOR 0.1
 #define WALK_FACTOR 0.01
 
-
-#include "resourceloader.h"
-#include <QHash>
 class View : public QGLWidget
 {
     Q_OBJECT
@@ -72,6 +75,7 @@ private slots:
     void tick();
 
 protected:
+     void setupScene();
      void updateCamera();
      void setupLights();
      float getMoveFactor();
@@ -88,8 +92,11 @@ protected:
      //! Whether or not shift is pressed
      bool m_shift;
 
-     //! The ground
-     Cube *m_ground;
+     //! The scene object factory to use when constructing scene objects
+     SceneObjectFactory m_factory;
+
+     //! The objects in the scene
+     vector<SceneObject *> m_objects;
 };
 
 #endif // VIEW_H

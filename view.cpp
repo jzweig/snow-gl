@@ -50,8 +50,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_snowEmitter.setCamera(m_camera);
     m_snowEmitter.setSpeed(&m_speed);
 
-    m_ground = new Cube();
-    m_ground->tesselate();
+    setupScene();
 
 }
 
@@ -59,6 +58,22 @@ View::~View()
 {
     safeDelete(m_camera);
     glmDelete(m_dragon.model);
+
+    // Delete the scene objects
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
+        delete *it;
+    }
+    m_objects.clear();
+}
+
+void View::setupScene()
+{
+    // Make the ground
+    SceneObject *ground = m_factory.constructCube();
+    ground->setColor(0.2, 0.39, 0.18, 1.0);
+    ground->scale(20.0, 0.2, 20.0);
+    ground->translate(0, -0.5, 0);
+    m_objects.push_back(ground);
 }
 
 /**
@@ -291,7 +306,12 @@ void View::paintGL()
     m_shaderPrograms["pulse"]->release();
     glDisable(GL_LIGHTING);
     drawUnitAxis(0.f,0.f,0.f);
-    paintSky();
+    //paintSky();
+
+    // Render all the objects in the scene
+    for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+       (*it)->render();
+    }
 
     drawWireframeGrid();
 
@@ -314,7 +334,7 @@ void View::paintGL()
 
 void View::paintSky()
 {
-    /*glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
     glVertex3f(-1000, 6, 1000);
     glVertex3f(-1000, 6, -1000);
@@ -325,14 +345,7 @@ void View::paintSky()
     glVertex3f(-1000, 0, -1000);
     glVertex3f(1000, 0, -1000);
     glVertex3f(1000, 0, 1000);
-    glEnd();*/
-
-    glPushMatrix();
-    glScalef(20, 0.2, 20);
-    glTranslatef(0, -0.5, 0);
-    glColor4f(0.05, 0.4, 0.15, 1.0);
-    m_ground->render();
-    glPopMatrix();
+    glEnd();
 }
 /**
   Draws text for the FPS and screenshot prompt

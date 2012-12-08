@@ -30,7 +30,9 @@ SOURCES += main.cpp \
     shapes/Triangle.cpp \
     shapes/Shape.cpp \
     shapes/Renderable.cpp \
-    shapes/Cube.cpp
+    shapes/Cube.cpp \
+    SceneObject.cpp \
+    SceneObjectFactory.cpp
 
 HEADERS += mainwindow.h \
     view.h \
@@ -49,7 +51,9 @@ HEADERS += mainwindow.h \
     shapes/Triangle.h \
     shapes/Shape.h \
     shapes/Renderable.h \
-    shapes/Cube.h
+    shapes/Cube.h \
+    SceneObject.h \
+    SceneObjectFactory.h
 
 FORMS += mainwindow.ui
 
