@@ -5,12 +5,10 @@
 #include <CS123Common.h>
 #include "camera.h"
 #include "GL/glut.h"
-static const int MAX_FPS = 120;
+static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
-    //load that dragon...
-    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
 
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -29,6 +27,8 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    // fps timer
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     // Setup the camera
@@ -65,30 +65,6 @@ void View::createShaderPrograms()
    // m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
 }
 
-GLuint View::loadTexture(const QString &path)
-{
-    QFile file(path);
-
-    QImage image, texture;
-    if(!file.exists()) {
-        std::cout << "Texture file " << path.toStdString() << " does not exist" << std::endl;
-        return -1;
-    }
-    image.load(file.fileName());
-    texture = QGLWidget::convertToGLFormat(image);
-
-    glEnable(GL_TEXTURE_2D);
-    GLuint textureid;
-    glGenTextures(1, &textureid);
-    glBindTexture(GL_TEXTURE_2D, textureid);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return textureid;
-}
 
 void View::initializeGL()
 {
@@ -126,13 +102,16 @@ void View::initializeGL()
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
+    //load that dragon...
+    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+
     // Load the texture
-    GLuint textureId = loadTexture( ":/textures/textures/snowflake_design.png" );
+    GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
 
     updateCamera();
     setupLights();
-
+    glFrontFace(GL_CCW);
     createShaderPrograms();
     cout << "initialized shader programs..." << endl;
     paintGL();
@@ -255,11 +234,26 @@ void View::drawWireframeGrid()
 
 void View::drawUnitAxis(float x, float y, float z){
 
+    glBegin(GL_LINES);
+    glColor3f(1,0,0); // x - red
+    glVertex3f(0,0,0);
+    glVertex3f(1,0,0 );
+    glColor3f(0,1,0); // y - green
+    glVertex3f(0,0,0);
+    glVertex3f(0,1,0);
+    glColor3f(0,0,1); // z - blue
+    glVertex3f(0,0,0);
+    glVertex3f(0,0,1);
+    glEnd();
 }
 
 void View::paintGL()
 {
 
+    glPushMatrix();
+    glTranslatef(-.25f, 3.f, 0.f);
+    glCallList(m_dragon.idx);
+    glPopMatrix();
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
@@ -276,10 +270,6 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // TODO: Paint scene
-    glPushMatrix();
-    glTranslatef(-1.25f, 0.f, 0.f);
-    glCallList(m_dragon.idx);
-    glPopMatrix();
 
     float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {5.0f, 0.5f, 0.0f};
@@ -291,11 +281,9 @@ void View::paintGL()
     drawPlane(col,pos,scale,rot,90);
     m_shaderPrograms["pulse"]->release();
     glDisable(GL_LIGHTING);
+    drawUnitAxis(0.f,0.f,0.f);
+    //paintSky();
 
-    paintSky();
-
-    // Paint GUI
-    paintUI();
 
     drawWireframeGrid();
     // Render dem snowflakes
@@ -309,13 +297,15 @@ void View::paintGL()
     glFlush();
     swapBuffers();
 
+    // Paint GUI
+    paintUI();
 }
 
 
 
 void View::paintSky()
 {
-    /*glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
     glVertex3f(-1000, 6, 1000);
     glVertex3f(-1000, 6, -1000);
@@ -326,17 +316,6 @@ void View::paintSky()
     glVertex3f(-1000, 0, -1000);
     glVertex3f(1000, 0, -1000);
     glVertex3f(1000, 0, 1000);
-    glEnd();*/
-    glBegin(GL_LINES);
-    glColor3f(1,0,0); // x - red
-    glVertex3f(0,0,0);
-    glVertex3f(1,0,0 );
-    glColor3f(0,1,0); // y - green
-    glVertex3f(0,0,0);
-    glVertex3f(0,1,0);
-    glColor3f(0,0,1); // z - blue
-    glVertex3f(0,0,0);
-    glVertex3f(0,0,1);
     glEnd();
 }
 /**

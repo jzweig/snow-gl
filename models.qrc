@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/models">
+        <file>models/dragon.obj</file>
+    </qresource>
+</RCC>

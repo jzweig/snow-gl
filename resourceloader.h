@@ -24,6 +24,9 @@ namespace ResourceLoader
     // Returns the model
     Model loadObjModel(QString filePath);
 
+    //! Loads the texture at the given location, returning the GL texture id
+    GLuint loadTexture(const QString &path);
+
     // Returns the skybox ID
     GLuint loadSkybox();
 

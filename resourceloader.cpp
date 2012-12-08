@@ -4,7 +4,9 @@
 #include <QList>
 #include <QString>
 #include "glm.h"
+#include <iostream>
 
+using namespace std;
 
 /**
   Loads the cube map into video memory.
@@ -46,6 +48,32 @@ GLuint ResourceLoader::loadCubeMap(QList<QFile *> files)
 
     return id;
 }
+
+GLuint ResourceLoader::loadTexture(const QString &path)
+{
+    QFile file(path);
+
+    QImage image, texture;
+    if(!file.exists()) {
+        cout << "Texture file " << path.toStdString() << " does not exist" << endl;
+        return -1;
+    }
+    image.load(file.fileName());
+    texture = QGLWidget::convertToGLFormat(image);
+
+    glEnable(GL_TEXTURE_2D);
+    GLuint textureid;
+    glGenTextures(1, &textureid);
+    glBindTexture(GL_TEXTURE_2D, textureid);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureid;
+}
+
 
 /**
     Loads an OBJ models from a file

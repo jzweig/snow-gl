@@ -13,7 +13,7 @@
 #endif
 #include "SnowEmitter.h"
 #include "camera.h"
-
+#include <iostream>
 // Speeds affecting the speed of snow simulation. Fast speed occurs when holding down
 // the down arrow.
 #define DEFAULT_SPEED 1.0
@@ -49,8 +49,6 @@ private:
     void paintUI();
     void paintSky();
 
-    //! Loads the texture at the given location, returning the GL texture id
-    GLuint loadTexture(const QString &path);
     void createShaderPrograms();
 
     void mousePressEvent(QMouseEvent *event);
