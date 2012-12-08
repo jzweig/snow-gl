@@ -9,8 +9,6 @@ static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
-    //load that dragon...
-    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
 
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -66,30 +64,6 @@ void View::createShaderPrograms()
    // m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
 }
 
-GLuint View::loadTexture(const QString &path)
-{
-    QFile file(path);
-
-    QImage image, texture;
-    if(!file.exists()) {
-        std::cout << "Texture file " << path.toStdString() << " does not exist" << std::endl;
-        return -1;
-    }
-    image.load(file.fileName());
-    texture = QGLWidget::convertToGLFormat(image);
-
-    glEnable(GL_TEXTURE_2D);
-    GLuint textureid;
-    glGenTextures(1, &textureid);
-    glBindTexture(GL_TEXTURE_2D, textureid);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return textureid;
-}
 
 void View::initializeGL()
 {
@@ -127,8 +101,11 @@ void View::initializeGL()
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
+    //load that dragon...
+    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+
     // Load the texture
-    GLuint textureId = loadTexture( ":/textures/textures/snowflake_design.png" );
+    GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
 
     updateCamera();
@@ -306,8 +283,6 @@ void View::paintGL()
     drawUnitAxis(0.f,0.f,0.f);
     //paintSky();
 
-    // Paint GUI
-    paintUI();
 
     drawWireframeGrid();
     // Render dem snowflakes
@@ -321,6 +296,8 @@ void View::paintGL()
     glFlush();
     swapBuffers();
 
+    // Paint GUI
+    paintUI();
 }
 
 
