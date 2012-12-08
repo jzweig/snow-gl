@@ -35,7 +35,9 @@ HEADERS += mainwindow.h \
     lib/glm.h \
     math/CS123Algebra.h \
     resourceloader.h \
-    camera.h
+    camera.h \
+    lib/targa.h \
+    lib/glm.h
 
 FORMS += mainwindow.ui
 
