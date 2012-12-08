@@ -52,6 +52,9 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     setupScene();
 
+    m_wireframes = false;
+    m_solid = true;
+
 }
 
 View::~View()
@@ -292,7 +295,23 @@ void View::paintGL()
 
     glEnable(GL_LIGHTING);
 
-    // TODO: Paint scene
+    // Render all the objects in the scene
+
+    if( m_solid ) {
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+           (*it)->render();
+        }
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    }
+
+    if( m_wireframes ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+           (*it)->render();
+        }
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    }
+
 
     float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {5.0f, 0.5f, 0.0f};
@@ -308,12 +327,6 @@ void View::paintGL()
     drawUnitAxis(0.f,0.f,0.f);
     //paintSky();
 
-    // Render all the objects in the scene
-    for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-       (*it)->render();
-    }
-
-    drawWireframeGrid();
 
     // Render dem snowflakes
     glEnable(GL_BLEND);
@@ -347,8 +360,9 @@ void View::paintSky()
     glVertex3f(1000, 0, 1000);
     glEnd();
 }
+
 /**
-  Draws text for the FPS and screenshot prompt
+  Draws text for the FPS
  **/
 void View::paintUI()
 {
@@ -363,7 +377,6 @@ void View::paintUI()
 
     // QGLWidget's renderText takes xy coordinates, a string, and a font
     renderText(10, 20, "FPS: " + QString::number((int) (m_prevFps)), m_font);
-    renderText(10, 35, "S: Save screenshot", m_font);
 }
 
 void View::resizeGL(int w, int h)
@@ -427,6 +440,10 @@ void View::keyPressEvent(QKeyEvent *event)
         m_speed = FAST_SPEED;
     } else if(event->key() == Qt::Key_Shift) {
         m_shift = true;
+    } else if(event->key() == Qt::Key_1) {
+        m_wireframes = ! m_wireframes;
+    } else if(event->key() == Qt::Key_2) {
+        m_solid = ! m_solid;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

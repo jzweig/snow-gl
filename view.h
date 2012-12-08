@@ -97,6 +97,12 @@ protected:
 
      //! The objects in the scene
      vector<SceneObject *> m_objects;
+
+     //! Whether or not to display wireframes
+     bool m_wireframes;
+
+     //! Whether or not to display the solid scene
+     bool m_solid;
 };
 
 #endif // VIEW_H

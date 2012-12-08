@@ -10,7 +10,7 @@ Shape::Shape()
     m_triangles = NULL;
     m_triangleCount = 0;
     m_triangleIndex = 0;
-    m_pOne = 35;
+    m_pOne = 80;
     m_pTwo = 35;
     m_pThree = 35;
 }
