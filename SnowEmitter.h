@@ -11,7 +11,7 @@
 #define MAX_WIND_SPEED 0.001
 #define WIND_DOWNWARD_BIAS 0
 #define GRAVITY_Y_CHANGE -0.0001
-#define SNOWFLAKE_PROCESSING_BATCH 5000
+#define SNOWFLAKE_PROCESSING_BATCH 15000
 
 //#include "common.h"
 #include "CS123Common.h"

@@ -91,7 +91,7 @@ void SnowEmitter::tick()
     for( int i = 0; i < m_snowflakeCount; i+= SNOWFLAKE_PROCESSING_BATCH )
     {
         int startIndex = i;
-        int endIndex = (i + SNOWFLAKE_PROCESSING_BATCH) - 1;
+        int endIndex = MIN((i + SNOWFLAKE_PROCESSING_BATCH) - 1, m_snowflakeCount-1);
         QFuture<void> future = QtConcurrent::run(this, &SnowEmitter::rangedTick, startIndex, endIndex);
         sync.addFuture(future);
     }
