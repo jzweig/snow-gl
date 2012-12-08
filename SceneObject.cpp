@@ -29,6 +29,7 @@ void SceneObject::render() const
             break;
         }
     }
+    cout << "color = " << m_color << endl;
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
     m_shape->render();
     glPopMatrix();
