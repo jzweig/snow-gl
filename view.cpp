@@ -54,6 +54,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     m_wireframes = false;
     m_solid = true;
+    m_unitAxis = false;
 
 }
 
@@ -72,6 +73,7 @@ View::~View()
 void View::setupScene()
 {
     // Make the ground
+    m_factory.setTesselationParameter(60);
     SceneObject *ground = m_factory.constructCube();
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 0.2, 20.0);
@@ -79,17 +81,19 @@ void View::setupScene()
     m_objects.push_back(ground);
 
     // Make a demo box
+    m_factory.setTesselationParameter(10);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.5, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
-    /*SceneObject *smallBox = m_factory.constructCube();
+    m_factory.setTesselationParameter(6);
+    SceneObject *smallBox = m_factory.constructCube();
     smallBox->setColor(0.2, 0.2, 0.45, 0.75);
     smallBox->scale(0.5, 0.5, 0.5);
     smallBox->translate(-3.0, 0.5, 7.0);
-    m_objects.push_back(smallBox);*/
+    m_objects.push_back(smallBox);
 }
 
 /**
@@ -285,24 +289,18 @@ void View::paintGL()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    float col[3] = {0.0f, 0.2f, 0.6f};
-    float pos[3] = {5.0f, 0.5f, 0.0f};
-    float scale[3] = {10.0f, 10.0f, 10.0f};
-    float rot[3] ={0.0f, 0.0f, 1.0f};
-    float curTime = QTime::currentTime().msec() / 1000.0;
-    m_shaderPrograms["pulse"]->setUniformValue("time", curTime);
-    m_shaderPrograms["pulse"]->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
-    m_shaderPrograms["pulse"]->bind();
-    drawPlane(col,pos,scale,rot,90);
-    m_shaderPrograms["pulse"]->release();
-    glDisable(GL_LIGHTING);
-    drawUnitAxis(0.f,0.f,0.f);
-    //paintSky();
-
+    if( m_unitAxis )
+    {
+        glDisable(GL_LIGHTING);
+        drawUnitAxis(0.f,0.f,0.f);
+        glEnable(GL_LIGHTING);
+    }
 
     // Render dem snowflakes
     glEnable(GL_BLEND);
+    glDisable(GL_LIGHTING);
     m_snowEmitter.drawSnowflakes();
+    glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
 
     glPopMatrix();
@@ -313,24 +311,6 @@ void View::paintGL()
 
     // Paint GUI
     paintUI();
-}
-
-
-
-void View::paintSky()
-{
-    glBegin(GL_QUADS);
-    glColor3f(.2, .2, .2);
-    glVertex3f(-1000, 6, 1000);
-    glVertex3f(-1000, 6, -1000);
-    glVertex3f(1000, 6, -1000);
-    glVertex3f(1000, 6, 1000);
-    glColor3f(0.25f, .5f, 0.35f);
-    glVertex3f(-1000, 0, 1000);
-    glVertex3f(-1000, 0, -1000);
-    glVertex3f(1000, 0, -1000);
-    glVertex3f(1000, 0, 1000);
-    glEnd();
 }
 
 /**
@@ -416,6 +396,8 @@ void View::keyPressEvent(QKeyEvent *event)
         m_wireframes = ! m_wireframes;
     } else if(event->key() == Qt::Key_2) {
         m_solid = ! m_solid;
+    } else if(event->key() == Qt::Key_3) {
+        m_unitAxis = ! m_unitAxis;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

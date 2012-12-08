@@ -53,7 +53,6 @@ private:
     Model m_dragon; // dragon model
 
     void paintUI();
-    void paintSky();
 
     void createShaderPrograms();
 
@@ -102,6 +101,9 @@ protected:
 
      //! Whether or not to display the solid scene
      bool m_solid;
+
+     //! Whether or not to display the unit axis
+     bool m_unitAxis;
 };
 
 #endif // VIEW_H

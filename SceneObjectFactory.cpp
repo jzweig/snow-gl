@@ -2,25 +2,24 @@
 
 SceneObjectFactory::SceneObjectFactory()
 {
-    m_cube = NULL;
+    m_tesselationParameter = 10;
 }
 
 SceneObjectFactory::~SceneObjectFactory()
 {
-    if( m_cube != NULL )
-    {
-        delete m_cube;
-        m_cube = NULL;
-    }
+
 }
 
 SceneObject *SceneObjectFactory::constructCube()
 {
-    if( m_cube == NULL )
-    {
-        m_cube = new Cube();
-        m_cube->tesselate();
-    }
-    SceneObject *obj = new SceneObject(m_cube);
+    Cube *cube = new Cube();
+    cube->tesselate();
+    cube->setParamOne(m_tesselationParameter);
+    SceneObject *obj = new SceneObject(cube);
     return obj;
+}
+
+void SceneObjectFactory::setTesselationParameter(int parameter)
+{
+    m_tesselationParameter = parameter;
 }

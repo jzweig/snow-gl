@@ -7,7 +7,7 @@ SceneObject::SceneObject(Shape *shape) : m_shape(shape)
 
 SceneObject::~SceneObject()
 {
-
+    delete m_shape;
 }
 
 void SceneObject::render() const

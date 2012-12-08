@@ -13,8 +13,15 @@ public:
 
     SceneObject *constructCube();
 
-protected:
-    Cube *m_cube;
+    /**
+      * Tells the factory to use the given tesselation paramter when
+      * tesselating shapes
+      */
+    void setTesselationParameter(int parameter);
+
+
+    protected:
+        int m_tesselationParameter;
 };
 
 #endif // SCENEOBJECTFACTORY_H
