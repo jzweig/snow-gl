@@ -9,6 +9,9 @@ static const int MAX_FPS = 120;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
+    //load that dragon...
+    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -272,20 +275,27 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // TODO: Paint scene
-
-    glDisable(GL_LIGHTING);
-
-    paintSky();
+    glPushMatrix();
+    glTranslatef(-1.25f, 0.f, 0.f);
+    glCallList(m_dragon.idx);
+    glPopMatrix();
 
     float col[3] = {0.0f, 0.2f, 0.6f};
-    float pos[3] = {5.0f, 0.0f, 0.0f};
+    float pos[3] = {5.0f, 0.5f, 0.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 0.0f, 1.0f};
-    m_shaderPrograms["pulse"]->setUniformValue("time",665.712f);
+    m_shaderPrograms["pulse"]->setUniformValue("time",m_clock.elapsed());
     m_shaderPrograms["pulse"]->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
     m_shaderPrograms["pulse"]->bind();
     drawPlane(col,pos,scale,rot,90);
     m_shaderPrograms["pulse"]->release();
+    glDisable(GL_LIGHTING);
+
+    paintSky();
+
+    // Paint GUI
+    paintUI();
+
     drawWireframeGrid();
     // Render dem snowflakes
     glEnable(GL_BLEND);
@@ -298,8 +308,6 @@ void View::paintGL()
     glFlush();
     swapBuffers();
 
-    // Paint GUI
-    paintUI();
 }
 
 

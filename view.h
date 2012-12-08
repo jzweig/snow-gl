@@ -44,6 +44,7 @@ private:
     void paintGL();
     void resizeGL(int w, int h);
 
+    Model m_dragon; // dragon model
 
     void paintUI();
     void paintSky();
