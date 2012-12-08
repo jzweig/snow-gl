@@ -5,7 +5,7 @@
 #include <CS123Common.h>
 #include "camera.h"
 #include "GL/glut.h"
-static const int MAX_FPS = 120;
+static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
@@ -29,6 +29,8 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    // fps timer
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 
     // Setup the camera
@@ -131,7 +133,7 @@ void View::initializeGL()
 
     updateCamera();
     setupLights();
-
+    glFrontFace(GL_CCW);
     createShaderPrograms();
     cout << "initialized shader programs..." << endl;
     paintGL();
@@ -254,11 +256,26 @@ void View::drawWireframeGrid()
 
 void View::drawUnitAxis(float x, float y, float z){
 
+    glBegin(GL_LINES);
+    glColor3f(1,0,0); // x - red
+    glVertex3f(0,0,0);
+    glVertex3f(1,0,0 );
+    glColor3f(0,1,0); // y - green
+    glVertex3f(0,0,0);
+    glVertex3f(0,1,0);
+    glColor3f(0,0,1); // z - blue
+    glVertex3f(0,0,0);
+    glVertex3f(0,0,1);
+    glEnd();
 }
 
 void View::paintGL()
 {
 
+    glPushMatrix();
+    glTranslatef(-.25f, 3.f, 0.f);
+    glCallList(m_dragon.idx);
+    glPopMatrix();
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
@@ -275,10 +292,6 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // TODO: Paint scene
-    glPushMatrix();
-    glTranslatef(-1.25f, 0.f, 0.f);
-    glCallList(m_dragon.idx);
-    glPopMatrix();
 
     float col[3] = {0.0f, 0.2f, 0.6f};
     float pos[3] = {5.0f, 0.5f, 0.0f};
@@ -290,7 +303,7 @@ void View::paintGL()
     drawPlane(col,pos,scale,rot,90);
     m_shaderPrograms["pulse"]->release();
     glDisable(GL_LIGHTING);
-
+    drawUnitAxis(0.f,0.f,0.f);
     paintSky();
 
     // Paint GUI
@@ -325,17 +338,6 @@ void View::paintSky()
     glVertex3f(-1000, 0, -1000);
     glVertex3f(1000, 0, -1000);
     glVertex3f(1000, 0, 1000);
-    glEnd();
-    glBegin(GL_LINES);
-    glColor3f(1,0,0); // x - red
-    glVertex3f(0,0,0);
-    glVertex3f(1,0,0 );
-    glColor3f(0,1,0); // y - green
-    glVertex3f(0,0,0);
-    glVertex3f(0,1,0);
-    glColor3f(0,0,1); // z - blue
-    glVertex3f(0,0,0);
-    glVertex3f(0,0,1);
     glEnd();
 }
 /**
