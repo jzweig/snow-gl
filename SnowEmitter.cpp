@@ -72,7 +72,7 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
     m_snowflakes[snowflakeIndex].dir.z = 0;
     m_snowflakes[snowflakeIndex].dir.w = 0;
     m_snowflakes[snowflakeIndex].speed = 0.5;
-    m_snowflakes[snowflakeIndex].size = 0.004 + (float)rand()/((float)RAND_MAX/(0.002));
+    m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
     resetWind(snowflakeIndex);
 }
 

@@ -4,7 +4,12 @@
 #include <ctime>
 #include <CS123Common.h>
 #include "camera.h"
+#include <GL/gl.h>
 #include "GL/glut.h"
+#include "GL/glu.h"
+#include <GL/freeglut.h>
+
+
 static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
@@ -96,7 +101,7 @@ void View::initializeGL()
     glEnable(GL_DEPTH_TEST);
 
     // Setup blending
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
     // Enable alpha
@@ -275,7 +280,8 @@ void View::paintGL()
     float pos[3] = {5.0f, 0.5f, 0.0f};
     float scale[3] = {10.0f, 10.0f, 10.0f};
     float rot[3] ={0.0f, 0.0f, 1.0f};
-    m_shaderPrograms["pulse"]->setUniformValue("time",m_clock.elapsed());
+    float curTime = QTime::currentTime().msec() / 1000.0;
+    m_shaderPrograms["pulse"]->setUniformValue("time", curTime);
     m_shaderPrograms["pulse"]->setUniformValue("color", QVector4D(1.0f, 0.5f, 0.5f, 1.0f));
     m_shaderPrograms["pulse"]->bind();
     drawPlane(col,pos,scale,rot,90);
