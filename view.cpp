@@ -50,6 +50,9 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_snowEmitter.setCamera(m_camera);
     m_snowEmitter.setSpeed(&m_speed);
 
+    m_ground = new Cube();
+    m_ground->tesselate();
+
 }
 
 View::~View()
@@ -311,7 +314,7 @@ void View::paintGL()
 
 void View::paintSky()
 {
-    glBegin(GL_QUADS);
+    /*glBegin(GL_QUADS);
     glColor3f(.2, .2, .2);
     glVertex3f(-1000, 6, 1000);
     glVertex3f(-1000, 6, -1000);
@@ -322,7 +325,14 @@ void View::paintSky()
     glVertex3f(-1000, 0, -1000);
     glVertex3f(1000, 0, -1000);
     glVertex3f(1000, 0, 1000);
-    glEnd();
+    glEnd();*/
+
+    glPushMatrix();
+    glScalef(20, 0.2, 20);
+    glTranslatef(0, -0.5, 0);
+    glColor4f(0.05, 0.4, 0.15, 1.0);
+    m_ground->render();
+    glPopMatrix();
 }
 /**
   Draws text for the FPS and screenshot prompt

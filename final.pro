@@ -24,7 +24,13 @@ SOURCES += main.cpp \
     lib/targa.cpp \
     lib/glm.cpp \
     resourceloader.cpp \
-    camera.cpp
+    camera.cpp \
+    shapes/Vertex.cpp \
+    shapes/Vector.cpp \
+    shapes/Triangle.cpp \
+    shapes/Shape.cpp \
+    shapes/Renderable.cpp \
+    shapes/Cube.cpp
 
 HEADERS += mainwindow.h \
     view.h \
@@ -37,7 +43,13 @@ HEADERS += mainwindow.h \
     resourceloader.h \
     camera.h \
     lib/targa.h \
-    lib/glm.h
+    lib/glm.h \
+    shapes/Vertex.h \
+    shapes/Vector.h \
+    shapes/Triangle.h \
+    shapes/Shape.h \
+    shapes/Renderable.h \
+    shapes/Cube.h
 
 FORMS += mainwindow.ui
 

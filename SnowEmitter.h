@@ -1,10 +1,11 @@
 #ifndef SNOWEMITTER_H
 #define SNOWEMITTER_H
 
+#define SNOWFALL_RADIUS 10
 #define INITIAL_SNOWFLAKE_COUNT 50000
 #define INITIAL_SNOWFLAKE_HEIGHT 6.0f
 #define SNOWFLAKE_CUTOFF 0
-#define BASE_FLAKE_SPEED_FACTOR .005f
+#define BASE_FLAKE_SPEED_FACTOR .0025f
 #define SNOWFLAKE_DROP_PROBABILITY .01f
 #define MAX_WIND_EXPIRE 50
 #define MIN_WIND_EXPIRE 5
@@ -42,10 +43,6 @@ struct Snowflake
       */
     Vector4 pos;
     /**
-      * The speed at which the snowflake is travelling
-      */
-    float speed;
-    /**
       * The direction this particle is currently moving. The velocity of any particle
       * in the system is: velocity = ParticleEmitter.m_speed * Particle.dir
       */
@@ -58,6 +55,10 @@ struct Snowflake
       * The time remaining on this this snowflake's wind force.
       */
     int windExpire;
+    /**
+      * Whether or not this snowflake might be visible.
+      */
+    bool isVisible;
 };
 
 class SnowEmitter

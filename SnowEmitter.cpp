@@ -63,16 +63,16 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
     m_activeSnowflakes++;
 
     m_snowflakes[snowflakeIndex].active = true;
-    m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0)) ;
-    m_snowflakes[snowflakeIndex].pos.x = camera_x - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
-    m_snowflakes[snowflakeIndex].pos.z = camera_z - 2.0 + (float)rand()/((float)RAND_MAX/(4.0));
+    m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
+    m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
+    m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
     m_snowflakes[snowflakeIndex].pos.w = 0;
     m_snowflakes[snowflakeIndex].dir.x = 0;
     m_snowflakes[snowflakeIndex].dir.y = -1;
     m_snowflakes[snowflakeIndex].dir.z = 0;
     m_snowflakes[snowflakeIndex].dir.w = 0;
-    m_snowflakes[snowflakeIndex].speed = 0.5;
     m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+    m_snowflakes[snowflakeIndex].isVisible = false;
     resetWind(snowflakeIndex);
 }
 
@@ -106,24 +106,25 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
         {
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF ||
                 (m_snowflakes[i].pos.y > INITIAL_SNOWFLAKE_HEIGHT &&
-                (fabs(m_camera->eye.x - m_snowflakes[i].pos.x) > 2 || fabs(m_camera->eye.z - m_snowflakes[i].pos.z) > 2)) ) {
+                (fabs(m_camera->eye.x - m_snowflakes[i].pos.x) > SNOWFALL_RADIUS || fabs(m_camera->eye.z - m_snowflakes[i].pos.z) > SNOWFALL_RADIUS)) ) {
                 m_snowflakes[i].active = false;
                 m_activeSnowflakes--;
                 continue;
             }
 
             m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
-            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * m_snowflakes[i].speed * (*m_speed))) + m_snowflakes[i].pos;
+            m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * (*m_speed))) + m_snowflakes[i].pos;
 
             if( m_snowflakes[i].windExpire == 0 )
                 resetWind(i);
             else
                 m_snowflakes[i].windExpire--;
 
-            if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF )
-            {
+            if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF ) {
                 m_snowflakes[i].active = false;
                 m_activeSnowflakes--;
+            } else if( m_snowflakes[i].pos.y < INITIAL_SNOWFLAKE_HEIGHT && ! m_snowflakes[i].isVisible ) {
+                m_snowflakes[i].isVisible = true;
             }
         }
         else
@@ -151,7 +152,7 @@ void SnowEmitter::drawSnowflakes()
     glColor3f(1.0f, 1.0f, 1.0f);
     for(int i = 0; i < m_snowflakeCount; i++)
     {
-        if( m_snowflakes[i].active )
+        if( m_snowflakes[i].active && m_snowflakes[i].isVisible )
         {
             float size = m_snowflakes[i].size;
 

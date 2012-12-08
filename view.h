@@ -13,6 +13,7 @@
 #endif
 #include "SnowEmitter.h"
 #include "camera.h"
+#include "shapes/Cube.h"
 #include <iostream>
 // Speeds affecting the speed of snow simulation. Fast speed occurs when holding down
 // the down arrow.
@@ -86,6 +87,9 @@ protected:
 
      //! Whether or not shift is pressed
      bool m_shift;
+
+     //! The ground
+     Cube *m_ground;
 };
 
 #endif // VIEW_H
