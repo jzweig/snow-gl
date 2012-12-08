@@ -304,7 +304,7 @@ void View::paintGL()
     m_shaderPrograms["pulse"]->release();
     glDisable(GL_LIGHTING);
     drawUnitAxis(0.f,0.f,0.f);
-    paintSky();
+    //paintSky();
 
     // Paint GUI
     paintUI();
