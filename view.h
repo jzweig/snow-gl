@@ -18,6 +18,8 @@
 // the down arrow.
 #define DEFAULT_SPEED 1.0
 #define FAST_SPEED 20.0
+#define SPRINT_FACTOR 0.1
+#define WALK_FACTOR 0.01
 
 
 #include "resourceloader.h"

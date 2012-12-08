@@ -41,7 +41,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_camera->eye.x = 0.0f, m_camera->eye.y = 1.0f, m_camera->eye.z = 0.0f;
     m_camera->center.x = 0.0f, m_camera->center.y = 0.0f, m_camera->center.z = -1.0f;
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
-    m_camera->angle = 45.0f, m_camera->near = .05f, m_camera->far = 1000.0f;
+    m_camera->angle = 45.0f, m_camera->near = .01f, m_camera->far = 1000.0f;
 
     //added for orbit
     m_camera->zoom = 3.5f;
@@ -288,10 +288,10 @@ void View::paintGL()
     m_shaderPrograms["pulse"]->release();
     glDisable(GL_LIGHTING);
     drawUnitAxis(0.f,0.f,0.f);
-    //paintSky();
-
+    paintSky();
 
     drawWireframeGrid();
+
     // Render dem snowflakes
     glEnable(GL_BLEND);
     m_snowEmitter.drawSnowflakes();
@@ -398,8 +398,7 @@ void View::wheelEvent(QWheelEvent *event)
 
 void View::keyPressEvent(QKeyEvent *event)
 {
-
-    if (event->key() == Qt::Key_Escape){
+    if (event->key() == Qt::Key_Escape) {
         QApplication::quit();
     } else if(event->key() == Qt::Key_Down) {
         m_speed = FAST_SPEED;
@@ -439,10 +438,7 @@ void View::keyPressEvent(QKeyEvent *event)
 
 float View::getMoveFactor()
 {
-    if( m_shift )
-        return 0.1;
-    else
-        return .01;
+    return m_shift ? SPRINT_FACTOR : WALK_FACTOR;
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
@@ -458,7 +454,6 @@ void View::tick()
     // Get the number of seconds since the last tick (variable update rate)
     float seconds = time.restart() * 0.001f;
 
-    // TODO: Implement the demo update here
     m_snowEmitter.tick();
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
