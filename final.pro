@@ -60,14 +60,13 @@ FORMS += mainwindow.ui
 RESOURCES += textures.qrc \
     shaders.qrc
 OTHER_FILES += \
-shaders/pulse.frag \
-shaders/pulse.vars \
-shaders/pulse.vert \
 shaders/terrain.frag \
 shaders/terrain.vars \
 shaders/terrain.vert \
 shaders/reflect.frag \
-shaders/reflect.vert
+shaders/reflect.vert \
+    shaders/snow.frag \
+    shaders/snow.vert
 
 # Don't add the -pg flag unless you know what you are doing. It makes QThreadPool freeze on Mac OS X
 QMAKE_CXXFLAGS_RELEASE -= -O2

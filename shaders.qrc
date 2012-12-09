@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/shaders">
-        <file>shaders/terrain.frag</file>
-        <file>shaders/terrain.vert</file>
-        <file>shaders/pulse.frag</file>
-        <file>shaders/pulse.vert</file>
+        <file>shaders/snow.frag</file>
+        <file>shaders/snow.vert</file>
     </qresource>
 </RCC>

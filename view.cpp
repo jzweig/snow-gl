@@ -9,12 +9,14 @@
 #include "GL/glu.h"
 #include <GL/freeglut.h>
 
+static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
 
 static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
-
+    m_showShader = true;
+    m_gridLength = 60;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -52,9 +54,18 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     setupScene();
 
-    m_wireframes = false;
-    m_solid = true;
+    m_isWireframe = false;
+    m_isSolid = true;
     m_unitAxis = false;
+
+    int terrain_array_size = m_gridLength * m_gridLength;
+    m_snowHeight = new float[terrain_array_size];
+    //Test terrain heights
+    for(int i=0;i<m_gridLength;i++){
+        for(int j=0;j<m_gridLength;j++){
+            m_snowHeight[i*m_gridLength+j] = (i+j)/(1.0f*m_gridLength);
+        }
+    }
 
 }
 
@@ -62,7 +73,7 @@ View::~View()
 {
     safeDelete(m_camera);
     glmDelete(m_dragon.model);
-
+    safeDelete(m_snowHeight);
     // Delete the scene objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
         delete *it;
@@ -73,7 +84,7 @@ View::~View()
 void View::setupScene()
 {
     // Make the ground
-    m_factory.setTesselationParameter(60);
+    m_factory.setTesselationParameter(m_gridLength);
     SceneObject *ground = m_factory.constructCube();
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 0.2, 20.0);
@@ -102,15 +113,18 @@ void View::setupScene()
 void View::createShaderPrograms()
 {
     const QGLContext *ctx = context();
-    //m_shaderPrograms["terrain"] = ResourceLoader::newShaderProgram(ctx, ":/shaders/shaders/terrain.vert", ":/shaders/shaders/terrain.frag");
-    m_shaderPrograms["pulse"] = ResourceLoader::newShaderProgram(ctx, ":/shaders/shaders/pulse.vert", ":/shaders/shaders/pulse.frag");
-  //  m_shaderPrograms["brightpass"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/brightpass.frag");
-   // m_shaderPrograms["blur"] = ResourceLoader::newFragShaderProgram(ctx, "shaders/blur.frag");
+    QString vShader = PROJECT_DIR+"shaders/snow.vert";
+    QString fShader = PROJECT_DIR+"shaders/snow.frag";
+    m_shaderPrograms["snow"] = ResourceLoader::newShaderProgram(ctx, vShader, fShader);
 }
 
 
 void View::initializeGL()
 {
+    cout << "Using OpenGL Version " << glGetString(GL_VERSION) << endl << endl;
+
+    cout << "initialized shader programs..." << endl;
+
     // All OpenGL initialization *MUST* be done during or after this
     // method. Before this method is called, there is no active OpenGL
     // context and all OpenGL calls have no effect.
@@ -151,12 +165,10 @@ void View::initializeGL()
     // Load the texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
-
     updateCamera();
     setupLights();
     glFrontFace(GL_CCW);
     createShaderPrograms();
-    cout << "initialized shader programs..." << endl;
     paintGL();
 }
 
@@ -258,7 +270,7 @@ void View::paintGL()
     glCallList(m_dragon.idx);
     glPopMatrix();
     // Update the fps
-    int time = m_clock.elapsed();
+    float time = (m_clock.elapsed()%10)*.1;
     m_fps = 1000.f / (time - m_prevTime);
     m_prevTime = time;
 
@@ -274,14 +286,26 @@ void View::paintGL()
 
     // Render all the objects in the scene
 
-    if( m_solid ) {
+    if( m_isSolid ) {
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-           (*it)->render();
+            if(m_showShader){
+                m_shaderPrograms["snow"]->bind();
+                // Load the texture
+                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                glBindTexture(GL_TEXTURE_2D,textureId);
+                m_shaderPrograms["snow"]->setUniformValue("time", time);
+                (*it)->render();
+                glBindTexture(GL_TEXTURE_2D,0);
+                m_shaderPrograms["snow"]->release();
+            }else{
+                (*it)->render();
+
+            }
         }
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
 
-    if( m_wireframes ) {
+    if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
            (*it)->render();
@@ -393,9 +417,9 @@ void View::keyPressEvent(QKeyEvent *event)
     } else if(event->key() == Qt::Key_Shift) {
         m_shift = true;
     } else if(event->key() == Qt::Key_1) {
-        m_wireframes = ! m_wireframes;
+        m_isWireframe = ! m_isWireframe;
     } else if(event->key() == Qt::Key_2) {
-        m_solid = ! m_solid;
+        m_isSolid = ! m_isSolid;
     } else if(event->key() == Qt::Key_3) {
         m_unitAxis = ! m_unitAxis;
     } else {

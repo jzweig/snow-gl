@@ -74,6 +74,21 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     return textureid;
 }
 
+GLuint ResourceLoader::loadHeightMapTexture(float* heightmap,int width, int height)
+{
+    glEnable(GL_TEXTURE_2D);
+    GLuint textureid;
+    glGenTextures(1, &textureid);
+    glBindTexture(GL_TEXTURE_2D, textureid);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_R32F, GL_UNSIGNED_BYTE, heightmap);
+
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureid;
+}
+
 
 /**
     Loads an OBJ models from a file
