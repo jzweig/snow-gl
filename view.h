@@ -37,20 +37,20 @@ public:
     ~View();
 
 private:
-    QTime time;
-    QTimer timer;
+    //QTime time;
+    //QTimer timer;
     Vector2 m_prevMousePos;
     QTimer m_timer;
     QTime m_clock;
     int m_prevTime;
     float m_prevFps, m_fps;
     QFont m_font; // font for rendering text
+    Model m_dragon; // dragon model
 
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
 
-    Model m_dragon; // dragon model
 
     void paintUI();
 
@@ -90,7 +90,7 @@ protected:
      float m_speed;
 
      //! Whether or not shift is pressed
-     bool m_shift;
+     bool m_isShiftPressed;
 
      //! The scene object factory to use when constructing scene objects
      SceneObjectFactory m_factory;
@@ -106,11 +106,12 @@ protected:
      //! Whether or not to display the solid scene
      bool m_isSolid;
 
-     //! Whether or not to display the unit axis
-     bool m_unitAxis;
-
      //! Whether or not to display snow shader material
      bool m_showShader;
+
+     //! Whether or not to display the unit axis
+     bool m_showUnitAxis;
+
 
 };
 

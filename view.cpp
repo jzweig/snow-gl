@@ -32,11 +32,9 @@ View::View(QWidget *parent) : QGLWidget(parent),
     // Seed the random number generator
     srand(QTime::currentTime().msec());
 
-    // The game loop is implemented using a timer
-    connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 
-    // fps timer
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
+    // The event loop timer
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 
     // Setup the camera
     m_camera = new OrbitCamera();
@@ -56,7 +54,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     m_isWireframe = false;
     m_isSolid = true;
-    m_unitAxis = false;
+    m_showUnitAxis = false;
 
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
@@ -87,7 +85,7 @@ void View::setupScene()
     // Make the ground
     m_factory.setTesselationParameter(m_gridLength);
     SceneObject *ground = m_factory.constructCube();
-    ground->setColor(0.2, 0.39, 0.18, 1.0);
+    ground->setColor(0.2, 0.39, 0.18, 1.0); // when not using the shader
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
     //m_objects.push_back(ground);
@@ -133,8 +131,8 @@ void View::initializeGL()
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
-    time.start();
-    timer.start(1000 / 60);
+    //time.start();
+    //timer.start(1000 / 60);
 
     // Start the drawing timer
     m_timer.start(1000.0f / MAX_FPS);
@@ -271,6 +269,7 @@ void View::paintGL()
     glTranslatef(-.25f, 3.f, 0.f);
     glCallList(m_dragon.idx);
     glPopMatrix();
+
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
@@ -288,7 +287,12 @@ void View::paintGL()
 
     // Render all the objects in the scene
 
-    if( m_isSolid ) {
+    if( m_isWireframe ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    } else if( m_isSolid ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    }
+    if( m_isWireframe || m_isSolid){
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
             if(m_showShader){
                 m_shaderPrograms["snow"]->bind();
@@ -306,18 +310,11 @@ void View::paintGL()
 
             }
         }
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     }
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-    if( m_isWireframe ) {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-           (*it)->render();
-        }
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    }
 
-    if( m_unitAxis )
+    if( m_showUnitAxis )
     {
         glDisable(GL_LIGHTING);
         drawUnitAxis(0.f,0.f,0.f);
@@ -419,13 +416,13 @@ void View::keyPressEvent(QKeyEvent *event)
     } else if(event->key() == Qt::Key_Down) {
         m_speed = FAST_SPEED;
     } else if(event->key() == Qt::Key_Shift) {
-        m_shift = true;
+        m_isShiftPressed = true;
     } else if(event->key() == Qt::Key_1) {
         m_isWireframe = ! m_isWireframe;
     } else if(event->key() == Qt::Key_2) {
         m_isSolid = ! m_isSolid;
     } else if(event->key() == Qt::Key_3) {
-        m_unitAxis = ! m_unitAxis;
+        m_showUnitAxis = ! m_showUnitAxis;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
@@ -460,7 +457,7 @@ void View::keyPressEvent(QKeyEvent *event)
 
 float View::getMoveFactor()
 {
-    return m_shift ? SPRINT_FACTOR : WALK_FACTOR;
+    return m_isShiftPressed ? SPRINT_FACTOR : WALK_FACTOR;
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
@@ -468,13 +465,13 @@ void View::keyReleaseEvent(QKeyEvent *event)
     if( event->key() == Qt::Key_Down )
         m_speed = DEFAULT_SPEED;
     else if( event->key() == Qt::Key_Shift)
-        m_shift = false;
+        m_isShiftPressed = false;
 }
 
 void View::tick()
 {
     // Get the number of seconds since the last tick (variable update rate)
-    float seconds = time.restart() * 0.001f;
+    //float seconds = m_clock.restart() * 0.001f;
 
     m_snowEmitter.tick();
 
