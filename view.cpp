@@ -79,6 +79,7 @@ View::~View()
         delete *it;
     }
     m_objects.clear();
+    delete m_terrain;
 }
 
 void View::setupScene()
@@ -89,7 +90,8 @@ void View::setupScene()
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
-    m_objects.push_back(ground);
+    //m_objects.push_back(ground);
+    m_terrain = ground;
 
     // Make a demo box
     m_factory.setTesselationParameter(10);
@@ -270,7 +272,7 @@ void View::paintGL()
     glCallList(m_dragon.idx);
     glPopMatrix();
     // Update the fps
-    float time = (m_clock.elapsed()%10)*.1;
+    int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
     m_prevTime = time;
 
@@ -294,10 +296,12 @@ void View::paintGL()
                 GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
                 glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->setUniformValue("time", time);
-                (*it)->render();
+                (*m_terrain).render();
                 glBindTexture(GL_TEXTURE_2D,0);
                 m_shaderPrograms["snow"]->release();
+                (*it)->render();
             }else{
+                (*m_terrain).render();
                 (*it)->render();
 
             }

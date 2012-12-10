@@ -17,7 +17,7 @@ void main()
 
      vec4 dv;
      //gl_TexCoord[0].xy = gl_MultiTexCoord0.xy;
-    // dv =  texture2D( displacementMap, gl_MultiTexCoord0.xy );
+     dv =  texture2D( displacementMap, gl_MultiTexCoord0.xy );
 
      // Flatten the normals to make the lighting a little more realistic
      //vec3 normal = normalize(gl_NormalMatrix * gl_Normal * vec3(1.0, 1.0, 1.0 / scale));
@@ -32,6 +32,6 @@ void main()
      //float vDisp = texture2D( displacementMap, gl_MultiTexCoord0.xy );
 
      vec4 v = vec4(gl_Vertex);
-     v.y = v.y+v.x;//(dv.x+dv.y+dv.z)*10.0;//v.x/time;
+     v.y = v.y+(dv.x+dv.y+dv.z)*10.0;//v.x/time;
      gl_Position = gl_ModelViewProjectionMatrix * v;
 }

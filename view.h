@@ -97,6 +97,8 @@ protected:
 
      //! The objects in the scene
      vector<SceneObject *> m_objects;
+     //! Single-case terrain, at least for testing, for now
+     SceneObject* m_terrain;
 
      //! Whether or not to display wireframes
      bool m_isWireframe;
