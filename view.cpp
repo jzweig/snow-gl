@@ -10,8 +10,16 @@
 #include <GL/freeglut.h>
 
 static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
-
 static const int MAX_FPS = 60;
+
+#ifndef __APPLE__
+extern "C" {
+    GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
+    GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
+    GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+}
+#endif
+
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
