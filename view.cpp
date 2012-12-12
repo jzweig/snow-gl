@@ -4,6 +4,8 @@
 #include <ctime>
 #include <CS123Common.h>
 #include "camera.h"
+#include <pwd.h>
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -16,7 +18,7 @@
 #endif
 
 
-static const QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
+static  QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
 
 
 
@@ -125,6 +127,9 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     // Load the file into memory
     //m_snowHeightMap->load(file.fileName());
+
+    m_homeDir = getpwuid(getuid())->pw_dir;
+    m_projDir = m_homeDir+"/course/cs123/snow-gl/";
 }
 
 View::~View()
@@ -228,8 +233,8 @@ void View::initSceneVbo()
 void View::createShaderPrograms()
 {
     const QGLContext *ctx = context();
-    QString vShader = PROJECT_DIR+"shaders/snow.vert";
-    QString fShader = PROJECT_DIR+"shaders/snow.frag";
+    QString vShader = m_projDir+"shaders/snow.vert";
+    QString fShader = m_projDir+"shaders/snow.frag";
     m_shaderPrograms["snow"] = ResourceLoader::newShaderProgram(ctx, vShader, fShader);
 }
 

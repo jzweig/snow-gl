@@ -124,6 +124,9 @@ protected:
      //! when the vbo is initialized.
      int m_triangleCount;
 
+     QString m_homeDir;
+     QString m_projDir;
+
 };
 
 #endif // VIEW_H
