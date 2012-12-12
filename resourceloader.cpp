@@ -74,19 +74,52 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     return textureid;
 }
 
-GLuint ResourceLoader::loadHeightMapTexture(float* heightmap,int width, int height)
+GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 {
     glEnable(GL_TEXTURE_2D);
     GLuint textureid;
+    QImage texture = QGLWidget::convertToGLFormat(heightMap->mirrored(false,true));
+
     glGenTextures(1, &textureid);
+    // make texture active (bind)
     glBindTexture(GL_TEXTURE_2D, textureid);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_R32F, GL_UNSIGNED_BYTE, heightmap);
 
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+    glTexCoord2i(0,0);
+    glTexCoord2i(0,1);
+    glTexCoord2i(1,1);
+    glTexCoord2i(1,0);
+    // filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    // clamp coordinate wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    // deactivate texture (unbind)
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureid;
+
+}
+
+
+GLuint ResourceLoader::loadHeightMapTexture(float* heightmap,int width, int height)
+{
+    glEnable(GL_TEXTURE_2D);
+    GLuint id;
+
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_BGRA, GL_FLOAT, heightmap);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return id;
 }
 
 

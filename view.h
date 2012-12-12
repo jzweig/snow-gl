@@ -112,6 +112,9 @@ protected:
      //! Whether or not to display the unit axis
      bool m_showUnitAxis;
 
+     QImage* m_snowHeightMap;
+     BGRA* m_data;
+
 
 };
 

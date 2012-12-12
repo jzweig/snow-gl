@@ -11,6 +11,11 @@
 
 static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
 
+extern "C"
+{
+    extern void APIENTRY glActiveTexture(GLenum);
+}
+
 static const int MAX_FPS = 60;
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
@@ -59,12 +64,29 @@ View::View(QWidget *parent) : QGLWidget(parent),
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
     //Test terrain heights
+    m_snowHeightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+
+    // set the new image to black
+    //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
+    m_data = (BGRA *)m_snowHeightMap->bits();
+    uchar* temp =  m_snowHeightMap->bits();
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
-            m_snowHeight[i*m_gridLength+j] = (i+j)/(1.0f*m_gridLength);
+            float inc = (float) rand()/RAND_MAX;
+            m_snowHeight[i*m_gridLength+j] = inc*100;//(i+j)/(1.0f*m_gridLength);
+            m_data[i*m_gridLength+j].r =((int)(inc*255));
+            m_data[i*m_gridLength+j].g =((int)(inc*255));
+            m_data[i*m_gridLength+j].b =((int)(inc*255));
+            m_data[i*m_gridLength+j].a = 255;
+            cout<<inc<<endl;
         }
     }
+    for(int i=0;i<m_gridLength;i++){
+        for(int j=0;j<m_gridLength;j++){
+            cout<<(int)temp[i*m_gridLength+j]<<endl;
 
+        }
+    }
 }
 
 View::~View()
@@ -264,16 +286,16 @@ void View::drawUnitAxis(float x, float y, float z){
 
 void View::paintGL()
 {
+    // Update the fps
+    int time = m_clock.elapsed();
+    m_fps = 1000.f / (time - m_prevTime);
+    m_prevTime = time;
 
     glPushMatrix();
     glTranslatef(-.25f, 3.f, 0.f);
     glCallList(m_dragon.idx);
     glPopMatrix();
 
-    // Update the fps
-    int time = m_clock.elapsed();
-    m_fps = 1000.f / (time - m_prevTime);
-    m_prevTime = time;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -297,13 +319,18 @@ void View::paintGL()
             if(m_showShader){
                 m_shaderPrograms["snow"]->bind();
                 // Load the texture
-                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                //QImage* image = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+                //image->loadFromData((uchar *)m_data,m_gridLength*m_gridLength,QImage::Format_RGB32);
+                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
                 glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->setUniformValue("time", time);
                 (*m_terrain).render();
                 glBindTexture(GL_TEXTURE_2D,0);
                 m_shaderPrograms["snow"]->release();
                 (*it)->render();
+
+                //delete image;
             }else{
                 (*m_terrain).render();
                 (*it)->render();
