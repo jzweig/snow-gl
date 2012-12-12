@@ -137,3 +137,7 @@ void SceneObject::rotate(float angle, float x, float y, float z)
     m_transformations.push_back(transformation);
     refreshMatrix();
 }
+
+void SceneObject::paintTexture(float x, float y, float z){
+
+}

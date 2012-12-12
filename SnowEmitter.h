@@ -21,6 +21,7 @@
 #include <QtCore>
 #include <QFutureSynchronizer>
 #include "camera.h"
+#include "SceneObject.h"
 
 
 /**
@@ -115,6 +116,9 @@ class SnowEmitter
           * Resets a snowflake to fall from the sky at a random location.
           */
         void dropSnowflake(int snowflakeIndex);
+
+        //! modifies texturemap if object has collisions
+        void collisionDetect(SceneObject* obj);
 
         //! Snowflakes array on the heap
         Snowflake *m_snowflakes;
