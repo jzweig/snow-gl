@@ -24,7 +24,7 @@ struct Transformation
 class SceneObject
 {
     public:
-        SceneObject(Shape *shape);
+        SceneObject(Shape *shape,float mapWidth,float mapHeight);
         virtual ~SceneObject();
         void render(bool m_useVbo) const;
         void translate(float x, float y, float z);
@@ -44,6 +44,7 @@ class SceneObject
         Vector4 m_color;
         Matrix4x4 m_matrix;
         GLuint m_vbo;
+        QImage* m_heightMap;
 
  };
 

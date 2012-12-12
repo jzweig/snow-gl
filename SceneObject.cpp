@@ -8,15 +8,16 @@ extern "C" {
 }
 #endif
 
-SceneObject::SceneObject(Shape *shape) : m_shape(shape)
+SceneObject::SceneObject(Shape *shape,float mapWidth,float mapHeight) : m_shape(shape)
 {
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
+    m_heightMap = new QImage(mapWidth,mapHeight,QImage::Format_RGB32);
 }
 
 SceneObject::~SceneObject()
 {
-
+    delete m_heightMap;
     delete m_shape;
 }
 
