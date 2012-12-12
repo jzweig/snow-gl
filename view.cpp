@@ -93,7 +93,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
             m_data[i*m_gridLength+j].g =((int)(incg*255));
             m_data[i*m_gridLength+j].b =((int)(incb*255));
             m_data[i*m_gridLength+j].a = 255;
-            cout<<incr<<endl;
         }
     }
 /*
@@ -118,13 +117,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
             m_data[j].a = 255;
             //cout<<incr<<endl;
         }*/
-    for(int i=0;i<m_gridLength;i++){
-        for(int j=0;j<m_gridLength;j++){
-            cout<<(int)temp[i*m_gridLength+j]<<endl;
-
-        }
-    }
-
 
     // Make sure the image file exists
     QFile file("/course/cs123/data/image/BoneHead.jpg");

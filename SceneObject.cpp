@@ -38,7 +38,7 @@ void SceneObject::render(bool useVbo) const
 
         glVertexPointer(3, GL_FLOAT, sizeof(float)*8, (void *) 0 );
         glNormalPointer(GL_FLOAT, sizeof(float)*8, (void *) (sizeof(float)*3) );
-        glTexCoordPointer(2, GL_FLOAT, sizeof(float)*8, (void *) (sizeof(float)*7));
+        glTexCoordPointer(2, GL_FLOAT, sizeof(float)*8, (void *) (sizeof(float)*6));
 
         // Draw dat shit
         glDrawArrays(GL_TRIANGLES, 0, m_shape->getNumTriangles()*3);
