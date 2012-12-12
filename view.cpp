@@ -16,7 +16,7 @@
 #endif
 
 
-static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
+static const QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
 
 
 
@@ -186,7 +186,7 @@ void View::initSceneVbo()
         Shape *shape = (*it)->getShape();
         int objTriangleCount = shape->getNumTriangles();
 
-        float *buffer = new float[objTriangleCount*18];
+        float *buffer = new float[objTriangleCount*24];
         GLuint buffer_name;
         glGenBuffers(1, &buffer_name);
         glBindBuffer(GL_ARRAY_BUFFER, buffer_name);
@@ -200,22 +200,28 @@ void View::initSceneVbo()
             bufferIndex += 3;
             memcpy(buffer + bufferIndex, triangles[i].getVertexOne()->getNormal()->getData(), sizeof(float)*3);
             bufferIndex += 3;
+            buffer[bufferIndex++] = triangles[i].getVertexOne()->getTexCoord()->x();
+            buffer[bufferIndex++] = triangles[i].getVertexOne()->getTexCoord()->y();
 
             memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getData(), sizeof(float)*3);
             bufferIndex += 3;
             memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getNormal()->getData(), sizeof(float)*3);
             bufferIndex += 3;
+            buffer[bufferIndex++] = triangles[i].getVertexTwo()->getTexCoord()->x();
+            buffer[bufferIndex++] = triangles[i].getVertexTwo()->getTexCoord()->y();
 
             memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getData(), sizeof(float)*3);
             bufferIndex += 3;
             memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getNormal()->getData(), sizeof(float)*3);
             bufferIndex += 3;
+            buffer[bufferIndex++] = triangles[i].getVertexThree()->getTexCoord()->x();
+            buffer[bufferIndex++] = triangles[i].getVertexThree()->getTexCoord()->y();
         }
 
         // Tell the scene object its vbo buffer
         (*it)->setVboBuffer(buffer_name);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*objTriangleCount*18, buffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*objTriangleCount*24, buffer, GL_STATIC_DRAW);
 
         // unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0);
