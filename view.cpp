@@ -17,6 +17,15 @@ extern "C"
 }
 
 static const int MAX_FPS = 60;
+
+#ifndef __APPLE__
+extern "C" {
+    GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
+    GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
+    GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+}
+#endif
+
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
@@ -55,11 +64,11 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_snowEmitter.setCamera(m_camera);
     m_snowEmitter.setSpeed(&m_speed);
 
-    setupScene();
-
     m_isWireframe = false;
     m_isSolid = true;
     m_showUnitAxis = false;
+    m_useVbo = true;
+
 
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
@@ -110,23 +119,72 @@ void View::setupScene()
     ground->setColor(0.2, 0.39, 0.18, 1.0); // when not using the shader
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
-    //m_objects.push_back(ground);
+    m_objects.push_back(ground);
     m_terrain = ground;
 
     // Make a demo box
-    m_factory.setTesselationParameter(10);
+    m_factory.setTesselationParameter(50);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.5, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
-    m_factory.setTesselationParameter(6);
+    m_factory.setTesselationParameter(50);
     SceneObject *smallBox = m_factory.constructCube();
     smallBox->setColor(0.2, 0.2, 0.45, 0.75);
     smallBox->scale(0.5, 0.5, 0.5);
     smallBox->translate(-3.0, 0.5, 7.0);
     m_objects.push_back(smallBox);
+
+    initSceneVbo();
+}
+
+void View::initSceneVbo()
+{
+
+    // Iterate through all the triangles of all the objects
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
+    {
+        Shape *shape = (*it)->getShape();
+        int objTriangleCount = shape->getNumTriangles();
+
+        float *buffer = new float[objTriangleCount*18];
+        GLuint buffer_name;
+        glGenBuffers(1, &buffer_name);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_name);
+
+        int bufferIndex = 0;
+
+        Triangle *triangles = shape->getTriangles();
+        for( int i = 0; i < objTriangleCount; i++ )
+        {
+            memcpy(buffer + bufferIndex, triangles[i].getVertexOne()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexOne()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+
+            memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+
+            memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+        }
+
+        // Tell the scene object its vbo buffer
+        (*it)->setVboBuffer(buffer_name);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*objTriangleCount*18, buffer, GL_STATIC_DRAW);
+
+        // unbind
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        delete[] buffer;
+    }
+
 }
 
 /**
@@ -183,6 +241,8 @@ void View::initializeGL()
 
     //load that dragon...
     m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+
+    setupScene();
 
     // Load the texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
@@ -284,6 +344,40 @@ void View::drawUnitAxis(float x, float y, float z){
     glEnd();
 }
 
+void View::renderScene()
+{
+    // Render the wireframes if enabled
+    if( m_isWireframe ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        (*m_terrain).render(false);
+         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+            (*it)->render(m_useVbo);
+         }
+    }
+
+    // Render the solid scene
+    if( m_isSolid ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+            if(m_showShader){
+                m_shaderPrograms["snow"]->bind();
+                // Load the texture
+                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                glBindTexture(GL_TEXTURE_2D,textureId);
+                m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
+                (*m_terrain).render(false);
+                glBindTexture(GL_TEXTURE_2D,0);
+                m_shaderPrograms["snow"]->release();
+                (*it)->render(m_useVbo);
+            } else {
+                (*m_terrain).render(false);
+                (*it)->render(m_useVbo);
+            }
+        }
+    }
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+}
+
 void View::paintGL()
 {
     // Update the fps
@@ -308,6 +402,7 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // Render all the objects in the scene
+<<<<<<< HEAD
 
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -340,6 +435,9 @@ void View::paintGL()
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+=======
+    renderScene();
+>>>>>>> 906a08d065584bd63fbf68726daf8c9e3c99608d
 
     if( m_showUnitAxis )
     {
@@ -450,6 +548,10 @@ void View::keyPressEvent(QKeyEvent *event)
         m_isSolid = ! m_isSolid;
     } else if(event->key() == Qt::Key_3) {
         m_showUnitAxis = ! m_showUnitAxis;
+    } else if(event->key() == Qt::Key_4) {
+        m_useVbo = ! m_useVbo;
+    } else if(event->key() == Qt::Key_5) {
+        m_showShader = ! m_showShader;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

@@ -74,9 +74,11 @@ private slots:
 
 protected:
      void setupScene();
+     void initSceneVbo();
      void updateCamera();
      void setupLights();
      float getMoveFactor();
+     void renderScene();
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
@@ -115,6 +117,12 @@ protected:
      QImage* m_snowHeightMap;
      BGRA* m_data;
 
+     //! Use scene vbo
+     bool m_useVbo;
+
+     //! The number of scene triangles. This is used for the vbo's and dynamicaly determined
+     //! when the vbo is initialized.
+     int m_triangleCount;
 
 };
 

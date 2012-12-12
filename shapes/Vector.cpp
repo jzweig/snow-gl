@@ -46,6 +46,11 @@ void Vector::z(float z)
     m_z = z;
 }
 
+float *Vector::getData()
+{
+    return &data[0];
+}
+
 Vector4 Vector::toVec4() const
 {
     return Vector4(m_x, m_y, m_z, 0);

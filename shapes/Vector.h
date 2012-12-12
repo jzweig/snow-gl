@@ -26,10 +26,13 @@ class Vector
 
         Vector4 toVec4() const;
 
+        float *getData();
+
     protected:
-        float m_x;
-        float m_y;
-        float m_z;
+        union {
+            float data[3];
+            struct { float m_x, m_y, m_z; };
+        };
 };
 
 #endif // VECTOR_H
