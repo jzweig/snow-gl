@@ -75,9 +75,10 @@ void Shape::render()
 void Shape::initializeTriangles()
 {
     Vector normal = Vector(0, 0, 1.0f);
-    Vertex one = Vertex(-1.0f, -1.0f, 0.0f, normal);
-    Vertex two = Vertex(0, 1.0f, 0, normal);
-    Vertex three = Vertex(1.0f, -1.0f, 0.0f, normal);
+    Vector texCoord = Vector(0, 0, 0);
+    Vertex one = Vertex(-1.0f, -1.0f, 0.0f, normal, texCoord);
+    Vertex two = Vertex(0, 1.0f, 0, normal, texCoord);
+    Vertex three = Vertex(1.0f, -1.0f, 0.0f, normal, texCoord);
     Triangle tri = Triangle(three, two, one);
     for( int i = 0; i < m_triangleCount; i++ )
     {
@@ -111,7 +112,8 @@ void Shape::tesselateCircle(float y)
     // Calculate the normal. If the circle is being drawn at a positive y position,
     // make it face up. Otherwise, make it face down.
     Vector normal = Vector(0.0f, (y >= 0.0f ? 1.0f : -1.0f), 0.0f);
-    Vertex center = Vertex(0.0f, y, 0.0f, normal);
+    Vector texCoord = Vector(0, 0, 0); // TODO: Fix this
+    Vertex center = Vertex(0.0f, y, 0.0f, normal, texCoord);
 
     float pieSliceRadians = 2 * M_PI / pieSlices;
 
@@ -131,10 +133,10 @@ void Shape::tesselateCircle(float y)
         {
             float rightPct = (s+1.0f)/sliceSections;
             float leftPct = (((float)s)/sliceSections);
-            topLeft = Vertex(topX * leftPct, y, topZ * leftPct, normal);
-            topRight = Vertex(topX * rightPct, y, topZ * rightPct, normal);
-            bottomLeft = Vertex(bottomX * leftPct, y, bottomZ * leftPct, normal);
-            bottomRight = Vertex(bottomX * rightPct, y, bottomZ * rightPct, normal);
+            topLeft = Vertex(topX * leftPct, y, topZ * leftPct, normal, texCoord);
+            topRight = Vertex(topX * rightPct, y, topZ * rightPct, normal, texCoord);
+            bottomLeft = Vertex(bottomX * leftPct, y, bottomZ * leftPct, normal, texCoord);
+            bottomRight = Vertex(bottomX * rightPct, y, bottomZ * rightPct, normal, texCoord);
             m_triangles[m_triangleIndex++] = Triangle(y >= 0 ? topLeft : bottomRight, topRight, y >= 0 ? bottomRight : topLeft);
             m_triangles[m_triangleIndex++] = Triangle(y >= 0 ? bottomRight : topLeft, bottomLeft, y >= 0 ? topLeft : bottomRight);
         }
@@ -142,8 +144,8 @@ void Shape::tesselateCircle(float y)
         float slicePct = 1.0f / sliceSections;
 
         // Draw the final triangle that connectts with the center of the circle
-        Vertex top = Vertex(slicePct*topX, y, topZ * slicePct, normal);
-        Vertex bottom = Vertex(slicePct*bottomX, y, bottomZ * slicePct, normal);
+        Vertex top = Vertex(slicePct*topX, y, topZ * slicePct, normal, texCoord);
+        Vertex bottom = Vertex(slicePct*bottomX, y, bottomZ * slicePct, normal, texCoord);
         m_triangles[m_triangleIndex++] = Triangle(y < 0 ? top : bottom, center, y < 0 ? bottom : top );
     }
 

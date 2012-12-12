@@ -51,10 +51,13 @@ void Cube::drawXYFace(float z)
             float leftX = -0.5f + c * triangleWidth;
             float bottomY = -0.5f + r * triangleWidth;
             Vertex bottomLeft, bottomRight, topLeft, topRight;
-            bottomLeft = Vertex(leftX, bottomY, z, currentNormal);
-            bottomRight = Vertex(leftX + triangleWidth, bottomY, z, currentNormal);
-            topLeft = Vertex(leftX, bottomY + triangleWidth, z, currentNormal);
-            topRight = Vertex(leftX + triangleWidth, bottomY + triangleWidth, z, currentNormal);
+            Vector texCoord = Vector(0, 0, 0);
+            // TODO: Actually compute the tex coord ^
+            bottomLeft = Vertex(leftX, bottomY, z, currentNormal, texCoord);
+            bottomRight = Vertex(leftX + triangleWidth, bottomY, z, currentNormal, texCoord);
+            topLeft = Vertex(leftX, bottomY + triangleWidth, z, currentNormal, texCoord);
+            topRight = Vertex(leftX + triangleWidth, bottomY + triangleWidth, z, currentNormal, texCoord);
+
 
             m_triangles[m_triangleIndex++] = Triangle( z >= 0 ? bottomLeft : topLeft, bottomRight, z >= 0 ? topLeft : bottomLeft);
             m_triangles[m_triangleIndex++] = Triangle( z >= 0 ? topLeft : topRight, bottomRight, z >= 0 ? topRight : topLeft);
@@ -75,6 +78,8 @@ void Cube::drawYZFace(float x)
             bottomRight = Vertex(x, bottomY, leftZ + triangleWidth, currentNormal);
             topLeft = Vertex(x, bottomY + triangleWidth, leftZ, currentNormal);
             topRight = Vertex(x, bottomY + triangleWidth, leftZ + triangleWidth, currentNormal);
+            Vector texCoord = Vector(0, 0, 0);
+            // TODO: Actually compute the tex coord ^
 
             m_triangles[m_triangleIndex++] = Triangle( x < 0 ? bottomLeft : topLeft, bottomRight, x < 0 ? topLeft : bottomLeft);
             m_triangles[m_triangleIndex++] = Triangle( x < 0 ? topLeft : topRight, bottomRight, x < 0 ? topRight : topLeft);
@@ -91,10 +96,10 @@ void Cube::drawXZFace(float y)
             float leftZ = -0.5f + c * triangleWidth;
             float bottomX = -0.5f + r * triangleWidth;
             Vertex bottomLeft, bottomRight, topLeft, topRight;
-            bottomLeft = Vertex(bottomX, y, leftZ, currentNormal);
-            bottomRight = Vertex(bottomX, y, leftZ + triangleWidth, currentNormal);
-            topLeft = Vertex(bottomX + triangleWidth, y, leftZ, currentNormal);
-            topRight = Vertex(bottomX + triangleWidth, y, leftZ + triangleWidth, currentNormal);
+            bottomLeft = Vertex(bottomX, y, leftZ, currentNormal, Vector(bottomX + 0.5, leftZ + 0.5, 0));
+            bottomRight = Vertex(bottomX, y, leftZ + triangleWidth, currentNormal, Vector(bottomX + 0.5, leftZ + triangleWidth + 0.5, 0));
+            topLeft = Vertex(bottomX + triangleWidth, y, leftZ, currentNormal, Vector(bottomX + triangleWidth + 0.5, leftZ + 0.5, 0));
+            topRight = Vertex(bottomX + triangleWidth, y, leftZ + triangleWidth, currentNormal, Vector(bottomX + triangleWidth + 0.5, leftZ + triangleWidth + 0.5, 0));
 
             m_triangles[m_triangleIndex++] = Triangle( y >= 0 ? bottomLeft : topLeft, bottomRight, y >= 0 ? topLeft : bottomLeft);
             m_triangles[m_triangleIndex++] = Triangle( y >= 0 ? topLeft : topRight, bottomRight, y >= 0 ? topRight : topLeft);

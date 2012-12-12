@@ -326,7 +326,7 @@ void View::renderScene()
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        (*m_terrain).render(false);
+        (*m_terrain).render(m_useVbo);
          for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
             (*it)->render(m_useVbo);
          }
@@ -342,12 +342,12 @@ void View::renderScene()
                 GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
                 glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
-                (*m_terrain).render(false);
+                (*m_terrain).render(m_useVbo);
                 glBindTexture(GL_TEXTURE_2D,0);
                 m_shaderPrograms["snow"]->release();
                 (*it)->render(m_useVbo);
             } else {
-                (*m_terrain).render(false);
+                (*m_terrain).render(m_useVbo);
                 (*it)->render(m_useVbo);
             }
         }
