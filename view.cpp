@@ -81,7 +81,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     uchar* temp =  m_snowHeightMap->bits();
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
-            float incr = ((float) rand())/(float)RAND_MAX;
+            float incr = ((float) rand())/RAND_MAX;
             float incg = ((float) rand())/RAND_MAX;
             float incb = ((float) rand())/RAND_MAX;
             m_snowHeight[i*m_gridLength+j] = incr*100;//(i+j)/(1.0f*m_gridLength);
@@ -92,6 +92,28 @@ View::View(QWidget *parent) : QGLWidget(parent),
             cout<<incr<<endl;
         }
     }
+/*
+    for(int i=0;i<m_gridLength;i++){
+        for(int j=0;j<m_gridLength;j++){
+            float incr = ((float) rand())/(float)RAND_MAX;
+            float incg = ((float) rand())/RAND_MAX;
+            float incb = ((float) rand())/RAND_MAX;
+            m_snowHeight[i*m_gridLength+j] = incr*100;//(i+j)/(1.0f*m_gridLength);
+            m_data[i*m_gridLength+j].r =((int)(incr*0));
+            m_data[i*m_gridLength+j].g =((int)(incg*0));
+            m_data[i*m_gridLength+j].b =((int)(incb*0));
+            m_data[i*m_gridLength+j].a = 255;
+            //cout<<incr<<endl;
+        }
+    }
+
+        for(int j=0;j<m_gridLength;j++){
+            m_data[j].r =((int)(255));
+            m_data[j].g =((int)(0));
+            m_data[j].b =((int)(0));
+            m_data[j].a = 255;
+            //cout<<incr<<endl;
+        }*/
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
             cout<<(int)temp[i*m_gridLength+j]<<endl;
@@ -371,17 +393,26 @@ void View::renderScene()
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
             if(m_showShader){
+                glActiveTexture(textureId);
+                glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->bind();
                 // Load the texture
-                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
                 //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
-                glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
+                //m_shaderPrograms["snow"]->setUniformValue("snowTexture", textureId);
+                GLuint sky = ResourceLoader::loadSkybox();
+                glCallList(sky);
                 (*m_terrain).render(m_useVbo);
-                glBindTexture(GL_TEXTURE_2D,0);
+
                 m_shaderPrograms["snow"]->release();
+
+                glBindTexture(GL_TEXTURE_2D,0);
+
+
+
                 (*it)->render(m_useVbo);
             } else {
                 (*m_terrain).render(m_useVbo);

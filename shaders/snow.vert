@@ -16,7 +16,7 @@ void main()
      float scale = computeScale(time);
 
     // vec4 dv;
-     //gl_TexCoord[0].xy = gl_MultiTexCoord0.xy;
+     gl_TexCoord[0].st = gl_MultiTexCoord0.st;
      //dv =  texture2D( displacementMap, gl_MultiTexCoord0.xy );
 
      // Flatten the normals to make the lighting a little more realistic
