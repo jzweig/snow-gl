@@ -16,6 +16,8 @@ class Vertex : public Vector
           reflecting the position of the vertex and a Vector contianing the normal
           of the vertex.
           */
+        Vertex(float x, float y, float z, Vector normal, Vector texCoord);
+
         Vertex(float x, float y, float z, Vector normal);
 
         float w();
@@ -24,9 +26,13 @@ class Vertex : public Vector
         //! Returns a pointer to the vector that is the normal of this vertex.
         Vector *getNormal();
 
+        //! Returns a pointer to the vector that is the tex coordinate for this vertex.
+        Vector *getTexCoord();
+
     protected:
         float m_w;
         Vector m_normal;
+        Vector m_texCoord;
 };
 
 #endif // VERTEX_H
