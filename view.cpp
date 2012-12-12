@@ -396,16 +396,14 @@ void View::renderScene()
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        // Load the texture
         GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
             if(m_showShader){
                 glActiveTexture(textureId);
                 glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->bind();
-                // Load the texture
-                //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
                 m_shaderPrograms["snow"]->setUniformValue("useDisplacement", m_useDisplacement);
-                //m_shaderPrograms["snow"]->setUniformValue("snowTexture", textureId);
                 GLuint sky = ResourceLoader::loadSkybox();
                 glCallList(sky);
                 (*m_terrain).render(m_useVbo);

@@ -27,6 +27,9 @@ namespace ResourceLoader
     //! Loads the texture at the given location, returning the GL texture id
     GLuint loadTexture(const QString &path);
 
+    //! returns the heightmap textureID
+    GLuint loadHeightMapTexture(QImage* heightMap);
+
     // Returns the skybox ID
     GLuint loadSkybox();
 
@@ -38,8 +41,6 @@ namespace ResourceLoader
     // Returns the cubeMap ID
     GLuint loadCubeMap(QList<QFile *> files);
 
-    GLuint loadHeightMapTexture(QImage* heightMap);
-    GLuint loadHeightMapTexture(float* heightmap,int width, int height);
 
 }
 

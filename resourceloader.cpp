@@ -77,8 +77,6 @@ GLuint ResourceLoader::loadTexture(const QString &path)
 GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 {
     //glEnable(GL_TEXTURE_2D);
-    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     GLuint textureid;
     QImage texture = QGLWidget::convertToGLFormat((* heightMap));//->mirrored(false,true));
 
@@ -107,23 +105,6 @@ GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 
 }
 
-
-GLuint ResourceLoader::loadHeightMapTexture(float* heightmap,int width, int height)
-{
-    glEnable(GL_TEXTURE_2D);
-    GLuint id;
-
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_BGRA, GL_FLOAT, heightmap);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return id;
-}
 
 
 /**
