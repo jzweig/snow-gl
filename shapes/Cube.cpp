@@ -3,7 +3,12 @@
 #include "Triangle.h"
 #include "float.h"
 #include <cstddef>
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 Cube::Cube()
 {

@@ -73,11 +73,11 @@ QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_CXXFLAGS_WARN_ON -= -Wall
 QMAKE_CXXFLAGS_WARN_ON += -Waddress \
-    -Warray-bounds \
-    -Wc++0x-compat \
+#    -Warray-bounds \
+ #   -Wc++0x-compat \
     -Wchar-subscripts \
     -Wformat \
-    -Wmain \
+ #   -Wmain \
     -Wmissing-braces \
     -Wparentheses \
     -Wreorder \

@@ -4,17 +4,21 @@
 #include <ctime>
 #include <CS123Common.h>
 #include "camera.h"
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include "GL/glut.h"
 #include "GL/glu.h"
 #include <GL/freeglut.h>
+#endif
+
 
 static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
 
-extern "C"
-{
-    extern void APIENTRY glActiveTexture(GLenum);
-}
+
 
 static const int MAX_FPS = 60;
 
@@ -112,7 +116,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
 View::~View()
 {
     safeDelete(m_camera);
-    glmDelete(m_dragon.model);
+    //glmDelete(m_dragon.model);
     safeDelete(m_snowHeight);
     // Delete the scene objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
@@ -251,7 +255,7 @@ void View::initializeGL()
     glEnable(GL_ALPHA_TEST);
 
     //load that dragon...
-    m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+    //m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
 
     setupScene();
 
@@ -399,11 +403,12 @@ void View::paintGL()
     m_fps = 1000.f / (time - m_prevTime);
     m_prevTime = time;
 
+    /*
     glPushMatrix();
     glTranslatef(-.25f, 3.f, 0.f);
     glCallList(m_dragon.idx);
     glPopMatrix();
-
+*/
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
