@@ -362,7 +362,8 @@ void View::renderScene()
             if(m_showShader){
                 m_shaderPrograms["snow"]->bind();
                 // Load the texture
-                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
+                //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
                 glBindTexture(GL_TEXTURE_2D,textureId);
                 m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
                 (*m_terrain).render(false);
@@ -402,42 +403,7 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // Render all the objects in the scene
-<<<<<<< HEAD
-
-    if( m_isWireframe ) {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    } else if( m_isSolid ) {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    }
-    if( m_isWireframe || m_isSolid){
-        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            if(m_showShader){
-                m_shaderPrograms["snow"]->bind();
-                // Load the texture
-                //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
-                //QImage* image = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
-                //image->loadFromData((uchar *)m_data,m_gridLength*m_gridLength,QImage::Format_RGB32);
-                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
-                glBindTexture(GL_TEXTURE_2D,textureId);
-                m_shaderPrograms["snow"]->setUniformValue("time", time);
-                (*m_terrain).render();
-                glBindTexture(GL_TEXTURE_2D,0);
-                m_shaderPrograms["snow"]->release();
-                (*it)->render();
-
-                //delete image;
-            }else{
-                (*m_terrain).render();
-                (*it)->render();
-
-            }
-        }
-    }
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-=======
     renderScene();
->>>>>>> 906a08d065584bd63fbf68726daf8c9e3c99608d
 
     if( m_showUnitAxis )
     {
