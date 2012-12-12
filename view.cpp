@@ -81,13 +81,15 @@ View::View(QWidget *parent) : QGLWidget(parent),
     uchar* temp =  m_snowHeightMap->bits();
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
-            float inc = (float) rand()/RAND_MAX;
-            m_snowHeight[i*m_gridLength+j] = inc*100;//(i+j)/(1.0f*m_gridLength);
-            m_data[i*m_gridLength+j].r =((int)(inc*255));
-            m_data[i*m_gridLength+j].g =((int)(inc*255));
-            m_data[i*m_gridLength+j].b =((int)(inc*255));
+            float incr = ((float) rand())/(float)RAND_MAX;
+            float incg = ((float) rand())/RAND_MAX;
+            float incb = ((float) rand())/RAND_MAX;
+            m_snowHeight[i*m_gridLength+j] = incr*100;//(i+j)/(1.0f*m_gridLength);
+            m_data[i*m_gridLength+j].r =((int)(incr*255));
+            m_data[i*m_gridLength+j].g =((int)(incg*255));
+            m_data[i*m_gridLength+j].b =((int)(incb*255));
             m_data[i*m_gridLength+j].a = 255;
-            cout<<inc<<endl;
+            cout<<incr<<endl;
         }
     }
     for(int i=0;i<m_gridLength;i++){
@@ -96,6 +98,15 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
         }
     }
+
+
+    // Make sure the image file exists
+    QFile file("/course/cs123/data/image/BoneHead.jpg");
+    if (!file.exists())
+        cout<<"/course/cs123/data/image/BoneHead.jpg FILE DOES NOT EXIST"<<endl;
+
+    // Load the file into memory
+    //m_snowHeightMap->load(file.fileName());
 }
 
 View::~View()
@@ -250,6 +261,8 @@ void View::initializeGL()
     updateCamera();
     setupLights();
     glFrontFace(GL_CCW);
+    glEnable(GL_TEXTURE_2D);
+    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     createShaderPrograms();
     paintGL();
 }
