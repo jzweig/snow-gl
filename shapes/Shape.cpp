@@ -3,7 +3,12 @@
 #include "CS123Common.h"
 #include <cstddef>
 #include <QList>
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 Shape::Shape()
 {
