@@ -35,7 +35,7 @@ class SceneObject
         void setVboBuffer(GLuint buffer_name);
         Shape *getShape();
         GLuint getVboBuffer();
-
+        void paintTexture(float x, float y, float z);
     protected:
         void refreshMatrix();
 

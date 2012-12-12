@@ -175,3 +175,7 @@ void SnowEmitter::drawSnowflakes()
     glBindTexture(GL_TEXTURE_2D, 0);
     glEnable(GL_LIGHTING);
 }
+
+void SnowEmitter::collisionDetect(SceneObject* obj)
+{
+}
