@@ -120,6 +120,9 @@ protected:
      //! Use scene vbo
      bool m_useVbo;
 
+     //! Use shader displacement mapping
+     bool m_useDisplacement;
+
      //! The number of scene triangles. This is used for the vbo's and dynamicaly determined
      //! when the vbo is initialized.
      int m_triangleCount;

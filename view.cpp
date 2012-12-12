@@ -74,6 +74,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_isSolid = true;
     m_showUnitAxis = false;
     m_useVbo = true;
+    m_useDisplacement = true;
 
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
@@ -403,7 +404,7 @@ void View::renderScene()
                 m_shaderPrograms["snow"]->bind();
                 // Load the texture
                 //GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
-                m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
+                m_shaderPrograms["snow"]->setUniformValue("useDisplacement", m_useDisplacement);
                 //m_shaderPrograms["snow"]->setUniformValue("snowTexture", textureId);
                 GLuint sky = ResourceLoader::loadSkybox();
                 glCallList(sky);
@@ -558,6 +559,9 @@ void View::keyPressEvent(QKeyEvent *event)
         m_useVbo = ! m_useVbo;
     } else if(event->key() == Qt::Key_5) {
         m_showShader = ! m_showShader;
+
+    } else if(event->key() == Qt::Key_6) {
+        m_useDisplacement = ! m_useDisplacement;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
