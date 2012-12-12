@@ -73,7 +73,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_showUnitAxis = false;
     m_useVbo = true;
 
-
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
     //Test terrain heights
@@ -130,7 +129,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
 View::~View()
 {
     safeDelete(m_camera);
-    //glmDelete(m_dragon.model);
     safeDelete(m_snowHeight);
     // Delete the scene objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
@@ -273,9 +271,6 @@ void View::initializeGL()
 
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
-
-    //load that dragon...
-    //m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
 
     setupScene();
 
@@ -431,13 +426,6 @@ void View::paintGL()
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
     m_prevTime = time;
-
-    /*
-    glPushMatrix();
-    glTranslatef(-.25f, 3.f, 0.f);
-    glCallList(m_dragon.idx);
-    glPopMatrix();
-*/
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
