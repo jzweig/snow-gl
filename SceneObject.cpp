@@ -36,10 +36,9 @@ void SceneObject::render(bool useVbo) const
         glEnableClientState(GL_NORMAL_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-
-        glVertexPointer(3, GL_FLOAT, sizeof(float)*6, (void *) 0 );
-        glNormalPointer(GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*3) );
-        glTexCoordPointer(2, GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*6));
+        glVertexPointer(3, GL_FLOAT, sizeof(float)*8, (void *) 0 );
+        glNormalPointer(GL_FLOAT, sizeof(float)*8, (void *) (sizeof(float)*3) );
+        glTexCoordPointer(2, GL_FLOAT, sizeof(float)*8, (void *) (sizeof(float)*7));
 
         // Draw dat shit
         glDrawArrays(GL_TRIANGLES, 0, m_shape->getNumTriangles()*3);
