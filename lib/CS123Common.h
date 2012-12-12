@@ -43,6 +43,7 @@ struct BGRA
         unsigned char channels[4];
     };
 
+
     // @TODO: [OPTIONAL] You can implement some operators here for color arithmetic.
 
 };

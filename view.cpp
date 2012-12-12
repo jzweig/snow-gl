@@ -9,7 +9,7 @@
 #include "GL/glu.h"
 #include <GL/freeglut.h>
 
-static const QString PROJECT_DIR = "/home/jmzweig/course/cs123/snow-gl/";
+static const QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
 static const int MAX_FPS = 60;
 
 #ifndef __APPLE__
@@ -63,6 +63,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_isWireframe = false;
     m_isSolid = true;
     m_showUnitAxis = false;
+    m_useVbo = false;
 
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
@@ -113,6 +114,55 @@ void View::setupScene()
     smallBox->scale(0.5, 0.5, 0.5);
     smallBox->translate(-3.0, 0.5, 7.0);
     m_objects.push_back(smallBox);
+
+    initSceneVbo();
+}
+
+void View::initSceneVbo()
+{
+    // Calculate the number of triangles in our scene
+    int triangleCount = 0;
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
+        triangleCount += (*it)->getShape()->getNumTriangles();
+    }
+    m_triangleCount = triangleCount;
+    float *buffer = new float[triangleCount*18];
+    glGenBuffers(1, &m_scene_vbo_binding);
+    cout << "m_scene_vbo_binding = " << m_scene_vbo_binding << endl;
+    glBindBuffer(GL_ARRAY_BUFFER, m_scene_vbo_binding);
+
+    int bufferIndex = 0;
+
+    // Iterate through all the triangles of all the objects
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
+    {
+        Shape *shape = (*it)->getShape();
+        int objTriangleCount = shape->getNumTriangles();
+        Triangle *triangles = shape->getTriangles();
+        for( int i = 0; i < objTriangleCount; i++ )
+        {
+            memcpy(buffer + bufferIndex, triangles[i].getVertexOne()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexOne()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+
+            memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexTwo()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+
+            memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getNormal()->getData(), sizeof(float)*3);
+            bufferIndex += 3;
+        }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triangleCount*18, buffer, GL_STATIC_DRAW);
+
+    // unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    delete[] buffer;
 }
 
 /**
@@ -270,6 +320,69 @@ void View::drawUnitAxis(float x, float y, float z){
     glEnd();
 }
 
+void View::renderScene()
+{
+    // Render the wireframes if enabled
+    if( m_isWireframe ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        renderScene();
+        (*m_terrain).render();
+        if( m_useVbo ) {
+            renderVbo();
+        } else {
+            for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+                (*it)->render();
+            }
+        }
+    }
+
+    // Render the solid scene
+    if( m_isSolid ) {
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        if( m_useVbo ) {
+            renderVbo();
+        } else {
+            for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+                if(m_showShader){
+                    m_shaderPrograms["snow"]->bind();
+                    // Load the texture
+                    GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                    glBindTexture(GL_TEXTURE_2D,textureId);
+                    m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
+                    (*m_terrain).render();
+                    glBindTexture(GL_TEXTURE_2D,0);
+                    m_shaderPrograms["snow"]->release();
+                    (*it)->render();
+                } else {
+                    (*m_terrain).render();
+                    (*it)->render();
+                }
+            }
+        }
+    }
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+}
+
+void View::renderVbo()
+{
+    cout << "m_scene_vbo_binding = " << m_scene_vbo_binding << endl;
+    // Bind the vbo buffer
+    glBindBuffer(GL_ARRAY_BUFFER, m_scene_vbo_binding);
+
+    // Tell OpenGL what's up
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+
+    glVertexPointer(3, GL_FLOAT, sizeof(float)*6, (void *) 0 );
+    glNormalPointer(GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*3) );
+
+    // Draw dat shit
+    glDrawArrays(GL_TRIANGLES, 0, m_triangleCount*3);
+
+    // Unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void View::paintGL()
 {
 
@@ -294,33 +407,7 @@ void View::paintGL()
     glEnable(GL_LIGHTING);
 
     // Render all the objects in the scene
-
-    if( m_isWireframe ) {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    } else if( m_isSolid ) {
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    }
-    if( m_isWireframe || m_isSolid){
-        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            if(m_showShader){
-                m_shaderPrograms["snow"]->bind();
-                // Load the texture
-                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
-                glBindTexture(GL_TEXTURE_2D,textureId);
-                m_shaderPrograms["snow"]->setUniformValue("time", time);
-                (*m_terrain).render();
-                glBindTexture(GL_TEXTURE_2D,0);
-                m_shaderPrograms["snow"]->release();
-                (*it)->render();
-            }else{
-                (*m_terrain).render();
-                (*it)->render();
-
-            }
-        }
-    }
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
+    renderScene();
 
     if( m_showUnitAxis )
     {
@@ -431,6 +518,10 @@ void View::keyPressEvent(QKeyEvent *event)
         m_isSolid = ! m_isSolid;
     } else if(event->key() == Qt::Key_3) {
         m_showUnitAxis = ! m_showUnitAxis;
+    } else if(event->key() == Qt::Key_4) {
+        m_useVbo = ! m_useVbo;
+    } else if(event->key() == Qt::Key_5) {
+        m_showShader = ! m_showShader;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

@@ -22,7 +22,7 @@ class Vertex : public Vector
         void w(float w);
 
         //! Returns a pointer to the vector that is the normal of this vertex.
-        const Vector *getNormal();
+        Vector *getNormal();
 
     protected:
         float m_w;

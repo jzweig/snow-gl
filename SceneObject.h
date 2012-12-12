@@ -32,6 +32,7 @@ class SceneObject
         void rotate(float angle, float x, float y, float z);
         void setColor(float r, float g, float b, float a);
         void setColor(Vector4 color);
+        Shape *getShape();
 
     protected:
         void refreshMatrix();

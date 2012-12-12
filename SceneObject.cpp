@@ -19,6 +19,11 @@ void SceneObject::render() const
     glPopMatrix();
 }
 
+Shape *SceneObject::getShape()
+{
+    return m_shape;
+}
+
 void SceneObject::setColor(float r, float g, float b, float a)
 {
     m_color.x = r;

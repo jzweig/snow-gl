@@ -24,7 +24,7 @@ void Vertex::w(float w)
     m_w = w;
 }
 
-const Vector *Vertex::getNormal()
+Vector *Vertex::getNormal()
 {
     return &m_normal;
 }
