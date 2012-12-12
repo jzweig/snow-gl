@@ -34,9 +34,12 @@ void SceneObject::render(bool useVbo) const
         // Tell OpenGL what's up
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
 
         glVertexPointer(3, GL_FLOAT, sizeof(float)*6, (void *) 0 );
         glNormalPointer(GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*3) );
+        glTexCoordPointer(2, GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*6));
 
         // Draw dat shit
         glDrawArrays(GL_TRIANGLES, 0, m_shape->getNumTriangles()*3);
