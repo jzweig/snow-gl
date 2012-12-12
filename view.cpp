@@ -58,12 +58,11 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_snowEmitter.setCamera(m_camera);
     m_snowEmitter.setSpeed(&m_speed);
 
-    setupScene();
-
     m_isWireframe = false;
     m_isSolid = true;
     m_showUnitAxis = false;
-    m_useVbo = false;
+    m_useVbo = true;
+
 
     int terrain_array_size = m_gridLength * m_gridLength;
     m_snowHeight = new float[terrain_array_size];
@@ -97,18 +96,18 @@ void View::setupScene()
     ground->setColor(0.2, 0.39, 0.18, 1.0); // when not using the shader
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
-    //m_objects.push_back(ground);
+    m_objects.push_back(ground);
     m_terrain = ground;
 
     // Make a demo box
-    m_factory.setTesselationParameter(10);
+    m_factory.setTesselationParameter(50);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.5, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
-    m_factory.setTesselationParameter(6);
+    m_factory.setTesselationParameter(50);
     SceneObject *smallBox = m_factory.constructCube();
     smallBox->setColor(0.2, 0.2, 0.45, 0.75);
     smallBox->scale(0.5, 0.5, 0.5);
@@ -120,24 +119,20 @@ void View::setupScene()
 
 void View::initSceneVbo()
 {
-    // Calculate the number of triangles in our scene
-    int triangleCount = 0;
-    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
-        triangleCount += (*it)->getShape()->getNumTriangles();
-    }
-    m_triangleCount = triangleCount;
-    float *buffer = new float[triangleCount*18];
-    glGenBuffers(1, &m_scene_vbo_binding);
-    cout << "m_scene_vbo_binding = " << m_scene_vbo_binding << endl;
-    glBindBuffer(GL_ARRAY_BUFFER, m_scene_vbo_binding);
-
-    int bufferIndex = 0;
 
     // Iterate through all the triangles of all the objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
     {
         Shape *shape = (*it)->getShape();
         int objTriangleCount = shape->getNumTriangles();
+
+        float *buffer = new float[objTriangleCount*18];
+        GLuint buffer_name;
+        glGenBuffers(1, &buffer_name);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_name);
+
+        int bufferIndex = 0;
+
         Triangle *triangles = shape->getTriangles();
         for( int i = 0; i < objTriangleCount; i++ )
         {
@@ -156,13 +151,17 @@ void View::initSceneVbo()
             memcpy(buffer + bufferIndex, triangles[i].getVertexThree()->getNormal()->getData(), sizeof(float)*3);
             bufferIndex += 3;
         }
+
+        // Tell the scene object its vbo buffer
+        (*it)->setVboBuffer(buffer_name);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*objTriangleCount*18, buffer, GL_STATIC_DRAW);
+
+        // unbind
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        delete[] buffer;
     }
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triangleCount*18, buffer, GL_STATIC_DRAW);
-
-    // unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    delete[] buffer;
 }
 
 /**
@@ -219,6 +218,8 @@ void View::initializeGL()
 
     //load that dragon...
     m_dragon = ResourceLoader::loadObjModel("/course/cs123/bin/models/xyzrgb_dragon.obj");
+
+    setupScene();
 
     // Load the texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
@@ -325,62 +326,33 @@ void View::renderScene()
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        renderScene();
-        (*m_terrain).render();
-        if( m_useVbo ) {
-            renderVbo();
-        } else {
-            for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-                (*it)->render();
-            }
-        }
+        (*m_terrain).render(false);
+         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+            (*it)->render(m_useVbo);
+         }
     }
 
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        if( m_useVbo ) {
-            renderVbo();
-        } else {
-            for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-                if(m_showShader){
-                    m_shaderPrograms["snow"]->bind();
-                    // Load the texture
-                    GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
-                    glBindTexture(GL_TEXTURE_2D,textureId);
-                    m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
-                    (*m_terrain).render();
-                    glBindTexture(GL_TEXTURE_2D,0);
-                    m_shaderPrograms["snow"]->release();
-                    (*it)->render();
-                } else {
-                    (*m_terrain).render();
-                    (*it)->render();
-                }
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+            if(m_showShader){
+                m_shaderPrograms["snow"]->bind();
+                // Load the texture
+                GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeight,m_gridLength,m_gridLength);
+                glBindTexture(GL_TEXTURE_2D,textureId);
+                m_shaderPrograms["snow"]->setUniformValue("time", m_clock.elapsed());
+                (*m_terrain).render(false);
+                glBindTexture(GL_TEXTURE_2D,0);
+                m_shaderPrograms["snow"]->release();
+                (*it)->render(m_useVbo);
+            } else {
+                (*m_terrain).render(false);
+                (*it)->render(m_useVbo);
             }
         }
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-}
-
-void View::renderVbo()
-{
-    cout << "m_scene_vbo_binding = " << m_scene_vbo_binding << endl;
-    // Bind the vbo buffer
-    glBindBuffer(GL_ARRAY_BUFFER, m_scene_vbo_binding);
-
-    // Tell OpenGL what's up
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-
-    glVertexPointer(3, GL_FLOAT, sizeof(float)*6, (void *) 0 );
-    glNormalPointer(GL_FLOAT, sizeof(float)*6, (void *) (sizeof(float)*3) );
-
-    // Draw dat shit
-    glDrawArrays(GL_TRIANGLES, 0, m_triangleCount*3);
-
-    // Unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void View::paintGL()

@@ -79,7 +79,6 @@ protected:
      void setupLights();
      float getMoveFactor();
      void renderScene();
-     void renderVbo();
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
@@ -117,9 +116,6 @@ protected:
 
      //! Use scene vbo
      bool m_useVbo;
-
-     //! The vbo binding for the scene data.
-     unsigned int m_scene_vbo_binding;
 
      //! The number of scene triangles. This is used for the vbo's and dynamicaly determined
      //! when the vbo is initialized.

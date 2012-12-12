@@ -26,13 +26,15 @@ class SceneObject
     public:
         SceneObject(Shape *shape);
         virtual ~SceneObject();
-        void render() const;
+        void render(bool m_useVbo) const;
         void translate(float x, float y, float z);
         void scale(float x, float y, float z);
         void rotate(float angle, float x, float y, float z);
         void setColor(float r, float g, float b, float a);
         void setColor(Vector4 color);
+        void setVboBuffer(GLuint buffer_name);
         Shape *getShape();
+        GLuint getVboBuffer();
 
     protected:
         void refreshMatrix();
@@ -41,6 +43,7 @@ class SceneObject
         vector<Transformation> m_transformations;
         Vector4 m_color;
         Matrix4x4 m_matrix;
+        GLuint m_vbo;
 
  };
 
