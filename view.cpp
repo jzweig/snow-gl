@@ -17,11 +17,7 @@
 #include <GL/freeglut.h>
 #endif
 
-
 static  QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
-
-
-
 static const int MAX_FPS = 60;
 
 #ifndef __APPLE__
@@ -40,9 +36,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
-    // Hide the cursor since this is a fullscreen app
-    //setCursor(Qt::BlankCursor);
-
     // View needs keyboard focus
     setFocusPolicy(Qt::StrongFocus);
 
@@ -51,7 +44,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     // Seed the random number generator
     srand(QTime::currentTime().msec());
-
 
     // The event loop timer
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -286,7 +278,6 @@ void View::initializeGL()
     setupLights();
     glFrontFace(GL_CCW);
     glEnable(GL_TEXTURE_2D);
-    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     createShaderPrograms();
     paintGL();
 }
@@ -317,7 +308,7 @@ void View::updateCamera()
 
     float ratio = ((float) w) / h;
     Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
-    Vector4 eye = m_camera->eye;//(m_camera->center - dir * m_camera->zoom);
+    Vector4 eye = m_camera->eye;
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -500,20 +491,6 @@ void View::mousePressEvent(QMouseEvent *event)
 
 void View::mouseMoveEvent(QMouseEvent *event)
 {
-    // This starter code implements mouse capture, which gives the change in
-    // mouse position since the last mouse movement. The mouse needs to be
-    // recentered after every movement because it might otherwise run into
-    // the edge of the screen, which would stop the user from moving further
-    // in that direction. Note that it is important to check that deltaX and
-    // deltaY are not zero before recentering the mouse, otherwise there will
-    // be an infinite loop of mouse move events.
-    //int deltaX = event->x() - width() / 2;
-    //int deltaY = event->y() - height() / 2;
-    //if (!deltaX && !deltaY) return;
-    //QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
-
-    // TODO: Handle mouse movements here
-
     Vector2 pos(event->x(), event->y());
     if (event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton)
     {
@@ -522,7 +499,6 @@ void View::mouseMoveEvent(QMouseEvent *event)
     m_prevMousePos = pos;
 
     updateCamera();
-
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
