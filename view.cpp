@@ -55,13 +55,17 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_camera->up.x = 0.0f, m_camera->up.y = 1.0f, m_camera->up.z = 0.0f;
     m_camera->angle = 45.0f, m_camera->near = .01f, m_camera->far = 1000.0f;
 
-    //added for orbit
+    // Orbit Camera specific settings
     m_camera->zoom = 3.5f;
     m_camera->theta = M_PI * 1.5f, m_camera->phi = -0.2f;
     m_camera->fovy = 60.f;
     m_snowEmitter.setCamera(m_camera);
     m_snowEmitter.setSpeed(&m_speed);
 
+    // Initialize fbos
+    m_fbo_main = m_fbo_snow = NULL;
+
+    // Initialize settings
     m_isWireframe = false;
     m_isSolid = true;
     m_showUnitAxis = false;
@@ -132,7 +136,16 @@ View::~View()
         delete *it;
     }
     m_objects.clear();
-    delete m_terrain;
+
+    // Delete any frame buffer objects
+    if( m_fbo_main ) {
+        delete m_fbo_main;
+        m_fbo_main = NULL;
+    }
+    if( m_fbo_snow ) {
+        delete m_fbo_snow;
+        m_fbo_snow = NULL;
+    }
 }
 
 void View::setupScene()
@@ -235,27 +248,13 @@ void View::initializeGL()
 
     cout << "initialized shader programs..." << endl;
 
-    // All OpenGL initialization *MUST* be done during or after this
-    // method. Before this method is called, there is no active OpenGL
-    // context and all OpenGL calls have no effect.
-
-    // Start a timer that will try to get 60 frames per second (the actual
-    // frame rate depends on the operating system and other running programs)
-    //time.start();
-    //timer.start(1000 / 60);
-
     // Start the drawing timer
     m_timer.start(1000.0f / MAX_FPS);
 
-    // Center the mouse, which is explained more in mouseMoveEvent() below.
-    // This needs to be done here because the mouse may be initially outside
-    // the fullscreen window and will not automatically receive mouse move
-    // events. This occurs if there are two monitors and the mouse is on the
-    // secondary monitor.
+    // Center the mouse
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     glClearColor(0.0f,0.0f,0.0f,0.0f);
-
     glEnable(GL_COLOR_MATERIAL);
     glShadeModel(GL_SMOOTH);
 
@@ -269,12 +268,16 @@ void View::initializeGL()
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
+    // Tesselate the scene and setup all of the transformation matrices
     setupScene();
+
+    // Create the frame buffer objects
+    createFramebufferObjects(width(), height());
 
     // Load the texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
-    updateCamera();
+    applyProjectionCamera();
     setupLights();
     glFrontFace(GL_CCW);
     glEnable(GL_TEXTURE_2D);
@@ -302,7 +305,7 @@ void View::setupLights()
 /**
   * Applied the current camera position and orientation to the OpenGL modelview and projection matrices.
   */
-void View::updateCamera()
+void View::applyProjectionCamera()
 {
     float w = width(), h = height();
 
@@ -319,42 +322,17 @@ void View::updateCamera()
     glLoadIdentity();
 }
 
-
-void View::drawPlane(float color[], float translate[])
+/**
+  Called to switch to an orthogonal OpenGL camera.
+  Useful for rending a textured quad across the whole screen.
+**/
+void View::applyOrthogonalCamera()
 {
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-
-    glBegin(GL_QUADS);
-    //XY axis
-    glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-    glEnd();
-
-    glPopMatrix();
-}
-
-void View::drawPlane(float color[], float translate[], float scale[], float rotate[],int angle)
-{
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-    glScalef(scale[0],scale[1],scale[2]);
-    glRotatef(angle,rotate[0],rotate[1],rotate[2]);
-
-    glBegin(GL_QUADS);
-    glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 1.0f);
-    glEnd();
-
-    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.f, width(), 0.f, height());
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void View::drawUnitAxis(float x, float y, float z){
@@ -404,8 +382,6 @@ void View::renderScene()
 
                 glBindTexture(GL_TEXTURE_2D,0);
 
-
-
                 (*it)->render(m_useVbo);
             } else {
                 (*m_terrain).render(m_useVbo);
@@ -418,30 +394,31 @@ void View::renderScene()
 
 void View::paintGL()
 {
+    // NOTE: Opaque objects must be rendered before transparent. This means
+    //       objects before snowflakes.
+
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);
     m_prevTime = time;
 
+    // Clear the scene
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    // NOTE: Opaque objects must be rendered before transparent. This means
-    //       objects before snowflakes.
-
+    // Render the scene to a framebuffer
+    m_fbo_main->bind();
     glEnable(GL_LIGHTING);
-
-    // Render all the objects in the scene
     renderScene();
-
     if( m_showUnitAxis )
     {
         glDisable(GL_LIGHTING);
         drawUnitAxis(0.f,0.f,0.f);
         glEnable(GL_LIGHTING);
     }
+    m_fbo_main->release();
 
     // Render dem snowflakes
     glEnable(GL_BLEND);
@@ -481,6 +458,9 @@ void View::paintUI()
 void View::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+    // If the dimensions changed and we have fbo's, we need new fbo's of the right size
+    if( m_fbo_main && m_fbo_snow )
+        createFramebufferObjects(w, h);
 }
 
 void View::mousePressEvent(QMouseEvent *event)
@@ -498,7 +478,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
     }
     m_prevMousePos = pos;
 
-    updateCamera();
+    applyProjectionCamera();
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
@@ -562,7 +542,7 @@ void View::keyPressEvent(QKeyEvent *event)
             translationVec.normalize();
             m_camera->eye = m_camera->eye + translationVec * getMoveFactor();
         }
-        updateCamera();
+        applyProjectionCamera();
     }
 }
 
@@ -588,4 +568,34 @@ void View::tick()
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
     update();
+}
+
+/**
+  Allocate framebuffer objects.
+
+  @param width: the viewport width
+  @param height: the viewport height
+ **/
+void View::createFramebufferObjects(int width, int height)
+{
+    // Deallocate any existing fbo's.
+    if( m_fbo_main ) {
+        delete m_fbo_main;
+        m_fbo_main = NULL;
+    }
+    if( m_fbo_snow ) {
+        delete m_fbo_snow;
+        m_fbo_snow = NULL;
+    }
+
+    // Allocate the main framebuffer object for rendering the scene to
+    // This needs a depth attachment
+    m_fbo_main = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth,
+                                          GL_TEXTURE_2D, GL_RGB16F_ARB);
+    m_fbo_main->format().setSamples(16);
+    // Allocate the secondary framebuffer obejcts for rendering snow displacement.
+    // I think this also needs a depth attachment.
+    m_fbo_snow = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth,
+                                          GL_TEXTURE_2D, GL_RGB16F_ARB);
+    m_fbo_snow->format().setSamples(16);
 }

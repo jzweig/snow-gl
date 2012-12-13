@@ -5,6 +5,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QHash>
+#include <QGLFramebufferObject>
 #include <QtOpenGL>
 #include <QString>
 #include <QImage>
@@ -65,8 +66,6 @@ private:
     void keyReleaseEvent(QKeyEvent *event);
 
     void drawUnitAxis(float x, float y, float z);
-    void drawPlane(float color[], float translate[]);
-    void drawPlane(float color[], float translate[], float scale[], float rotate[],int angle);
     // Resources
     QHash<QString, QGLShaderProgram *> m_shaderPrograms; // hash map of all shader programs
 private slots:
@@ -75,10 +74,12 @@ private slots:
 protected:
      void setupScene();
      void initSceneVbo();
-     void updateCamera();
+     void applyProjectionCamera();
+     void applyOrthogonalCamera();
      void setupLights();
      float getMoveFactor();
      void renderScene();
+     void createFramebufferObjects(int width, int height);
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
@@ -123,6 +124,12 @@ protected:
      //! The number of scene triangles. This is used for the vbo's and dynamicaly determined
      //! when the vbo is initialized.
      int m_triangleCount;
+
+     //! The main fbo into which we render the snowless scene
+     QGLFramebufferObject *m_fbo_main;
+
+     //! The snow fbo into which we render the accumulated snow
+     QGLFramebufferObject *m_fbo_snow;
 
      QString m_homeDir;
      QString m_projDir;
