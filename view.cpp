@@ -539,10 +539,15 @@ void View::keyReleaseEvent(QKeyEvent *event)
 
 void View::tick()
 {
-    // TODO: Collision detect in parallel
+    // Handle collision detections concurrenetly
+    QFutureSynchronizer<void> sync;
     for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-       m_snowEmitter.collisionDetect((*it));
+        SceneObject *obj = *it;
+        QFuture<void> future = QtConcurrent::run(&m_snowEmitter, &SnowEmitter::collisionDetect, obj);
+        sync.addFuture(future);
     }
+    sync.waitForFinished();
+
     m_snowEmitter.tick();
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
