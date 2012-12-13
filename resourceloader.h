@@ -29,6 +29,7 @@ namespace ResourceLoader
 
     //! returns the heightmap textureID
     GLuint loadHeightMapTexture(QImage* heightMap);
+    GLuint reloadHeightMapTexture(QImage* heightMap, GLuint textureid);
 
     // Returns the skybox ID
     GLuint loadSkybox();

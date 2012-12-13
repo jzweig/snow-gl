@@ -23,12 +23,13 @@ SceneObject::SceneObject(Shape* shape, int m_gridLength) : m_shape(shape)
             float incr = ((float) rand())/RAND_MAX;
             float incg = ((float) rand())/RAND_MAX;
             float incb = ((float) rand())/RAND_MAX;
-            m_data[i*m_gridLength+j].r =((int)(incr*255));
-            m_data[i*m_gridLength+j].g =((int)(incg*255));
+            m_data[i*m_gridLength+j].r = 200;//((int)(incr*255));
+            m_data[i*m_gridLength+j].g =150;//((int)(incg*255));
             m_data[i*m_gridLength+j].b =((int)(incb*255));
             m_data[i*m_gridLength+j].a = 255;
         }
     }
+    m_snowtextureId = ResourceLoader::loadHeightMapTexture(m_heightMap);
 }
 
 SceneObject::~SceneObject()
@@ -40,10 +41,8 @@ SceneObject::~SceneObject()
 void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
 {
     if(useShader){
-        // Load the texture
-        GLuint textureId = ResourceLoader::loadHeightMapTexture(m_heightMap);
-        glActiveTexture(textureId);
-        glBindTexture(GL_TEXTURE_2D,textureId);
+        glActiveTexture(m_snowtextureId);
+        glBindTexture(GL_TEXTURE_2D,m_snowtextureId);
         shader->bind();
         shader->setUniformValue("useDisplacement", useDisplacement);
     }

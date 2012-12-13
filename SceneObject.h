@@ -28,7 +28,7 @@ class SceneObject
     public:
         SceneObject(Shape* shape, int gridLength);
         virtual ~SceneObject();
-        void render(const bool useVbo,const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const;
+        void render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const;
         void translate(float x, float y, float z);
         void scale(float x, float y, float z);
         void rotate(float angle, float x, float y, float z);
@@ -47,7 +47,7 @@ class SceneObject
         Matrix4x4 m_matrix;
         GLuint m_vbo;
         QImage* m_heightMap;
-
+        GLuint m_snowtextureId;
  };
 
 #endif // SCENEOBJECT_H

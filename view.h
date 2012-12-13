@@ -130,6 +130,8 @@ protected:
      QString m_homeDir;
      QString m_projDir;
 
+     GLuint m_snowtextureId;
+
 };
 
 #endif // VIEW_H

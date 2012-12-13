@@ -74,6 +74,23 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     return textureid;
 }
 
+GLuint ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
+{
+    QImage texture = QGLWidget::convertToGLFormat((* heightMap));
+    // make texture active (bind)
+    glBindTexture(GL_TEXTURE_2D, textureid);
+
+    // Copy the image data into the OpenGL texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+    // filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // deactivate texture (unbind)
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 {
     //glEnable(GL_TEXTURE_2D);

@@ -119,6 +119,10 @@ View::View(QWidget *parent) : QGLWidget(parent),
             //cout<<incr<<endl;
         }*/
 
+
+    // Load the texture
+    m_snowtextureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
+
     // Make sure the image file exists
     QFile file("/course/cs123/data/image/BoneHead.jpg");
     if (!file.exists())
