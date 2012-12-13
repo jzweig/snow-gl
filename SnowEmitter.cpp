@@ -188,9 +188,10 @@ void SnowEmitter::collisionDetect(SceneObject* obj)
             if((snowPos.x<= pBound.x && snowPos.x>=nBound.x) &&
                (snowPos.z<= pBound.z && snowPos.z>=nBound.z) &&
                (snowPos.y<= pBound.y && snowPos.y>=nBound.y)){
+                obj->paintTexture(snowPos.x,snowPos.y,snowPos.z);
                 //reset snowflake that collided.
                 dropSnowflake(i);
-                cout<<"COLLISION!"<<endl;
+                //cout<<"COLLISION!"<<endl;
 
             }
         }

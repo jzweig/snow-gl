@@ -51,6 +51,7 @@ class SceneObject
         GLuint m_vbo;
         QImage* m_heightMap;
         GLuint m_snowtextureId;
+        int m_gridLength;
  };
 
 #endif // SCENEOBJECT_H

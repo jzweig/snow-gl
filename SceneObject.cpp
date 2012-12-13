@@ -9,8 +9,9 @@ extern "C" {
 }
 #endif
 
-SceneObject::SceneObject(Shape* shape, int m_gridLength) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, int gridLength) : m_shape(shape)
 {
+    m_gridLength = gridLength;
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
     m_heightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
@@ -23,9 +24,9 @@ SceneObject::SceneObject(Shape* shape, int m_gridLength) : m_shape(shape)
             float incr = ((float) rand())/RAND_MAX;
             float incg = ((float) rand())/RAND_MAX;
             float incb = ((float) rand())/RAND_MAX;
-            m_data[i*m_gridLength+j].r = 200;//((int)(incr*255));
-            m_data[i*m_gridLength+j].g =150;//((int)(incg*255));
-            m_data[i*m_gridLength+j].b =((int)(incb*255));
+            m_data[i*m_gridLength+j].r = 0;//200;//((int)(incr*255));
+            m_data[i*m_gridLength+j].g = 0;//150;//((int)(incg*255));
+            m_data[i*m_gridLength+j].b = 0;//((int)(incb*255));
             m_data[i*m_gridLength+j].a = 255;
         }
     }
@@ -41,6 +42,7 @@ SceneObject::~SceneObject()
 void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
 {
     if(useShader){
+        ResourceLoader::reloadHeightMapTexture(m_heightMap,m_snowtextureId);
         glActiveTexture(m_snowtextureId);
         glBindTexture(GL_TEXTURE_2D,m_snowtextureId);
         shader->bind();
@@ -181,5 +183,16 @@ void SceneObject::rotate(float angle, float x, float y, float z)
 }
 
 void SceneObject::paintTexture(float x, float y, float z){
+    Vector4 locVec = Vector4(x, y, z, 0);
+    locVec = m_matrix.getInverse()*locVec;
+    int xcoord = (locVec.x+.5)*m_gridLength;
+    int ycoord = (locVec.z+.5)*m_gridLength;
+    //cout<<"painting: ["<<xcoord<<","<<ycoord<<"]"<<endl;
+    BGRA* m_data = (BGRA *)m_heightMap->bits();
+    //increment snowmap;
+    int incr = 10;
+    m_data[ycoord*m_gridLength+xcoord].r = min(m_data[ycoord*m_gridLength+xcoord].r+incr,255);
+    m_data[ycoord*m_gridLength+xcoord].g = min(m_data[ycoord*m_gridLength+xcoord].g+incr,255);
+    m_data[ycoord*m_gridLength+xcoord].b = min(m_data[ycoord*m_gridLength+xcoord].b+incr,255);
 
 }
