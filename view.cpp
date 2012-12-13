@@ -539,7 +539,7 @@ void View::keyReleaseEvent(QKeyEvent *event)
 
 void View::tick()
 {
-    // Handle collision detections concurrenetly
+    // Handle collision detections concurrently
     QFutureSynchronizer<void> sync;
     for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
         SceneObject *obj = *it;
