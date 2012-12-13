@@ -200,6 +200,7 @@ void SnowEmitter::collisionDetect(SceneObject* obj)
 
                     //reset snowflake that collided.
                     m_snowflakes[i].active = false;
+                    m_activeSnowflakes--;
                 }
             }
         }

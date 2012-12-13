@@ -191,7 +191,7 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
 
     BGRA* data = (BGRA *)m_displacementMap->bits();
     
-    int index = ycoord*m_gridLength+xcoord;
+    int index = ycoord*m_displacementResolution+xcoord;
 
     int r = data[index].r;
     int g = data[index].g;
@@ -221,9 +221,9 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
   */
 float SceneObject::getDisplacement(Vector4 objPosition)
 {
-    int xcoord = (objPosition.x + 0.5)*m_gridLength;
-    int ycoord = (objPosition.z + 0.5)*m_gridLength;
+    int xcoord = (objPosition.x + 0.5)*m_displacementResolution;
+    int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
 
     BGRA* data = (BGRA *)m_displacementMap->bits();
-    return data[ycoord*m_gridLength+xcoord].r;
+    return data[ycoord*m_displacementResolution+xcoord].r;
 }
