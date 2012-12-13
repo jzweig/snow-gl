@@ -188,14 +188,19 @@ void SnowEmitter::collisionDetect(SceneObject* obj)
 
             // Check for a collision on the unit cube. No support for non-cube objects.
             if((objSnowPos.x <= 0.5 && objSnowPos.x >= -0.5) &&
-               (objSnowPos.y <= 0.5 && objSnowPos.y >= -0.5) &&
+               (objSnowPos.y >= -0.5) &&
                (objSnowPos.z <= 0.5 && objSnowPos.z >= -0.5)){
 
-                obj->recordSnowfall(objSnowPos);
+                // Check y with displacement
+                float displacement = obj->getDisplacement(objSnowPos);
 
-                //reset snowflake that collided.
-                m_snowflakes[i].active = false;
+                // If contained within the upper y plus displacement, it collided
+                if( objSnowPos.y <= 0.5 + displacement ) {
+                    obj->recordSnowfall(objSnowPos);
 
+                    //reset snowflake that collided.
+                    m_snowflakes[i].active = false;
+                }
             }
         }
 

@@ -39,6 +39,7 @@ class SceneObject
         void recordSnowfall(Vector4 objPos);
         Vector4 getPosition();
         Matrix4x4 getTransformationMatrix() const;
+        float getDisplacement(Vector4 objPosition);
     protected:
         void refreshMatrix();
 

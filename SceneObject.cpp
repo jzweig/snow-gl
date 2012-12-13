@@ -191,10 +191,39 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
 
     BGRA* data = (BGRA *)m_displacementMap->bits();
     
-    //increment snowmap;
-    int incr = 10;
-    data[ycoord*m_gridLength+xcoord].r = min(data[ycoord*m_gridLength+xcoord].r+incr,255);
-    data[ycoord*m_gridLength+xcoord].g = min(data[ycoord*m_gridLength+xcoord].g+incr,255);
-    data[ycoord*m_gridLength+xcoord].b = min(data[ycoord*m_gridLength+xcoord].b+incr,255);
+    int index = ycoord*m_gridLength+xcoord;
 
+    int r = data[index].r;
+    int g = data[index].g;
+    int b = data[index].b;
+
+    // Convert rgb value to int
+    int curNum = r + 255*g + 255*255*b;
+
+    // Increment
+    curNum++;
+
+    // Convert back to rgb value
+    b = curNum / (255*255);
+    curNum %= (255*255);
+    g = curNum / 255;
+    curNum %= 255;
+    r = curNum;
+
+    data[index].r = r;
+    data[index].g = g;
+    data[index].b = b;
+
+}
+
+/**
+  * Returns the displacement at the given object position.
+  */
+float SceneObject::getDisplacement(Vector4 objPosition)
+{
+    int xcoord = (objPosition.x + 0.5)*m_gridLength;
+    int ycoord = (objPosition.z + 0.5)*m_gridLength;
+
+    BGRA* data = (BGRA *)m_displacementMap->bits();
+    return data[ycoord*m_gridLength+xcoord].r;
 }
