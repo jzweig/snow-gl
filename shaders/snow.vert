@@ -5,9 +5,11 @@ uniform float time;
 uniform sampler2D snowTexture;
 uniform bool useDisplacement;
     
-float computeOffset(vec4 hVec)
+int computeOffset(vec4 hVec)
 {
-    return (hVec.x+hVec.y+hVec.z)*10.0;
+    return (hVec.x
+            +hVec.y*255
+            +hVec.z*255*255);
 }
     
 void main()
