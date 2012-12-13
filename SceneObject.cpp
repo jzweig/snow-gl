@@ -227,5 +227,5 @@ float SceneObject::getDisplacement(Vector4 objPosition)
     BGRA* data = (BGRA *)m_displacementMap->bits();
 
     int index = ycoord*m_displacementResolution+xcoord;
-    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
+    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.00001;
 }
