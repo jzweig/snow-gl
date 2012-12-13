@@ -38,6 +38,9 @@ class SceneObject
         Shape *getShape();
         GLuint getVboBuffer();
         void paintTexture(float x, float y, float z);
+        Vector4 getPosition();
+        Vector4 getBound1();
+        Vector4 getBound2();
     protected:
         void refreshMatrix();
 

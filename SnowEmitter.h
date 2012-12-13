@@ -100,6 +100,9 @@ class SnowEmitter
           */
         void setSpeed(float *speed);
 
+        //! modifies texturemap if object has collisions
+        void collisionDetect(SceneObject* obj);
+
     protected:
 
         /**
@@ -117,8 +120,6 @@ class SnowEmitter
           */
         void dropSnowflake(int snowflakeIndex);
 
-        //! modifies texturemap if object has collisions
-        void collisionDetect(SceneObject* obj);
 
         //! Snowflakes array on the heap
         Snowflake *m_snowflakes;

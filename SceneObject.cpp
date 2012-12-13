@@ -86,6 +86,19 @@ Shape *SceneObject::getShape()
     return m_shape;
 }
 
+Vector4 SceneObject::getPosition()
+{
+    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
+}
+
+Vector4 SceneObject::getBound1()
+{
+    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
+}
+Vector4 SceneObject::getBound2()
+{
+    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
+}
 void SceneObject::setColor(float r, float g, float b, float a)
 {
     m_color.x = r;

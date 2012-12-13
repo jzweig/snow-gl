@@ -595,7 +595,10 @@ void View::tick()
 {
     // Get the number of seconds since the last tick (variable update rate)
     //float seconds = m_clock.restart() * 0.001f;
-
+    /*for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+       m_snowEmitter.collisionDetect((*it));
+    }*/
+    m_snowEmitter.collisionDetect(m_terrain);
     m_snowEmitter.tick();
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
