@@ -224,7 +224,6 @@ void View::initializeGL()
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
     glEnable(GL_DEPTH_TEST);
-
     // Setup blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
@@ -351,7 +350,7 @@ void View::renderScene()
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
                 GLuint sky = ResourceLoader::loadSkybox();
                 glCallList(sky);
-                (*it)->render(m_useVbo,true,m_useDisplacement,m_shaderPrograms["snow"]);
+                (*it)->render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
         }
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
