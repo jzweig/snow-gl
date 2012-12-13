@@ -40,6 +40,8 @@ class SceneObject
         Vector4 getPosition();
         Matrix4x4 getTransformationMatrix() const;
         float getDisplacement(Vector4 objPosition);
+        float getBump(Vector4 objPosition);
+        void incrementEndian(BGRA* color);
     protected:
         void refreshMatrix();
 

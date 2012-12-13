@@ -101,6 +101,7 @@ void View::setupScene()
 {
     // Make the ground
     m_factory.setTesselationParameter(50);
+    m_factory.setBumpResolution(1024);
     SceneObject *ground = m_factory.constructCube();
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 0.2, 20.0);
@@ -109,6 +110,7 @@ void View::setupScene()
 
     // Make a demo box
     m_factory.setTesselationParameter(50);
+    m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.5, 5.0);

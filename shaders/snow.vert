@@ -2,8 +2,10 @@
 varying float intensity;
 
 uniform float time;
-uniform sampler2D snowTexture;
 uniform bool useDisplacement;
+
+uniform sampler2D snowDisplacement;
+uniform sampler2D snowTexture;
     
 int computeOffset(vec4 hVec)
 {
@@ -15,8 +17,12 @@ int computeOffset(vec4 hVec)
 void main()
 {
 
-
+     //displacement map unit
+     //gl_TexCoord[0] = gl_MultiTexCoord0;
      gl_TexCoord[0].st = gl_MultiTexCoord0.st;
+     //bump map unit
+     //gl_TexCoord[1] = gl_MultiTexCoord1;
+     gl_TexCoord[1].st = gl_MultiTexCoord1.st;
 
      // Flatten the normals to make the lighting a little more realistic
      //vec3 normal = normalize(gl_NormalMatrix * gl_Normal * vec3(1.0, 1.0, 1.0 / scale));
@@ -26,7 +32,7 @@ void main()
      //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vec4 v = vec4(gl_Vertex);
      if(useDisplacement){
-         vec4 dv =  texture2D( snowTexture, gl_MultiTexCoord0.xy );
+         vec4 dv =  texture2D( snowDisplacement, gl_MultiTexCoord0.st );
          v.y = v.y+computeOffset(dv);
          gl_Position = gl_ModelViewProjectionMatrix * v;
      } else {

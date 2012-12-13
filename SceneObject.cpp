@@ -1,13 +1,20 @@
 #include "SceneObject.h"
 
 #include <CS123Common.h>
-#ifndef __APPLE__
+//#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <GL/glext.h>
+//#ifndef __APPLE__
 extern "C" {
+    GLAPI void APIENTRY glUniform1i(GLint location, GLint v0);
+    GLAPI GLuint APIENTRY glGetUniformLocation(GLuint program, const GLchar *name);
+    GLAPI void APIENTRY glUseProgram(GLuint program);
     GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
     GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
     GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
 }
-#endif
+//#endif
 
 SceneObject::SceneObject(Shape* shape, int bumpResolution) : m_shape(shape)
 {
@@ -44,13 +51,26 @@ void SceneObject::render(const bool useVbo, const bool useShader, const bool use
         ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glActiveTexture(m_bumpMapId);
-        glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
-        glActiveTexture(m_displacementMapId);
-        glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
+
+
         shader->bind();
+        shader->setUniformValue("snowDisplacement",0);
+        shader->setUniformValue("snowTexture",1);
         shader->setUniformValue("useDisplacement", useDisplacement);
         shader->setUniformValue("color",m_color.x, m_color.y, m_color.z, m_color.w);
+
+
+        //displacement
+        glActiveTexture(GL_TEXTURE0);
+        //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
+        glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
+
+        //bump
+        glActiveTexture(GL_TEXTURE1);
+        //glUniform1i(glGetUniformLocation(shader->programId(), "snowTexture"), 1);
+        glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
+
+        glActiveTexture(GL_TEXTURE0);
     }
 
     glPushMatrix();
@@ -185,17 +205,31 @@ void SceneObject::rotate(float angle, float x, float y, float z)
   * position in object coordinates.
   */
 void SceneObject::recordSnowfall(Vector4 objPosition){
+    // displacement map
+    int dx = (objPosition.x + 0.5)*m_displacementResolution;
+    int dy = (objPosition.z + 0.5)*m_displacementResolution;
 
-    int xcoord = (objPosition.x + 0.5)*m_displacementResolution;
-    int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
-
-    BGRA* data = (BGRA *)m_displacementMap->bits();
+    BGRA* dData = (BGRA *)m_displacementMap->bits();
     
-    int index = ycoord*m_displacementResolution+xcoord;
+    int dindex = dy*m_displacementResolution+dx;
+    incrementEndian(&dData[dindex]);
 
-    int r = data[index].r;
-    int g = data[index].g;
-    int b = data[index].b;
+    // bump map
+    int bx = (objPosition.x + 0.5)*m_bumpResolution;
+    int by = (objPosition.z + 0.5)*m_bumpResolution;
+
+    BGRA* bData = (BGRA *)m_bumpMap->bits();
+    int bindex = by*m_bumpResolution+bx;
+    incrementEndian(&bData[bindex]);
+
+
+}
+
+void SceneObject::incrementEndian(BGRA* color){
+\
+    int r = color->r;
+    int g = color->g;
+    int b = color->b;
 
     // Convert rgb value to int
     int curNum = r + 255*g + 255*255*b;
@@ -210,10 +244,9 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
     curNum %= 255;
     r = curNum;
 
-    data[index].r = r;
-    data[index].g = g;
-    data[index].b = b;
-
+    color->r = r;
+    color->g = g;
+    color->b = b;
 }
 
 /**
@@ -225,7 +258,19 @@ float SceneObject::getDisplacement(Vector4 objPosition)
     int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
 
     BGRA* data = (BGRA *)m_displacementMap->bits();
-
     int index = ycoord*m_displacementResolution+xcoord;
+    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
+}
+
+/**
+  * Returns the bump at the given object position.
+  */
+float SceneObject::getBump(Vector4 objPosition)
+{
+    int xcoord = (objPosition.x + 0.5)*m_bumpResolution;
+    int ycoord = (objPosition.z + 0.5)*m_bumpResolution;
+
+    BGRA* data = (BGRA *)m_bumpMap->bits();
+    int index = ycoord*m_bumpResolution+xcoord;
     return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
 }
