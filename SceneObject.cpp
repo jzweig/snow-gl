@@ -50,6 +50,7 @@ void SceneObject::render(const bool useVbo, const bool useShader, const bool use
         //glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
         shader->bind();
         shader->setUniformValue("useDisplacement", useDisplacement);
+        shader->setUniformValue("color",m_color.x, m_color.y, m_color.z, m_color.w);
     }
 
     glPushMatrix();
@@ -96,6 +97,7 @@ Vector4 SceneObject::getPosition()
 {
     return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
 }
+
 
 void SceneObject::setColor(float r, float g, float b, float a)
 {
