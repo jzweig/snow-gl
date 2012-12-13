@@ -7,9 +7,9 @@ uniform bool useDisplacement;
     
 int computeOffset(vec4 hVec)
 {
-    return (hVec.x
+    return (hVec.z
             +hVec.y*255
-            +hVec.z*255*255);
+            +hVec.x*255*255)*0.0001;
 }
     
 void main()
