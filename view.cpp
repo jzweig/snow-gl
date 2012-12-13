@@ -308,7 +308,6 @@ void View::setupLights()
 void View::applyProjectionCamera()
 {
     float w = width(), h = height();
-
     float ratio = ((float) w) / h;
     Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
     Vector4 eye = m_camera->eye;
@@ -352,6 +351,8 @@ void View::drawUnitAxis(float x, float y, float z){
 
 void View::renderScene()
 {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -390,6 +391,7 @@ void View::renderScene()
         }
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glPopMatrix();
 }
 
 void View::paintGL()
@@ -405,9 +407,6 @@ void View::paintGL()
     // Clear the scene
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
     // Render the scene to a framebuffer
     m_fbo_main->bind();
     glEnable(GL_LIGHTING);
@@ -420,14 +419,15 @@ void View::paintGL()
     }
     m_fbo_main->release();
 
+    // Render the framebuffer to the screen as textured quad.
+    renderFramebuffer(m_fbo_main);
+
     // Render dem snowflakes
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
     m_snowEmitter.drawSnowflakes();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
-
-    glPopMatrix();
 
     // Display the frame
     glFlush();
@@ -590,7 +590,7 @@ void View::createFramebufferObjects(int width, int height)
 
     // Allocate the main framebuffer object for rendering the scene to
     // This needs a depth attachment
-    m_fbo_main = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth,
+    m_fbo_main = new QGLFramebufferObject(width, height, QGLFramebufferObject::NoAttachment,
                                           GL_TEXTURE_2D, GL_RGB16F_ARB);
     m_fbo_main->format().setSamples(16);
     // Allocate the secondary framebuffer obejcts for rendering snow displacement.
@@ -598,4 +598,47 @@ void View::createFramebufferObjects(int width, int height)
     m_fbo_snow = new QGLFramebufferObject(width, height, QGLFramebufferObject::Depth,
                                           GL_TEXTURE_2D, GL_RGB16F_ARB);
     m_fbo_snow->format().setSamples(16);
+}
+
+/**
+  Draws a textured quad. The texture must be bound and unbound
+  before and after calling this method - this method assumes that the texture
+  has been bound beforehand.
+
+  @param framebufferObj: the framebuffer object to render
+**/
+void View::renderFramebuffer(QGLFramebufferObject *framebufferObj) {
+
+    // We must use the orthogonal camera to render the fbo to the screen
+    applyOrthogonalCamera();
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glColor3f(1.0, 1.0, 1.0);
+
+    int width = this->width();
+    int height = this->height();
+
+    // Bind the fbo's texture
+    glBindTexture(GL_TEXTURE_2D, framebufferObj->texture());
+
+    // Clamp value to edge of texture when texture index is out of bounds
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // Draw the  quad
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(0.0f, 0.0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(width, 0.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(width, height);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(0.0f, height);
+    glEnd();
+
+    glEnable(GL_LIGHTING);
+    // Unbind the fbo's texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 }

@@ -80,6 +80,7 @@ protected:
      float getMoveFactor();
      void renderScene();
      void createFramebufferObjects(int width, int height);
+     void renderFramebuffer(QGLFramebufferObject *framebufferObj);
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
