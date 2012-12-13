@@ -109,7 +109,7 @@ protected:
      bool m_isSolid;
 
      //! Whether or not to display snow shader material
-     bool m_showShader;
+     bool m_useShader;
 
      //! Whether or not to display the unit axis
      bool m_showUnitAxis;

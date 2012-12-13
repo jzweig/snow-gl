@@ -35,7 +35,7 @@ extern "C" {
 View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
-    m_showShader = true;
+    m_useShader = true;
     m_gridLength = 60;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -84,7 +84,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     // set the new image to black
     //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
     m_data = (BGRA *)m_snowHeightMap->bits();
-    uchar* temp =  m_snowHeightMap->bits();
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
             float incr = ((float) rand())/RAND_MAX;
@@ -242,6 +241,8 @@ void View::initializeGL()
 {
     cout << "Using OpenGL Version " << glGetString(GL_VERSION) << endl << endl;
 
+    glEnable(GL_TEXTURE_2D);
+    createShaderPrograms();
     cout << "initialized shader programs..." << endl;
 
     // All OpenGL initialization *MUST* be done during or after this
@@ -279,6 +280,7 @@ void View::initializeGL()
     glEnable(GL_ALPHA_TEST);
 
     setupScene();
+    cout<<"setup scene..."<<endl;
 
     // Load the texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
@@ -286,10 +288,8 @@ void View::initializeGL()
     updateCamera();
     setupLights();
     glFrontFace(GL_CCW);
-    glEnable(GL_TEXTURE_2D);
-    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    createShaderPrograms();
     paintGL();
+    cout<<"painted scene..."<<endl;
 }
 
 void View::setupLights()
@@ -387,38 +387,20 @@ void View::renderScene()
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        (*m_terrain).render(m_useVbo);
+        (*m_terrain).render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
          for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            (*it)->render(m_useVbo);
+            (*it)->render(m_useVbo,false,m_useDisplacement,m_shaderPrograms["snow"]);
          }
     }
 
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        // Load the texture
-        GLuint textureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            if(m_showShader){
-                glActiveTexture(textureId);
-                glBindTexture(GL_TEXTURE_2D,textureId);
-                m_shaderPrograms["snow"]->bind();
-                m_shaderPrograms["snow"]->setUniformValue("useDisplacement", m_useDisplacement);
                 GLuint sky = ResourceLoader::loadSkybox();
                 glCallList(sky);
-                (*m_terrain).render(m_useVbo);
-
-                m_shaderPrograms["snow"]->release();
-
-                glBindTexture(GL_TEXTURE_2D,0);
-
-
-
-                (*it)->render(m_useVbo);
-            } else {
-                (*m_terrain).render(m_useVbo);
-                (*it)->render(m_useVbo);
-            }
+                (*m_terrain).render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
+                (*it)->render(m_useVbo,false,m_useDisplacement,m_shaderPrograms["snow"]);
         }
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -556,7 +538,7 @@ void View::keyPressEvent(QKeyEvent *event)
     } else if(event->key() == Qt::Key_4) {
         m_useVbo = ! m_useVbo;
     } else if(event->key() == Qt::Key_5) {
-        m_showShader = ! m_showShader;
+        m_useShader = ! m_useShader;
 
     } else if(event->key() == Qt::Key_6) {
         m_useDisplacement = ! m_useDisplacement;

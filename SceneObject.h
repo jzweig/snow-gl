@@ -3,6 +3,8 @@
 
 #include "shapes/Shape.h"
 #include <QtOpenGL>
+#include "resourceloader.h"
+#include <CS123Common.h>
 
 enum TransformationType { ROTATION, TRANSLATION, SCALING };
 
@@ -24,9 +26,9 @@ struct Transformation
 class SceneObject
 {
     public:
-        SceneObject(Shape *shape,float mapWidth,float mapHeight);
+        SceneObject(Shape* shape, int gridLength);
         virtual ~SceneObject();
-        void render(bool m_useVbo) const;
+        void render(const bool useVbo,const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const;
         void translate(float x, float y, float z);
         void scale(float x, float y, float z);
         void rotate(float angle, float x, float y, float z);

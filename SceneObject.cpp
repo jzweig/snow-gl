@@ -1,5 +1,6 @@
 #include "SceneObject.h"
 
+#include <CS123Common.h>
 #ifndef __APPLE__
 extern "C" {
     GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
@@ -8,11 +9,26 @@ extern "C" {
 }
 #endif
 
-SceneObject::SceneObject(Shape *shape,float mapWidth,float mapHeight) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, int m_gridLength) : m_shape(shape)
 {
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
-    m_heightMap = new QImage(mapWidth,mapHeight,QImage::Format_RGB32);
+    m_heightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+
+    // set the new image to black
+    //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
+    BGRA* m_data = (BGRA *)m_heightMap->bits();
+    for(int i=0;i<m_gridLength;i++){
+        for(int j=0;j<m_gridLength;j++){
+            float incr = ((float) rand())/RAND_MAX;
+            float incg = ((float) rand())/RAND_MAX;
+            float incb = ((float) rand())/RAND_MAX;
+            m_data[i*m_gridLength+j].r =((int)(incr*255));
+            m_data[i*m_gridLength+j].g =((int)(incg*255));
+            m_data[i*m_gridLength+j].b =((int)(incb*255));
+            m_data[i*m_gridLength+j].a = 255;
+        }
+    }
 }
 
 SceneObject::~SceneObject()
@@ -21,14 +37,23 @@ SceneObject::~SceneObject()
     delete m_shape;
 }
 
-void SceneObject::render(bool useVbo) const
+void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
 {
+    if(useShader){
+        // Load the texture
+        GLuint textureId = ResourceLoader::loadHeightMapTexture(m_heightMap);
+        glActiveTexture(textureId);
+        glBindTexture(GL_TEXTURE_2D,textureId);
+        shader->bind();
+        shader->setUniformValue("useDisplacement", useDisplacement);
+    }
+
     glPushMatrix();
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
     glMultMatrixd(m_matrix.data);
 
-    if( useVbo && m_vbo )
-    {
+
+    if( useVbo && m_vbo ) {
         // Bind the vbo buffer
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
@@ -46,11 +71,15 @@ void SceneObject::render(bool useVbo) const
 
         // Unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-    else
+    } else {
         m_shape->render();
-
+    }
     glPopMatrix();
+
+    if(useShader){
+        shader->release();
+        glBindTexture(GL_TEXTURE_2D,0);
+    }
 }
 
 Shape *SceneObject::getShape()
