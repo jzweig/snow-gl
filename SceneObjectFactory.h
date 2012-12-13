@@ -14,14 +14,20 @@ public:
     SceneObject *constructCube();
 
     /**
-      * Tells the factory to use the given tesselation paramter when
+      * Tells the factory to use the given tesselation parameter when
       * tesselating shapes
       */
     void setTesselationParameter(int parameter);
 
 
+    /**
+      * Tells the factory to use the given bump map resolution (will be resolution x resolution texture)
+      */
+    void setBumpResolution(int resolution);
+
     protected:
         int m_tesselationParameter;
+        int m_BumpResolution;
 };
 
 #endif // SCENEOBJECTFACTORY_H
