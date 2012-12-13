@@ -49,8 +49,12 @@ class SceneObject
         Vector4 m_color;
         Matrix4x4 m_matrix;
         GLuint m_vbo;
-        QImage* m_heightMap;
-        GLuint m_snowtextureId;
+        QImage* m_displacementMap;
+        GLuint m_displacementMapId;
+        //GLuint m_baseMapId;
+        QImage* m_bumpMap;
+        GLuint m_bumpMapId;
+        int m_bumpResolution;
         int m_gridLength;
  };
 

@@ -179,7 +179,7 @@ void SnowEmitter::drawSnowflakes()
 void SnowEmitter::collisionDetect(SceneObject* obj)
 {
     Vector4 pos = obj->getPosition();
-    float offset =0.5;
+    float offset = 0.5;
     Vector4 pBound = pos+Vector4(offset*20.0,offset*0.2,offset*20.0,1);
     Vector4 nBound = pos+Vector4(-offset*20.0,-offset*0.2,-offset*20.0,1);
     for(int i = 0; i < m_snowflakeCount; i++){

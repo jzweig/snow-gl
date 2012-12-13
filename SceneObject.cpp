@@ -12,39 +12,37 @@ extern "C" {
 SceneObject::SceneObject(Shape* shape, int gridLength) : m_shape(shape)
 {
     m_gridLength = gridLength;
+    m_bumpResolution = 1024;
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
-    m_heightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+    m_displacementMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+    m_bumpMap = new QImage(m_bumpResolution,m_bumpResolution,QImage::Format_RGB32);
 
-    // set the new image to black
-    //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
-    BGRA* m_data = (BGRA *)m_heightMap->bits();
-    for(int i=0;i<m_gridLength;i++){
-        for(int j=0;j<m_gridLength;j++){
-            float incr = ((float) rand())/RAND_MAX;
-            float incg = ((float) rand())/RAND_MAX;
-            float incb = ((float) rand())/RAND_MAX;
-            m_data[i*m_gridLength+j].r = 0;//200;//((int)(incr*255));
-            m_data[i*m_gridLength+j].g = 0;//150;//((int)(incg*255));
-            m_data[i*m_gridLength+j].b = 0;//((int)(incb*255));
-            m_data[i*m_gridLength+j].a = 255;
-        }
-    }
-    m_snowtextureId = ResourceLoader::loadHeightMapTexture(m_heightMap);
+    // set the new images to black
+    memset(m_displacementMap->bits(), 0, m_gridLength * m_gridLength * sizeof(BGRA));
+    memset(m_bumpMap->bits(), 0, m_bumpResolution * m_bumpResolution * sizeof(BGRA));
+    m_displacementMapId = ResourceLoader::loadHeightMapTexture(m_displacementMap);
+    //m_bumpMapId = ResourceLoader::loadHeightMapTexture(m_bumpMap);
 }
 
 SceneObject::~SceneObject()
 {
-    delete m_heightMap;
+    delete m_bumpMap;
+    delete m_displacementMap;
     delete m_shape;
 }
 
 void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
 {
     if(useShader){
-        ResourceLoader::reloadHeightMapTexture(m_heightMap,m_snowtextureId);
-        glActiveTexture(m_snowtextureId);
-        glBindTexture(GL_TEXTURE_2D,m_snowtextureId);
+        ResourceLoader::reloadHeightMapTexture(m_displacementMap,m_displacementMapId);
+        //ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glActiveTexture(m_displacementMapId);
+        glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
+        //glActiveTexture(m_bumpMapId);
+        //glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
         shader->bind();
         shader->setUniformValue("useDisplacement", useDisplacement);
     }
@@ -80,6 +78,7 @@ void SceneObject::render(const bool useVbo, const bool useShader, const bool use
     if(useShader){
         shader->release();
         glBindTexture(GL_TEXTURE_2D,0);
+        glDisable(GL_BLEND);
     }
 }
 
@@ -188,7 +187,7 @@ void SceneObject::paintTexture(float x, float y, float z){
     int xcoord = (locVec.x+.5)*m_gridLength;
     int ycoord = (locVec.z+.5)*m_gridLength;
     //cout<<"painting: ["<<xcoord<<","<<ycoord<<"]"<<endl;
-    BGRA* m_data = (BGRA *)m_heightMap->bits();
+    BGRA* m_data = (BGRA *)m_displacementMap->bits();
     //increment snowmap;
     int incr = 10;
     m_data[ycoord*m_gridLength+xcoord].r = min(m_data[ycoord*m_gridLength+xcoord].r+incr,255);
