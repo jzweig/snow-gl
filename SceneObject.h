@@ -54,7 +54,7 @@ class SceneObject
         QImage* m_bumpMap;
         GLuint m_bumpMapId;
         int m_bumpResolution;
-        int m_gridLength;
+        int m_displacementResolution;
  };
 
 #endif // SCENEOBJECT_H

@@ -59,6 +59,21 @@ void Shape::setParamThree(int newParamThree)
     }
 }
 
+
+int Shape::getParamOne()
+{
+    return m_pOne;
+}
+
+int Shape::getParamTwo()
+{
+    return m_pTwo;
+}
+
+int Shape::getParamThree()
+{
+    return m_pThree;
+}
 /**
   This renders the shape. Subclasses shouldn't need to
   override this class if they implement tesselate().

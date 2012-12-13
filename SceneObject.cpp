@@ -9,26 +9,26 @@ extern "C" {
 }
 #endif
 
-SceneObject::SceneObject(Shape* shape, int gridLength) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, int bumpResolution) : m_shape(shape)
 {
-    m_gridLength = gridLength;
-    m_bumpResolution = 1024;
+    m_displacementResolution = m_shape->getParamOne();
+    m_bumpResolution = bumpResolution;
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
-    m_displacementMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
+    m_displacementMap = new QImage(m_displacementResolution,m_displacementResolution,QImage::Format_RGB32);
     m_bumpMap = new QImage(m_bumpResolution,m_bumpResolution,QImage::Format_RGB32);
 
     // set the new images to black
-    memset(m_displacementMap->bits(), 0, m_gridLength * m_gridLength * sizeof(BGRA));
+    memset(m_displacementMap->bits(), 0, m_displacementResolution * m_displacementResolution * sizeof(BGRA));
     memset(m_bumpMap->bits(), 0, m_bumpResolution * m_bumpResolution * sizeof(BGRA));
     m_displacementMapId = ResourceLoader::loadHeightMapTexture(m_displacementMap);
-    //m_bumpMapId = ResourceLoader::loadHeightMapTexture(m_bumpMap);
+    m_bumpMapId = ResourceLoader::loadHeightMapTexture(m_bumpMap);
 }
 
 SceneObject::~SceneObject()
 {
-    delete m_bumpMap;
     delete m_displacementMap;
+    delete m_bumpMap;
     delete m_shape;
 }
 
@@ -41,13 +41,13 @@ void SceneObject::render(const bool useVbo, const bool useShader, const bool use
 {
     if(useShader){
         ResourceLoader::reloadHeightMapTexture(m_displacementMap,m_displacementMapId);
-        //ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
+        ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glActiveTexture(m_bumpMapId);
+        glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
         glActiveTexture(m_displacementMapId);
         glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
-        //glActiveTexture(m_bumpMapId);
-        //glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
         shader->bind();
         shader->setUniformValue("useDisplacement", useDisplacement);
         shader->setUniformValue("color",m_color.x, m_color.y, m_color.z, m_color.w);
@@ -186,8 +186,8 @@ void SceneObject::rotate(float angle, float x, float y, float z)
   */
 void SceneObject::recordSnowfall(Vector4 objPosition){
 
-    int xcoord = (objPosition.x + 0.5)*m_gridLength;
-    int ycoord = (objPosition.z + 0.5)*m_gridLength;
+    int xcoord = (objPosition.x + 0.5)*m_displacementResolution;
+    int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
 
     BGRA* data = (BGRA *)m_displacementMap->bits();
     
