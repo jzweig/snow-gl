@@ -17,7 +17,6 @@ struct Transformation
     float angle;
 };
 
-
 /**
   * A scene object stores the data about an object in the scene. There is no
   * nesting of objects like in sceneview. All transformations should be applied
@@ -36,11 +35,10 @@ class SceneObject
         void setColor(Vector4 color);
         void setVboBuffer(GLuint buffer_name);
         Shape *getShape();
-        GLuint getVboBuffer();
-        void paintTexture(float x, float y, float z);
+        GLuint getVboBuffer() const;
+        void recordSnowfall(Vector4 objPos);
         Vector4 getPosition();
-        Vector4 getBound1();
-        Vector4 getBound2();
+        Matrix4x4 getTransformationMatrix() const;
     protected:
         void refreshMatrix();
 

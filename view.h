@@ -83,8 +83,6 @@ protected:
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
 
-     float* m_snowHeight;
-     int m_gridLength;
      //! The camera settings
      OrbitCamera *m_camera;
 
@@ -99,8 +97,6 @@ protected:
 
      //! The objects in the scene
      vector<SceneObject *> m_objects;
-     //! Single-case terrain, at least for testing, for now
-     SceneObject* m_terrain;
 
      //! Whether or not to display wireframes
      bool m_isWireframe;
@@ -129,8 +125,6 @@ protected:
 
      QString m_homeDir;
      QString m_projDir;
-
-     GLuint m_snowtextureId;
 
 };
 

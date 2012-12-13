@@ -17,16 +17,15 @@ SceneObject::SceneObject(Shape* shape, int gridLength) : m_shape(shape)
     m_heightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
 
     // set the new image to black
-    //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
     BGRA* m_data = (BGRA *)m_heightMap->bits();
     for(int i=0;i<m_gridLength;i++){
         for(int j=0;j<m_gridLength;j++){
             float incr = ((float) rand())/RAND_MAX;
             float incg = ((float) rand())/RAND_MAX;
             float incb = ((float) rand())/RAND_MAX;
-            m_data[i*m_gridLength+j].r = 0;//200;//((int)(incr*255));
-            m_data[i*m_gridLength+j].g = 0;//150;//((int)(incg*255));
-            m_data[i*m_gridLength+j].b = 0;//((int)(incb*255));
+            m_data[i*m_gridLength+j].r = 0;
+            m_data[i*m_gridLength+j].g = 0;
+            m_data[i*m_gridLength+j].b = 0;
             m_data[i*m_gridLength+j].a = 255;
         }
     }
@@ -37,6 +36,11 @@ SceneObject::~SceneObject()
 {
     delete m_heightMap;
     delete m_shape;
+}
+
+Matrix4x4 SceneObject::getTransformationMatrix() const
+{
+    return m_matrix;
 }
 
 void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
@@ -93,14 +97,6 @@ Vector4 SceneObject::getPosition()
     return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
 }
 
-Vector4 SceneObject::getBound1()
-{
-    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
-}
-Vector4 SceneObject::getBound2()
-{
-    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
-}
 void SceneObject::setColor(float r, float g, float b, float a)
 {
     m_color.x = r;
@@ -119,7 +115,7 @@ void SceneObject::setVboBuffer(GLuint buffer_name)
     m_vbo = buffer_name;
 }
 
-GLuint SceneObject::getVboBuffer()
+GLuint SceneObject::getVboBuffer() const
 {
     return m_vbo;
 }
@@ -182,17 +178,20 @@ void SceneObject::rotate(float angle, float x, float y, float z)
     refreshMatrix();
 }
 
-void SceneObject::paintTexture(float x, float y, float z){
-    Vector4 locVec = Vector4(x, y, z, 0);
-    locVec = m_matrix.getInverse()*locVec;
-    int xcoord = (locVec.x+.5)*m_gridLength;
-    int ycoord = (locVec.z+.5)*m_gridLength;
-    //cout<<"painting: ["<<xcoord<<","<<ycoord<<"]"<<endl;
-    BGRA* m_data = (BGRA *)m_heightMap->bits();
+/**
+  * Records a snowflake falling on this object at the provided
+  * position in object coordinates.
+  */
+void SceneObject::recordSnowfall(Vector4 objPosition){
+
+    int xcoord = (objPosition.x + 0.5)*m_gridLength;
+    int ycoord = (objPosition.z + 0.5)*m_gridLength;
+
+    BGRA* data = (BGRA *)m_heightMap->bits();
     //increment snowmap;
     int incr = 10;
-    m_data[ycoord*m_gridLength+xcoord].r = min(m_data[ycoord*m_gridLength+xcoord].r+incr,255);
-    m_data[ycoord*m_gridLength+xcoord].g = min(m_data[ycoord*m_gridLength+xcoord].g+incr,255);
-    m_data[ycoord*m_gridLength+xcoord].b = min(m_data[ycoord*m_gridLength+xcoord].b+incr,255);
+    data[ycoord*m_gridLength+xcoord].r = min(data[ycoord*m_gridLength+xcoord].r+incr,255);
+    data[ycoord*m_gridLength+xcoord].g = min(data[ycoord*m_gridLength+xcoord].g+incr,255);
+    data[ycoord*m_gridLength+xcoord].b = min(data[ycoord*m_gridLength+xcoord].b+incr,255);
 
 }

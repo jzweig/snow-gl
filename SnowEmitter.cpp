@@ -178,22 +178,26 @@ void SnowEmitter::drawSnowflakes()
 
 void SnowEmitter::collisionDetect(SceneObject* obj)
 {
-    Vector4 pos = obj->getPosition();
-    float offset =0.5;
-    Vector4 pBound = pos+Vector4(offset*20.0,offset*0.2,offset*20.0,1);
-    Vector4 nBound = pos+Vector4(-offset*20.0,-offset*0.2,-offset*20.0,1);
+    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getInverse();
+
     for(int i = 0; i < m_snowflakeCount; i++){
+
         if( m_snowflakes[i].active ){
-            Vector4 snowPos = m_snowflakes[i].pos;
-            if((snowPos.x<= pBound.x && snowPos.x>=nBound.x) &&
-               (snowPos.z<= pBound.z && snowPos.z>=nBound.z) &&
-               (snowPos.y<= pBound.y && snowPos.y>=nBound.y)){
-                obj->paintTexture(snowPos.x,snowPos.y,snowPos.z);
+            Vector4 worldSnowPos = m_snowflakes[i].pos;
+            Vector4 objSnowPos = inverseTransformationMatrix * worldSnowPos;
+
+            // Check for a collision on the unit cube. No support for non-cube objects.
+            if((objSnowPos.x <= 0.5 && objSnowPos.x >= -0.5) &&
+               (objSnowPos.y <= 0.5 && objSnowPos.y >= -0.5) &&
+               (objSnowPos.z <= 0.5 && objSnowPos.z >= -0.5)){
+
+                obj->recordSnowfall(objSnowPos);
+
                 //reset snowflake that collided.
-                dropSnowflake(i);
-                //cout<<"COLLISION!"<<endl;
+                m_snowflakes[i].active = false;
 
             }
         }
+
     }
 }

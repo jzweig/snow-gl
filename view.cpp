@@ -36,7 +36,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
         m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
     m_useShader = true;
-    m_gridLength = 60;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -76,53 +75,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_useVbo = true;
     m_useDisplacement = true;
 
-    int terrain_array_size = m_gridLength * m_gridLength;
-    m_snowHeight = new float[terrain_array_size];
-    //Test terrain heights
-    m_snowHeightMap = new QImage(m_gridLength,m_gridLength,QImage::Format_RGB32);
-
-    // set the new image to black
-    //memset(m_snowHeightMap->bits(), 0, width * height * sizeof(BGRA));
-    m_data = (BGRA *)m_snowHeightMap->bits();
-    for(int i=0;i<m_gridLength;i++){
-        for(int j=0;j<m_gridLength;j++){
-            float incr = ((float) rand())/RAND_MAX;
-            float incg = ((float) rand())/RAND_MAX;
-            float incb = ((float) rand())/RAND_MAX;
-            m_snowHeight[i*m_gridLength+j] = incr*100;//(i+j)/(1.0f*m_gridLength);
-            m_data[i*m_gridLength+j].r =((int)(incr*255));
-            m_data[i*m_gridLength+j].g =((int)(incg*255));
-            m_data[i*m_gridLength+j].b =((int)(incb*255));
-            m_data[i*m_gridLength+j].a = 255;
-        }
-    }
-/*
-    for(int i=0;i<m_gridLength;i++){
-        for(int j=0;j<m_gridLength;j++){
-            float incr = ((float) rand())/(float)RAND_MAX;
-            float incg = ((float) rand())/RAND_MAX;
-            float incb = ((float) rand())/RAND_MAX;
-            m_snowHeight[i*m_gridLength+j] = incr*100;//(i+j)/(1.0f*m_gridLength);
-            m_data[i*m_gridLength+j].r =((int)(incr*0));
-            m_data[i*m_gridLength+j].g =((int)(incg*0));
-            m_data[i*m_gridLength+j].b =((int)(incb*0));
-            m_data[i*m_gridLength+j].a = 255;
-            //cout<<incr<<endl;
-        }
-    }
-
-        for(int j=0;j<m_gridLength;j++){
-            m_data[j].r =((int)(255));
-            m_data[j].g =((int)(0));
-            m_data[j].b =((int)(0));
-            m_data[j].a = 255;
-            //cout<<incr<<endl;
-        }*/
-
-
-    // Load the texture
-    m_snowtextureId = ResourceLoader::loadHeightMapTexture(m_snowHeightMap);
-
     // Make sure the image file exists
     QFile file("/course/cs123/data/image/BoneHead.jpg");
     if (!file.exists())
@@ -138,25 +90,22 @@ View::View(QWidget *parent) : QGLWidget(parent),
 View::~View()
 {
     safeDelete(m_camera);
-    safeDelete(m_snowHeight);
     // Delete the scene objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
         delete *it;
     }
     m_objects.clear();
-    delete m_terrain;
 }
 
 void View::setupScene()
 {
     // Make the ground
-    m_factory.setTesselationParameter(m_gridLength);
+    m_factory.setTesselationParameter(50);
     SceneObject *ground = m_factory.constructCube();
-    ground->setColor(0.2, 0.39, 0.18, 1.0); // when not using the shader
+    ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 0.2, 20.0);
     ground->translate(0, -0.5, 0);
     m_objects.push_back(ground);
-    m_terrain = ground;
 
     // Make a demo box
     m_factory.setTesselationParameter(50);
@@ -391,9 +340,8 @@ void View::renderScene()
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        (*m_terrain).render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
          for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            (*it)->render(m_useVbo,false,m_useDisplacement,m_shaderPrograms["snow"]);
+            (*it)->render(m_useVbo,true,m_useDisplacement,m_shaderPrograms["snow"]);
          }
     }
 
@@ -403,8 +351,7 @@ void View::renderScene()
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
                 GLuint sky = ResourceLoader::loadSkybox();
                 glCallList(sky);
-                (*m_terrain).render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
-                (*it)->render(m_useVbo,false,m_useDisplacement,m_shaderPrograms["snow"]);
+                (*it)->render(m_useVbo,true,m_useDisplacement,m_shaderPrograms["snow"]);
         }
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -593,12 +540,10 @@ void View::keyReleaseEvent(QKeyEvent *event)
 
 void View::tick()
 {
-    // Get the number of seconds since the last tick (variable update rate)
-    //float seconds = m_clock.restart() * 0.001f;
-    /*for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+    // TODO: Collision detect in parallel
+    for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
        m_snowEmitter.collisionDetect((*it));
-    }*/
-    m_snowEmitter.collisionDetect(m_terrain);
+    }
     m_snowEmitter.tick();
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
