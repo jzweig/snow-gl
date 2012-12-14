@@ -132,12 +132,12 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
             m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
             m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * (*m_speed))) + m_snowflakes[i].pos;
 
-            if( m_snowflakes[i].windExpire == 0 )
+            if( m_snowflakes[i].windExpire == 0 ){
                 if(!m_isDirectableSnow)
                     resetWind(i);
-            else
+            } else {
                 m_snowflakes[i].windExpire--;
-
+            }
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF ) {
                 m_snowflakes[i].active = false;
                 m_activeSnowflakes--;
