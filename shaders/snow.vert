@@ -11,7 +11,7 @@ float computeOffset(vec4 hVec)
 {
     return float((hVec.z
             +hVec.y*255
-            +hVec.x*255*255))*0.0001;
+            +hVec.x*255*255))*0.00001;
 }
     
 void main()
@@ -28,6 +28,7 @@ void main()
      //vec3 normal = normalize(gl_NormalMatrix * gl_Normal * vec3(1.0, 1.0, 1.0 / scale));
      //vec3 light = normalize(gl_LightSource[0].position - (gl_ModelViewMatrix * vertex)).xyz;
      //intensity = max(0.0, dot(normal, light));
+     intensity = 1.0;
 
      //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vec4 v = vec4(gl_Vertex);

@@ -20,8 +20,8 @@ void ShaderAssistant::createBlurKernel(int radius, int width, int height, GLfloa
             float d = x * x + y * y;
             kernel[idx] = exp(-d / twoSigmaSigma) / rootSigma;
             total += kernel[idx];
-            offsets[offsetIndex++] = x * xOff;
-            offsets[offsetIndex++] = y * yOff;
+            offsets[offsetIndex++] = x * xOff * 0.3;
+            offsets[offsetIndex++] = y * yOff * 0.3;
         }
     }
     for (int i = 0; i < size * size; ++i)
