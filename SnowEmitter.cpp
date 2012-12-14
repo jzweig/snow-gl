@@ -5,9 +5,9 @@ SnowEmitter::SnowEmitter()
     m_snowflakeCount = 0;
     m_activeSnowflakes = 0;
     m_snowflakes = NULL;
-    m_directableCounter = 0;
-    m_directableGridSize = 20*1024;
-    m_directableGridInc = 20;
+    m_directableCounter = 1024*4;
+    m_directableGridSize = 1024;
+    m_directableGridInc = 1;
     m_isDirectableSnow = true;
     // Initialize the snow flakes
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
@@ -70,13 +70,13 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
 
         m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT;
         m_snowflakes[snowflakeIndex].pos.x = -10.0f+(((float)(m_directableCounter%m_directableGridSize))/m_directableGridSize)*20.0;
-        m_snowflakes[snowflakeIndex].pos.z = -10.0f+((m_directableCounter/m_directableGridSize)/m_directableGridSize)*20.0;
+        m_snowflakes[snowflakeIndex].pos.z = -10.0f+(((float)m_directableCounter/m_directableGridSize))/(m_directableGridSize)*20.0;
         m_snowflakes[snowflakeIndex].pos.w = 0;
         m_snowflakes[snowflakeIndex].dir.x = 0;
         m_snowflakes[snowflakeIndex].dir.y = -1;
         m_snowflakes[snowflakeIndex].dir.z = 0;
         m_snowflakes[snowflakeIndex].dir.w = 0;
-        m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+        m_snowflakes[snowflakeIndex].size = 0.003;
         m_directableCounter = (m_directableCounter+1)%(m_directableGridSize*m_directableGridSize);
     }else{
         m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
@@ -88,9 +88,9 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
         m_snowflakes[snowflakeIndex].dir.z = 0;
         m_snowflakes[snowflakeIndex].dir.w = 0;
         m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+        resetWind(snowflakeIndex);
 
     }
-    resetWind(snowflakeIndex);
 }
 
 void SnowEmitter::resetWind(int snowflakeIndex)
@@ -133,7 +133,8 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
             m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * (*m_speed))) + m_snowflakes[i].pos;
 
             if( m_snowflakes[i].windExpire == 0 )
-                resetWind(i);
+                if(!m_isDirectableSnow)
+                    resetWind(i);
             else
                 m_snowflakes[i].windExpire--;
 
