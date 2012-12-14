@@ -22,7 +22,7 @@ void main()
         heightsSum += kernel[i] * height;
         weightSum += kernel[i];
     }
-    float blurredHeight = heightsSum / weightSum;
+    float blurredHeight = float(heightsSum) / float(weightSum);
 /*
     if( blurredHeight >= 0.1 )
         col = color + vec4(0.2,0.2,0.2,0.0);
