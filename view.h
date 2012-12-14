@@ -132,6 +132,8 @@ protected:
      //! The snow fbo into which we render the accumulated snow
      QGLFramebufferObject *m_fbo_snow;
 
+     QGLFramebufferObject *m_fbo_buffer;
+
      QString m_homeDir;
      QString m_projDir;
 
