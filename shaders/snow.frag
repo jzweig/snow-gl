@@ -35,7 +35,7 @@ void main()
     }
     float blurredHeight = float(heightsSum) / float(weightSum);
 
-    col = color + vec4(1.0, 1.0, 1.0, 0.0) * blurredHeight * 100;
+    col = color + vec4(1.0, 1.0, 1.0, 0.0) * blurredHeight;
 
     gl_FragColor = col;
 }
