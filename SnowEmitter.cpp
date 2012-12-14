@@ -8,7 +8,7 @@ SnowEmitter::SnowEmitter()
     m_directableCounter = 0;
     m_directableGridSize = 20*1024;
     m_directableGridInc = 20;
-    m_isDirectableSnow = true;
+    m_isDirectableSnow = !true;
     // Initialize the snow flakes
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
 }
