@@ -76,7 +76,7 @@ GLuint ResourceLoader::loadTexture(const QString &path)
 
 GLuint ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
 {
-    QImage texture = QGLWidget::convertToGLFormat((* heightMap));
+    QImage texture = QGLWidget::convertToGLFormat((* heightMap).mirrored(false,true));
     // make texture active (bind)
     glBindTexture(GL_TEXTURE_2D, textureid);
 
