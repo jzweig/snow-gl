@@ -338,22 +338,73 @@ void View::drawUnitAxis(float x, float y, float z){
 
 void View::renderScene()
 {
+    QGLShaderProgram *shader = m_shaderPrograms["snow"];
+
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
          for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            (*it)->render(m_useVbo,true,m_useDisplacement,m_shaderPrograms["snow"]);
+            (*it)->render(m_useVbo);
          }
     }
 
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+        GLuint sky = ResourceLoader::loadSkybox();
+        glCallList(sky);
+
+
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-                GLuint sky = ResourceLoader::loadSkybox();
-                glCallList(sky);
-                (*it)->render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
+
+            SceneObject *obj = *it;
+
+            if(m_useShader){
+                ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
+                ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+                shader->bind();
+                shader->setUniformValue("snowDisplacement",0);
+                shader->setUniformValue("snowTexture",1);
+                shader->setUniformValue("useDisplacement", m_useDisplacement);
+                Vector4 color = obj->getColor();
+                shader->setUniformValue("color",color.x, color.y, color.z, color.w);
+
+                // Set the blur data
+                int radius = 1;
+                int dim = radius * 2 + 1;
+                GLfloat kernel[dim * dim];
+                GLfloat offsets[dim * dim * 2];
+                ShaderAssistant::createBlurKernel(radius, width(), height(), &kernel[0], &offsets[0]);
+                shader->setUniformValue("arraySize", dim * dim);
+                shader->setUniformValueArray("offsets", offsets, 2 * dim * dim, 2);
+                shader->setUniformValueArray("kernel", kernel, dim * dim, 1);
+
+                //displacement
+                glActiveTexture(GL_TEXTURE0);
+                //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
+                glBindTexture(GL_TEXTURE_2D,obj->getDisplacementMapId());
+
+                //bump
+                glActiveTexture(GL_TEXTURE1);
+                //glUniform1i(glGetUniformLocation(shader->programId(), "snowTexture"), 1);
+                glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+
+                glActiveTexture(GL_TEXTURE0);
+            }
+            (*it)->render(m_useVbo);
+            if( m_useShader )
+            {
+                shader->release();
+                glBindTexture(GL_TEXTURE_2D,0);
+                glDisable(GL_BLEND);
+            }
         }
+
+
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }

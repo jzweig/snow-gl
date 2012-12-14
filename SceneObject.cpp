@@ -44,39 +44,11 @@ Matrix4x4 SceneObject::getTransformationMatrix() const
     return m_matrix;
 }
 
-void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
+void SceneObject::render(const bool useVbo) const
 {
-    if(useShader){
-        ResourceLoader::reloadHeightMapTexture(m_displacementMap,m_displacementMapId);
-        ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-
-        shader->bind();
-        shader->setUniformValue("snowDisplacement",0);
-        shader->setUniformValue("snowTexture",1);
-        shader->setUniformValue("useDisplacement", useDisplacement);
-        shader->setUniformValue("color",m_color.x, m_color.y, m_color.z, m_color.w);
-
-
-        //displacement
-        glActiveTexture(GL_TEXTURE0);
-        //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
-        glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
-
-        //bump
-        glActiveTexture(GL_TEXTURE1);
-        //glUniform1i(glGetUniformLocation(shader->programId(), "snowTexture"), 1);
-        glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
-
-        glActiveTexture(GL_TEXTURE0);
-    }
-
     glPushMatrix();
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
     glMultMatrixd(m_matrix.data);
-
 
     if( useVbo && m_vbo ) {
         // Bind the vbo buffer
@@ -100,12 +72,26 @@ void SceneObject::render(const bool useVbo, const bool useShader, const bool use
         m_shape->render();
     }
     glPopMatrix();
+}
 
-    if(useShader){
-        shader->release();
-        glBindTexture(GL_TEXTURE_2D,0);
-        glDisable(GL_BLEND);
-    }
+QImage *SceneObject::getDisplacementMap()
+{
+    return m_displacementMap;
+}
+
+QImage *SceneObject::getBumpMap()
+{
+    return m_bumpMap;
+}
+
+GLuint SceneObject::getBumpMapId()
+{
+    return m_bumpMapId;
+}
+
+GLuint SceneObject::getDisplacementMapId()
+{
+    return m_displacementMapId;
 }
 
 Shape *SceneObject::getShape()
@@ -125,6 +111,11 @@ void SceneObject::setColor(float r, float g, float b, float a)
     m_color.y = g;
     m_color.z = b;
     m_color.w = a;
+}
+
+Vector4 SceneObject::getColor()
+{
+    return m_color;
 }
 
 void SceneObject::setColor(Vector4 color)

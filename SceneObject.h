@@ -5,6 +5,7 @@
 #include <QtOpenGL>
 #include "resourceloader.h"
 #include <CS123Common.h>
+#include "ShaderAssistant.h"
 
 enum TransformationType { ROTATION, TRANSLATION, SCALING };
 
@@ -27,7 +28,7 @@ class SceneObject
     public:
         SceneObject(Shape* shape, int gridLength);
         virtual ~SceneObject();
-        void render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const;
+        void render(const bool useVbo) const;
         void translate(float x, float y, float z);
         void scale(float x, float y, float z);
         void rotate(float angle, float x, float y, float z);
@@ -44,6 +45,11 @@ class SceneObject
         void incrementEndian(BGRA* color);
         int getBumpIndex(Vector4 objPosition);
         int getDisplacementIndex(Vector4 objPosition);
+        QImage *getDisplacementMap();
+        QImage *getBumpMap();
+        GLuint getBumpMapId();
+        GLuint getDisplacementMapId();
+        Vector4 getColor();
     protected:
         void refreshMatrix();
 
