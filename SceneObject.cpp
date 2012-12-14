@@ -209,18 +209,22 @@ int SceneObject::getBumpIndex(Vector4 objPosition)
     return bindex;
 }
 
+int SceneObject::getDisplacementIndex(Vector4 objPosition)
+{
+    int dx = (objPosition.x + 0.5)*m_displacementResolution;
+    int dy = (objPosition.z + 0.5)*m_displacementResolution;
+    int dindex = dy*m_displacementResolution+dx;
+    return dindex;
+}
+
 /**
   * Records a snowflake falling on this object at the provided
   * position in object coordinates.
   */
 void SceneObject::recordSnowfall(Vector4 objPosition){
     // displacement map
-    int dx = (objPosition.x + 0.5)*m_displacementResolution;
-    int dy = (objPosition.z + 0.5)*m_displacementResolution;
-
     BGRA* dData = (BGRA *)m_displacementMap->bits();
-    
-    int dindex = dy*m_displacementResolution+dx;
+    int dindex = getDisplacementIndex(objPosition);
     incrementEndian(&dData[dindex]);
 
     BGRA* bData = (BGRA *)m_bumpMap->bits();
@@ -257,11 +261,8 @@ void SceneObject::incrementEndian(BGRA* color){
   */
 float SceneObject::getDisplacement(Vector4 objPosition)
 {
-    int xcoord = (objPosition.x + 0.5)*m_displacementResolution;
-    int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
-
     BGRA* data = (BGRA *)m_displacementMap->bits();
-    int index = ycoord*m_displacementResolution+xcoord;
+    int index = getDisplacementIndex(objPosition);
     return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.00001;
 }
 

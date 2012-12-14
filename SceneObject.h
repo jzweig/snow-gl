@@ -43,6 +43,7 @@ class SceneObject
         float getBump(Vector4 objPosition);
         void incrementEndian(BGRA* color);
         int getBumpIndex(Vector4 objPosition);
+        int getDisplacementIndex(Vector4 objPosition);
     protected:
         void refreshMatrix();
 
