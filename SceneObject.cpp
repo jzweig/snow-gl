@@ -200,6 +200,15 @@ void SceneObject::rotate(float angle, float x, float y, float z)
     refreshMatrix();
 }
 
+int SceneObject::getBumpIndex(Vector4 objPosition)
+{
+    // bump map
+    int bx = (objPosition.x + 0.5)*m_bumpResolution;
+    int by = (objPosition.z + 0.5)*m_bumpResolution;
+    int bindex = by*m_bumpResolution+bx;
+    return bindex;
+}
+
 /**
   * Records a snowflake falling on this object at the provided
   * position in object coordinates.
@@ -214,15 +223,9 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
     int dindex = dy*m_displacementResolution+dx;
     incrementEndian(&dData[dindex]);
 
-    // bump map
-    int bx = (objPosition.x + 0.5)*m_bumpResolution;
-    int by = (objPosition.z + 0.5)*m_bumpResolution;
-
     BGRA* bData = (BGRA *)m_bumpMap->bits();
-    int bindex = by*m_bumpResolution+bx;
+    int bindex = getBumpIndex(objPosition);
     incrementEndian(&bData[bindex]);
-
-
 }
 
 void SceneObject::incrementEndian(BGRA* color){
@@ -267,10 +270,7 @@ float SceneObject::getDisplacement(Vector4 objPosition)
   */
 float SceneObject::getBump(Vector4 objPosition)
 {
-    int xcoord = (objPosition.x + 0.5)*m_bumpResolution;
-    int ycoord = (objPosition.z + 0.5)*m_bumpResolution;
-
     BGRA* data = (BGRA *)m_bumpMap->bits();
-    int index = ycoord*m_bumpResolution+xcoord;
+    int index = getBumpIndex(objPosition);
     return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
 }
