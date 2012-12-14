@@ -178,4 +178,32 @@ void SnowEmitter::drawSnowflakes()
 
 void SnowEmitter::collisionDetect(SceneObject* obj)
 {
+    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getInverse();
+
+    for(int i = 0; i < m_snowflakeCount; i++){
+
+        if( m_snowflakes[i].active ){
+            Vector4 worldSnowPos = m_snowflakes[i].pos;
+            Vector4 objSnowPos = inverseTransformationMatrix * worldSnowPos;
+
+            // Check for a collision on the unit cube. No support for non-cube objects.
+            if((objSnowPos.x <= 0.5 && objSnowPos.x >= -0.5) &&
+               (objSnowPos.y >= -0.5) &&
+               (objSnowPos.z <= 0.5 && objSnowPos.z >= -0.5)){
+
+                // Check y with displacement
+                float displacement = obj->getDisplacement(objSnowPos);
+
+                // If contained within the upper y plus displacement, it collided
+                if( objSnowPos.y <= 0.5 + displacement ) {
+                    obj->recordSnowfall(objSnowPos);
+
+                    //reset snowflake that collided.
+                    m_snowflakes[i].active = false;
+                    m_activeSnowflakes--;
+                }
+            }
+        }
+
+    }
 }

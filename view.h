@@ -85,8 +85,6 @@ protected:
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
 
-     float* m_snowHeight;
-     int m_gridLength;
      //! The camera settings
      OrbitCamera *m_camera;
 
@@ -101,8 +99,6 @@ protected:
 
      //! The objects in the scene
      vector<SceneObject *> m_objects;
-     //! Single-case terrain, at least for testing, for now
-     SceneObject* m_terrain;
 
      //! Whether or not to display wireframes
      bool m_isWireframe;
@@ -111,7 +107,7 @@ protected:
      bool m_isSolid;
 
      //! Whether or not to display snow shader material
-     bool m_showShader;
+     bool m_useShader;
 
      //! Whether or not to display the unit axis
      bool m_showUnitAxis;
@@ -121,6 +117,9 @@ protected:
 
      //! Use scene vbo
      bool m_useVbo;
+
+     //! Use shader displacement mapping
+     bool m_useDisplacement;
 
      //! The number of scene triangles. This is used for the vbo's and dynamicaly determined
      //! when the vbo is initialized.

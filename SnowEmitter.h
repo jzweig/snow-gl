@@ -1,7 +1,7 @@
 #ifndef SNOWEMITTER_H
 #define SNOWEMITTER_H
 
-#define SNOWFALL_RADIUS 10
+#define SNOWFALL_RADIUS 5
 #define INITIAL_SNOWFLAKE_COUNT 30000
 #define INITIAL_SNOWFLAKE_HEIGHT 6.0f
 #define SNOWFLAKE_CUTOFF 0
@@ -100,6 +100,9 @@ class SnowEmitter
           */
         void setSpeed(float *speed);
 
+        //! modifies texturemap if object has collisions
+        void collisionDetect(SceneObject* obj);
+
     protected:
 
         /**
@@ -117,8 +120,6 @@ class SnowEmitter
           */
         void dropSnowflake(int snowflakeIndex);
 
-        //! modifies texturemap if object has collisions
-        void collisionDetect(SceneObject* obj);
 
         //! Snowflakes array on the heap
         Snowflake *m_snowflakes;

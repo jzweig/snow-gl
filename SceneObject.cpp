@@ -1,33 +1,84 @@
 #include "SceneObject.h"
 
-#ifndef __APPLE__
+#include <CS123Common.h>
+//#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <GL/glext.h>
+//#ifndef __APPLE__
 extern "C" {
+    GLAPI void APIENTRY glUniform1i(GLint location, GLint v0);
+    GLAPI GLuint APIENTRY glGetUniformLocation(GLuint program, const GLchar *name);
+    GLAPI void APIENTRY glUseProgram(GLuint program);
     GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
     GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
     GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
 }
-#endif
+//#endif
 
-SceneObject::SceneObject(Shape *shape) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, int bumpResolution) : m_shape(shape)
 {
+    m_displacementResolution = m_shape->getParamOne();
+    m_bumpResolution = bumpResolution;
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
+    m_displacementMap = new QImage(m_displacementResolution,m_displacementResolution,QImage::Format_RGB32);
+    m_bumpMap = new QImage(m_bumpResolution,m_bumpResolution,QImage::Format_RGB32);
+
+    // set the new images to black
+    memset(m_displacementMap->bits(), 0, m_displacementResolution * m_displacementResolution * sizeof(BGRA));
+    memset(m_bumpMap->bits(), 0, m_bumpResolution * m_bumpResolution * sizeof(BGRA));
+    m_displacementMapId = ResourceLoader::loadHeightMapTexture(m_displacementMap);
+    m_bumpMapId = ResourceLoader::loadHeightMapTexture(m_bumpMap);
 }
 
 SceneObject::~SceneObject()
 {
-
+    delete m_displacementMap;
+    delete m_bumpMap;
     delete m_shape;
 }
 
-void SceneObject::render(bool useVbo) const
+Matrix4x4 SceneObject::getTransformationMatrix() const
 {
+    return m_matrix;
+}
+
+void SceneObject::render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const
+{
+    if(useShader){
+        ResourceLoader::reloadHeightMapTexture(m_displacementMap,m_displacementMapId);
+        ResourceLoader::reloadHeightMapTexture(m_bumpMap,m_bumpMapId);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+        shader->bind();
+        shader->setUniformValue("snowDisplacement",0);
+        shader->setUniformValue("snowTexture",1);
+        shader->setUniformValue("useDisplacement", useDisplacement);
+        shader->setUniformValue("color",m_color.x, m_color.y, m_color.z, m_color.w);
+
+
+        //displacement
+        glActiveTexture(GL_TEXTURE0);
+        //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
+        glBindTexture(GL_TEXTURE_2D,m_displacementMapId);
+
+        //bump
+        glActiveTexture(GL_TEXTURE1);
+        //glUniform1i(glGetUniformLocation(shader->programId(), "snowTexture"), 1);
+        glBindTexture(GL_TEXTURE_2D,m_bumpMapId);
+
+        glActiveTexture(GL_TEXTURE0);
+    }
+
     glPushMatrix();
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
     glMultMatrixd(m_matrix.data);
 
-    if( useVbo && m_vbo )
-    {
+
+    if( useVbo && m_vbo ) {
         // Bind the vbo buffer
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
@@ -45,17 +96,28 @@ void SceneObject::render(bool useVbo) const
 
         // Unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-    else
+    } else {
         m_shape->render();
-
+    }
     glPopMatrix();
+
+    if(useShader){
+        shader->release();
+        glBindTexture(GL_TEXTURE_2D,0);
+        glDisable(GL_BLEND);
+    }
 }
 
 Shape *SceneObject::getShape()
 {
     return m_shape;
 }
+
+Vector4 SceneObject::getPosition()
+{
+    return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
+}
+
 
 void SceneObject::setColor(float r, float g, float b, float a)
 {
@@ -75,7 +137,7 @@ void SceneObject::setVboBuffer(GLuint buffer_name)
     m_vbo = buffer_name;
 }
 
-GLuint SceneObject::getVboBuffer()
+GLuint SceneObject::getVboBuffer() const
 {
     return m_vbo;
 }
@@ -138,6 +200,77 @@ void SceneObject::rotate(float angle, float x, float y, float z)
     refreshMatrix();
 }
 
-void SceneObject::paintTexture(float x, float y, float z){
+/**
+  * Records a snowflake falling on this object at the provided
+  * position in object coordinates.
+  */
+void SceneObject::recordSnowfall(Vector4 objPosition){
+    // displacement map
+    int dx = (objPosition.x + 0.5)*m_displacementResolution;
+    int dy = (objPosition.z + 0.5)*m_displacementResolution;
 
+    BGRA* dData = (BGRA *)m_displacementMap->bits();
+    
+    int dindex = dy*m_displacementResolution+dx;
+    incrementEndian(&dData[dindex]);
+
+    // bump map
+    int bx = (objPosition.x + 0.5)*m_bumpResolution;
+    int by = (objPosition.z + 0.5)*m_bumpResolution;
+
+    BGRA* bData = (BGRA *)m_bumpMap->bits();
+    int bindex = by*m_bumpResolution+bx;
+    incrementEndian(&bData[bindex]);
+
+
+}
+
+void SceneObject::incrementEndian(BGRA* color){
+\
+    int r = color->r;
+    int g = color->g;
+    int b = color->b;
+
+    // Convert rgb value to int
+    int curNum = r + 255*g + 255*255*b;
+
+    // Increment
+    curNum++;
+
+    // Convert back to rgb value
+    b = curNum / (255*255);
+    curNum %= (255*255);
+    g = curNum / 255;
+    curNum %= 255;
+    r = curNum;
+
+    color->r = r;
+    color->g = g;
+    color->b = b;
+}
+
+/**
+  * Returns the displacement at the given object position.
+  */
+float SceneObject::getDisplacement(Vector4 objPosition)
+{
+    int xcoord = (objPosition.x + 0.5)*m_displacementResolution;
+    int ycoord = (objPosition.z + 0.5)*m_displacementResolution;
+
+    BGRA* data = (BGRA *)m_displacementMap->bits();
+    int index = ycoord*m_displacementResolution+xcoord;
+    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.00001;
+}
+
+/**
+  * Returns the bump at the given object position.
+  */
+float SceneObject::getBump(Vector4 objPosition)
+{
+    int xcoord = (objPosition.x + 0.5)*m_bumpResolution;
+    int ycoord = (objPosition.z + 0.5)*m_bumpResolution;
+
+    BGRA* data = (BGRA *)m_bumpMap->bits();
+    int index = ycoord*m_bumpResolution+xcoord;
+    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
 }

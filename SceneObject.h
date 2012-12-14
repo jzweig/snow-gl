@@ -3,6 +3,8 @@
 
 #include "shapes/Shape.h"
 #include <QtOpenGL>
+#include "resourceloader.h"
+#include <CS123Common.h>
 
 enum TransformationType { ROTATION, TRANSLATION, SCALING };
 
@@ -15,7 +17,6 @@ struct Transformation
     float angle;
 };
 
-
 /**
   * A scene object stores the data about an object in the scene. There is no
   * nesting of objects like in sceneview. All transformations should be applied
@@ -24,9 +25,9 @@ struct Transformation
 class SceneObject
 {
     public:
-        SceneObject(Shape *shape);
+        SceneObject(Shape* shape, int gridLength);
         virtual ~SceneObject();
-        void render(bool m_useVbo) const;
+        void render(const bool useVbo, const bool useShader, const bool useDisplacement, QGLShaderProgram* shader) const;
         void translate(float x, float y, float z);
         void scale(float x, float y, float z);
         void rotate(float angle, float x, float y, float z);
@@ -34,8 +35,13 @@ class SceneObject
         void setColor(Vector4 color);
         void setVboBuffer(GLuint buffer_name);
         Shape *getShape();
-        GLuint getVboBuffer();
-        void paintTexture(float x, float y, float z);
+        GLuint getVboBuffer() const;
+        void recordSnowfall(Vector4 objPos);
+        Vector4 getPosition();
+        Matrix4x4 getTransformationMatrix() const;
+        float getDisplacement(Vector4 objPosition);
+        float getBump(Vector4 objPosition);
+        void incrementEndian(BGRA* color);
     protected:
         void refreshMatrix();
 
@@ -44,7 +50,13 @@ class SceneObject
         Vector4 m_color;
         Matrix4x4 m_matrix;
         GLuint m_vbo;
-
+        QImage* m_displacementMap;
+        GLuint m_displacementMapId;
+        //GLuint m_baseMapId;
+        QImage* m_bumpMap;
+        GLuint m_bumpMapId;
+        int m_bumpResolution;
+        int m_displacementResolution;
  };
 
 #endif // SCENEOBJECT_H

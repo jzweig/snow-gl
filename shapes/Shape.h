@@ -25,6 +25,10 @@ class Shape : public Renderable
         void setParamTwo(int newParamTwo);
         void setParamThree(int newParamThree);
 
+        //! Retrieves the tesselation parameters of this shape
+        int getParamOne();
+        int getParamTwo();
+        int getParamThree();
         //! Tesselates the given shape
         virtual void tesselate() = 0;
 
@@ -39,6 +43,7 @@ class Shape : public Renderable
 
         //! Retrieves the number of triangles contained in the tesselation of this shape
         virtual int getNumTriangles();
+
 
     protected:
 

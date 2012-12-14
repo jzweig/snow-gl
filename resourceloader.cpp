@@ -74,11 +74,26 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     return textureid;
 }
 
+GLuint ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
+{
+    QImage texture = QGLWidget::convertToGLFormat((* heightMap));
+    // make texture active (bind)
+    glBindTexture(GL_TEXTURE_2D, textureid);
+
+    // Copy the image data into the OpenGL texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+    // filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // deactivate texture (unbind)
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 {
     //glEnable(GL_TEXTURE_2D);
-    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     GLuint textureid;
     QImage texture = QGLWidget::convertToGLFormat((* heightMap));//->mirrored(false,true));
 
@@ -107,23 +122,6 @@ GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 
 }
 
-
-GLuint ResourceLoader::loadHeightMapTexture(float* heightmap,int width, int height)
-{
-    glEnable(GL_TEXTURE_2D);
-    GLuint id;
-
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_BGRA, GL_FLOAT, heightmap);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return id;
-}
 
 
 /**
