@@ -20,22 +20,25 @@ void main()
 {
     vec4 col = color;
     vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
+    float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
 
     float heightsSum = 0.0;
     float weightSum = 0.0;
     for( int i = 0; i < arraySize; i++ )
     {
         vec4 sample = texture2D(snowTexture, gl_TexCoord[0].st + offsets[i]);
-        int r = int(sample.r * 255);
-        int g = int(sample.g * 255);
-        int b = int(sample.b * 255);
-        int height = r + g * 255 + b * 255 * 255;
+        float r = sample.r * 128;
+        float g = sample.g * 128;
+        float b = sample.b * 128;
+        float height = r + g * 255 + b * 255 * 255;
         heightsSum += kernel[i] * height;
         weightSum += kernel[i];
     }
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     col = color + vec4(1.0, 1.0, 1.0, 0.0) * blurredHeight * 0.5;
+
+    //col = color + vec4(1.0, 1.0, 1.0, 0.0) * actualHeight;
 
     gl_FragColor = col * intensity;
 }
