@@ -237,11 +237,11 @@ void SceneObject::incrementEndian(BGRA* color){
     curNum++;
 
     // Convert back to rgb value
-    b = curNum / (255*255);
-    curNum %= (255*255);
-    g = curNum / 255;
-    curNum %= 255;
-    r = curNum;
+    r = curNum % 255;
+    curNum /= 255;
+    g = curNum % 255;
+    curNum /= 255;
+    b = curNum;
 
     color->r = r;
     color->g = g;
