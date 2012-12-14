@@ -353,7 +353,6 @@ void View::renderScene()
 {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
-
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     // Render the wireframes if enabled
@@ -408,11 +407,10 @@ void View::paintGL()
     m_prevTime = time;
 
     // Clear the scene
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Render the scene to a framebuffer
     m_fbo_main->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable(GL_LIGHTING);
     renderScene();
     if( m_showUnitAxis )
@@ -423,23 +421,25 @@ void View::paintGL()
     }
     m_fbo_main->release();
 
+    /*
     m_fbo_main->blitFramebuffer(m_fbo_buffer,
                                 QRect(0, 0, width(), height()), m_fbo_main,
-                                QRect(0, 0, width(), height()), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                                QRect(0, 0, width(), height()), GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
 
     // Render the framebuffer to the screen as textured quad.
-    renderFramebuffer(m_fbo_buffer);
+    renderFramebuffer(m_fbo_main);
 
     // Render dem snowflakes
     glEnable(GL_BLEND);
     glDisable(GL_LIGHTING);
+    glColor4f(1, 1, 1, 1);
     m_snowEmitter.drawSnowflakes();
     glEnable(GL_LIGHTING);
     glDisable(GL_BLEND);
 
     // Display the frame
-    //glFlush();
-    //swapBuffers();
+    glFlush();
+    swapBuffers();
 
     // Paint GUI
     paintUI();
