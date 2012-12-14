@@ -71,7 +71,7 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
         m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT;
         m_snowflakes[snowflakeIndex].pos.x = -10.0f+(((float)(m_directableCounter%m_directableGridSize))/m_directableGridSize)*20.0;
         m_snowflakes[snowflakeIndex].pos.z = -10.0f+(((float)m_directableCounter/m_directableGridSize))/(m_directableGridSize)*20.0;
-        m_snowflakes[snowflakeIndex].pos.w = 0;
+        m_snowflakes[snowflakeIndex].pos.w = 1;
         m_snowflakes[snowflakeIndex].dir.x = 0;
         m_snowflakes[snowflakeIndex].dir.y = -1;
         m_snowflakes[snowflakeIndex].dir.z = 0;
@@ -82,7 +82,7 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
         m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
         m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
         m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
-        m_snowflakes[snowflakeIndex].pos.w = 0;
+        m_snowflakes[snowflakeIndex].pos.w = 1;
         m_snowflakes[snowflakeIndex].dir.x = 0;
         m_snowflakes[snowflakeIndex].dir.y = -1;
         m_snowflakes[snowflakeIndex].dir.z = 0;
@@ -196,7 +196,7 @@ void SnowEmitter::drawSnowflakes()
 
 void SnowEmitter::collisionDetect(SceneObject* obj)
 {
-    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getInverse();
+    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getTranspose().getInverse();
 
     for(int i = 0; i < m_snowflakeCount; i++){
 
@@ -213,7 +213,7 @@ void SnowEmitter::collisionDetect(SceneObject* obj)
                 float displacement = obj->getDisplacement(objSnowPos);
 
                 // If contained within the upper y plus displacement, it collided
-                if( objSnowPos.y <= 0.5 + displacement ) {
+                if( objSnowPos.y <= 0.5 ) {
                     obj->recordSnowfall(objSnowPos);
 
                     //reset snowflake that collided.
