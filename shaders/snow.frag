@@ -26,14 +26,13 @@ void main()
 /*
     if( blurredHeight >= 0.1 )
         col = color + vec4(0.2,0.2,0.2,0.0);
-
+*/
 
     if(snowSample.r != 0 || snowSample.g  != 0 || snowSample.b != 0){
         col = color + vec4(0.2,0.2,0.2,0.0);
     }
-*/
 
-    col = vec4(snowSample.r > 1 ? 1 : 0, snowSample.g ? 1 : 0, snowSample.b ? 1 : 0, 1);
+  //  col = vec4(snowSample.r > 1 ? 1 : 0, snowSample.g ? 1 : 0, snowSample.b ? 1 : 0, 1);
 
     gl_FragColor = col;
 }
