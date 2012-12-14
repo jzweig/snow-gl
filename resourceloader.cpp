@@ -65,7 +65,7 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     GLuint textureid;
     glGenTextures(1, &textureid);
     glBindTexture(GL_TEXTURE_2D, textureid);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -81,7 +81,7 @@ GLuint ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint texturei
     glBindTexture(GL_TEXTURE_2D, textureid);
 
     // Copy the image data into the OpenGL texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     // filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
