@@ -75,6 +75,7 @@ private slots:
 protected:
      void setupScene();
      void initSceneVbo();
+     void initScenePbo();
      void updateCamera();
      void setupLights();
      float getMoveFactor();
@@ -125,6 +126,8 @@ protected:
 
      QString m_homeDir;
      QString m_projDir;
+     int m_pboIndexA;
+     int m_pboIndexB;
 
 };
 

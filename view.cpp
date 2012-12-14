@@ -11,6 +11,7 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
+#include "GL/glext.h"
 #include <GL/gl.h>
 #include "GL/glut.h"
 #include "GL/glu.h"
@@ -26,15 +27,29 @@ static const int MAX_FPS = 60;
 
 #ifndef __APPLE__
 extern "C" {
-    GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
-    GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
-    GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
+GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
+GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
 }
 #endif
-
+extern "C" {
+GLAPI void APIENTRY glBindBufferARB (GLenum target, GLuint buffer);
+GLAPI void APIENTRY glDeleteBuffersARB (GLsizei n, const GLuint *buffers);
+GLAPI void APIENTRY glGenBuffersARB (GLsizei n, GLuint *buffers);
+GLAPI GLboolean APIENTRY glIsBufferARB (GLuint buffer);
+GLAPI void APIENTRY glBufferDataARB (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
+GLAPI void APIENTRY glBufferSubDataARB (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+GLAPI void APIENTRY glGetBufferSubDataARB (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
+GLAPI GLvoid* APIENTRY glMapBufferARB (GLenum target, GLenum access);
+GLAPI GLboolean APIENTRY glUnmapBufferARB (GLenum target);
+GLAPI void APIENTRY glGetBufferParameterivARB (GLenum target, GLenum pname, GLint *params);
+GLAPI void APIENTRY glGetBufferPointervARB (GLenum target, GLenum pname, GLvoid* *params);
+}
 View::View(QWidget *parent) : QGLWidget(parent),
-        m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
+    m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
+    m_pboIndexA =0;
+    m_pboIndexB =0;
     m_useShader = true;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -108,6 +123,7 @@ void View::setupScene()
     ground->translate(0, -0.5, 0);
     m_objects.push_back(ground);
 
+
     // Make a demo box
     m_factory.setTesselationParameter(50);
     m_factory.setBumpResolution(128);
@@ -125,8 +141,33 @@ void View::setupScene()
     m_objects.push_back(smallBox);
 
     initSceneVbo();
+    initScenePbo();
 }
 
+
+
+void View::initScenePbo()
+{
+    // Iterate through all of the objects
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
+    {
+        cout<<"CREATING PBO"<<endl;
+        int bufferSize = (*it)->m_bumpResolution * (*it)->m_bumpResolution * sizeof(BGRA);
+        GLuint* ids = (*it)->m_pbo;
+        //generate two buffers to alternate between during updating for performance (halting)
+        glGenBuffersARB(2, ids);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, ids[m_pboIndexA]);
+        glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, bufferSize, 0, GL_STREAM_DRAW_ARB);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, ids[m_pboIndexB]);
+        glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, bufferSize, 0, GL_STREAM_DRAW_ARB);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+        // Tell the scene object its pbo buffer
+        (*it)->setPboBuffers(ids);
+
+    }
+}
 void View::initSceneVbo()
 {
 
@@ -339,13 +380,15 @@ void View::drawUnitAxis(float x, float y, float z){
 void View::renderScene()
 {
     QGLShaderProgram *shader = m_shaderPrograms["snow"];
+    m_pboIndexA = (m_pboIndexA + 1) % 2;
+    m_pboIndexB = (m_pboIndexA + 1) % 2;
 
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
             (*it)->render(m_useVbo);
-         }
+        }
     }
 
     // Render the solid scene
@@ -361,8 +404,6 @@ void View::renderScene()
             SceneObject *obj = *it;
 
             if(m_useShader){
-                ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
-                ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -383,15 +424,42 @@ void View::renderScene()
                 shader->setUniformValueArray("offsets", offsets, 2 * dim * dim, 2);
                 shader->setUniformValueArray("kernel", kernel, dim * dim, 1);
 
+
+                ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
                 //displacement
                 glActiveTexture(GL_TEXTURE0);
                 //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
                 glBindTexture(GL_TEXTURE_2D,obj->getDisplacementMapId());
 
+
                 //bump
                 glActiveTexture(GL_TEXTURE1);
-                //glUniform1i(glGetUniformLocation(shader->programId(), "snowTexture"), 1);
+                QImage img = QGLWidget::convertToGLFormat((* obj->getBumpMap()).mirrored(false,true));
+                //ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
+
                 glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
+
+                //PBO -> Texture
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, 0);
+
+                int imgSize = img.width() * img.height() * sizeof(BGRA);
+                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
+                glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, imgSize, 0, GL_STREAM_DRAW_ARB);
+                GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+                if(ptr)
+                {
+                    unsigned char *pixel = (unsigned char *)ptr;
+                    for (int i = 0; i < img.height(); i++) {
+                        memcpy(pixel, img.scanLine(i), img.bytesPerLine());
+                        pixel += img.bytesPerLine();
+                    }
+                    glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
+                }
+                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+
+
+
 
                 glActiveTexture(GL_TEXTURE0);
             }
@@ -463,8 +531,8 @@ void View::paintUI()
     // Combine the previous and current framerate
     if (m_fps >= 0 && m_fps < 1000)
     {
-       m_prevFps *= 0.95f;
-       m_prevFps += m_fps * 0.05f;
+        m_prevFps *= 0.95f;
+        m_prevFps += m_fps * 0.05f;
     }
 
     // QGLWidget's renderText takes xy coordinates, a string, and a font

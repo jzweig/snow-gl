@@ -22,6 +22,7 @@ SceneObject::SceneObject(Shape* shape, int bumpResolution) : m_shape(shape)
     m_bumpResolution = bumpResolution;
     m_matrix = Matrix4x4::identity();
     m_vbo = 0;
+    m_pbo = new GLuint[2];
     m_displacementMap = new QImage(m_displacementResolution,m_displacementResolution,QImage::Format_RGB32);
     m_bumpMap = new QImage(m_bumpResolution,m_bumpResolution,QImage::Format_RGB32);
 
@@ -49,7 +50,6 @@ void SceneObject::render(const bool useVbo) const
     glPushMatrix();
     glColor4f(m_color.x, m_color.y, m_color.z, m_color.w);
     glMultMatrixd(m_matrix.data);
-
     if( useVbo && m_vbo ) {
         // Bind the vbo buffer
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -131,6 +131,16 @@ void SceneObject::setVboBuffer(GLuint buffer_name)
 GLuint SceneObject::getVboBuffer() const
 {
     return m_vbo;
+}
+
+void SceneObject::setPboBuffers(GLuint* buffer_name)
+{
+    m_pbo = buffer_name;
+}
+
+GLuint* SceneObject::getPboBuffers() const
+{
+    return m_pbo;
 }
 
 void SceneObject::refreshMatrix()

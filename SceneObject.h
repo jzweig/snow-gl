@@ -35,8 +35,10 @@ class SceneObject
         void setColor(float r, float g, float b, float a);
         void setColor(Vector4 color);
         void setVboBuffer(GLuint buffer_name);
+        void setPboBuffers(GLuint* buffer_name);
         Shape *getShape();
         GLuint getVboBuffer() const;
+        GLuint* getPboBuffers() const;
         void recordSnowfall(Vector4 objPos);
         Vector4 getPosition();
         Matrix4x4 getTransformationMatrix() const;
@@ -50,6 +52,8 @@ class SceneObject
         GLuint getBumpMapId();
         GLuint getDisplacementMapId();
         Vector4 getColor();
+        int m_bumpResolution;
+        GLuint* m_pbo;
     protected:
         void refreshMatrix();
 
@@ -63,7 +67,6 @@ class SceneObject
         //GLuint m_baseMapId;
         QImage* m_bumpMap;
         GLuint m_bumpMapId;
-        int m_bumpResolution;
         int m_displacementResolution;
  };
 
