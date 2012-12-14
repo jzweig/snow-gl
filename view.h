@@ -117,6 +117,8 @@ protected:
      //! Use scene vbo
      bool m_useVbo;
 
+     //! Use scene pbo
+     bool m_usePbo;
      //! Use shader displacement mapping
      bool m_useDisplacement;
 

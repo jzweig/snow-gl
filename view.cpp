@@ -50,7 +50,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
 {
     m_pboIndexA =0;
     m_pboIndexB =0;
-    m_useShader = true;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -88,7 +87,9 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_isSolid = true;
     m_showUnitAxis = false;
     m_useVbo = true;
+    m_usePbo = true;
     m_useDisplacement = true;
+    m_useShader = true;
 
     // Make sure the image file exists
     QFile file("/course/cs123/data/image/BoneHead.jpg");
@@ -380,8 +381,6 @@ void View::drawUnitAxis(float x, float y, float z){
 void View::renderScene()
 {
     QGLShaderProgram *shader = m_shaderPrograms["snow"];
-    m_pboIndexA = (m_pboIndexA + 1) % 2;
-    m_pboIndexB = (m_pboIndexA + 1) % 2;
 
     // Render the wireframes if enabled
     if( m_isWireframe ) {
@@ -425,41 +424,45 @@ void View::renderScene()
                 shader->setUniformValueArray("kernel", kernel, dim * dim, 1);
 
 
+                // Displacement
                 ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
-                //displacement
                 glActiveTexture(GL_TEXTURE0);
                 //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
                 glBindTexture(GL_TEXTURE_2D,obj->getDisplacementMapId());
 
 
-                //bump
+                // Bump
                 glActiveTexture(GL_TEXTURE1);
                 QImage img = QGLWidget::convertToGLFormat((* obj->getBumpMap()).mirrored(false,true));
-                //ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
+                if(!m_usePbo){
+                    ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
+                    glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+                }else{
+                    m_pboIndexA = (m_pboIndexA + 1) % 2;
+                    m_pboIndexB = (m_pboIndexA + 1) % 2;
 
-                glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
-                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
+                    glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
 
-                //PBO -> Texture
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                    //PBO -> Texture
+                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
-                int imgSize = img.width() * img.height() * sizeof(BGRA);
-                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
-                glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, imgSize, 0, GL_STREAM_DRAW_ARB);
-                GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
-                if(ptr)
-                {
-                    unsigned char *pixel = (unsigned char *)ptr;
-                    for (int i = 0; i < img.height(); i++) {
-                        memcpy(pixel, img.scanLine(i), img.bytesPerLine());
-                        pixel += img.bytesPerLine();
+                    int imgSize = img.width() * img.height() * sizeof(BGRA);
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
+                    glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, imgSize, 0, GL_STREAM_DRAW_ARB);
+                    GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+                    if(ptr){
+                        unsigned char *pixel = (unsigned char *)ptr;
+                        for (int i = 0; i < img.height(); i++) {
+                            memcpy(pixel, img.scanLine(i), img.bytesPerLine());
+                            pixel += img.bytesPerLine();
+                        }
+                        glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
                     }
-                    glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+
+
                 }
-                glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-
-
-
 
                 glActiveTexture(GL_TEXTURE0);
             }
@@ -610,9 +613,10 @@ void View::keyPressEvent(QKeyEvent *event)
         m_useVbo = ! m_useVbo;
     } else if(event->key() == Qt::Key_5) {
         m_useShader = ! m_useShader;
-
     } else if(event->key() == Qt::Key_6) {
         m_useDisplacement = ! m_useDisplacement;
+    } else if(event->key() == Qt::Key_7) {
+        m_usePbo = ! m_usePbo;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

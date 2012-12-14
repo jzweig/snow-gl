@@ -20,7 +20,7 @@ void main()
 {
     vec4 col = color;
     vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
-    float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
+    //float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
 
     float heightsSum = 0.0;
     float weightSum = 0.0;
