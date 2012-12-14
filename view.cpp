@@ -374,7 +374,7 @@ void View::renderScene()
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
 
                 // Set the blur data
-                int radius = 1;
+                int radius = 2;
                 int dim = radius * 2 + 1;
                 GLfloat kernel[dim * dim];
                 GLfloat offsets[dim * dim * 2];
