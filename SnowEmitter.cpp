@@ -5,7 +5,10 @@ SnowEmitter::SnowEmitter()
     m_snowflakeCount = 0;
     m_activeSnowflakes = 0;
     m_snowflakes = NULL;
-
+    m_directableCounter = 0;
+    m_directableGridSize = 20*1024;
+    m_directableGridInc = 20;
+    m_isDirectableSnow = true;
     // Initialize the snow flakes
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
 }
@@ -61,18 +64,32 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
 
     // One more active snowflake falling
     m_activeSnowflakes++;
-
     m_snowflakes[snowflakeIndex].active = true;
-    m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
-    m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
-    m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
-    m_snowflakes[snowflakeIndex].pos.w = 0;
-    m_snowflakes[snowflakeIndex].dir.x = 0;
-    m_snowflakes[snowflakeIndex].dir.y = -1;
-    m_snowflakes[snowflakeIndex].dir.z = 0;
-    m_snowflakes[snowflakeIndex].dir.w = 0;
-    m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
     m_snowflakes[snowflakeIndex].isVisible = false;
+    if(m_isDirectableSnow){
+
+        m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT;
+        m_snowflakes[snowflakeIndex].pos.x = -10.0f+(((float)(m_directableCounter%m_directableGridSize))/m_directableGridSize)*20.0;
+        m_snowflakes[snowflakeIndex].pos.z = -10.0f+((m_directableCounter/m_directableGridSize)/m_directableGridSize)*20.0;
+        m_snowflakes[snowflakeIndex].pos.w = 0;
+        m_snowflakes[snowflakeIndex].dir.x = 0;
+        m_snowflakes[snowflakeIndex].dir.y = -1;
+        m_snowflakes[snowflakeIndex].dir.z = 0;
+        m_snowflakes[snowflakeIndex].dir.w = 0;
+        m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+        m_directableCounter = (m_directableCounter+1)%(m_directableGridSize*m_directableGridSize);
+    }else{
+        m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
+        m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
+        m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
+        m_snowflakes[snowflakeIndex].pos.w = 0;
+        m_snowflakes[snowflakeIndex].dir.x = 0;
+        m_snowflakes[snowflakeIndex].dir.y = -1;
+        m_snowflakes[snowflakeIndex].dir.z = 0;
+        m_snowflakes[snowflakeIndex].dir.w = 0;
+        m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+
+    }
     resetWind(snowflakeIndex);
 }
 

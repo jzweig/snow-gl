@@ -8,6 +8,6 @@ void main()
 	vec4 eyeVec = gl_ProjectionMatrixInverse*vec4(0,0,-1,0);
 	normal = normalize( gl_NormalMatrix * gl_Normal );
 	vec3 I = normalize(vVertex - eyeVec.xyz); // Eye to vertex
-  r = reflect(I,normal);
+        r = reflect(I,normal);
 }
 

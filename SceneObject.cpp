@@ -205,6 +205,7 @@ int SceneObject::getBumpIndex(Vector4 objPosition)
     // bump map
     int bx = (objPosition.x + 0.5)*m_bumpResolution;
     int by = (objPosition.z + 0.5)*m_bumpResolution;
+
     int bindex = by*m_bumpResolution+bx;
     return bindex;
 }

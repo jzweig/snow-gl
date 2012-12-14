@@ -125,6 +125,10 @@ class SnowEmitter
         Snowflake *m_snowflakes;
         int m_snowflakeCount;
         int m_activeSnowflakes;
+        int m_directableCounter;
+        int m_directableGridSize;
+        int m_directableGridInc;
+        bool m_isDirectableSnow;
 
         //! The width of a snowflake
         float m_scale;
