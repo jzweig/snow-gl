@@ -30,15 +30,18 @@ void main()
 
      // Flatten the normals to make the lighting a little more realistic
      //vec3 normal = normalize(gl_NormalMatrix * gl_Normal * vec3(1.0, 1.0, 1.0 / scale));
-     //vec3 light = normalize(gl_LightSource[0].position - (gl_ModelViewMatrix * vertex)).xyz;
+     light = normalize(gl_LightSource[0].position - (gl_ModelViewMatrix * gl_Vertex)).xyz;
      //intensity = max(0.0, dot(normal, light));
      intensity = 1.0;
 
-     //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vertex = (gl_ModelViewMatrix * gl_Vertex).xyz;
-     light = normalize(gl_LightSource[0].position.xyz - vertex);
      eye = -vertex;
+
+     //light = normalize(gl_LightSource[0].position.xyz-vertex);
      normal = normalize(gl_NormalMatrix * gl_Normal);
+
+     gl_FrontColor = gl_Color;
+     //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vec4 v = vec4(gl_Vertex);
      if(useDisplacement){
          vec4 dv =  texture2D( snowDisplacement, gl_MultiTexCoord0.st );

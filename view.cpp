@@ -266,9 +266,11 @@ void View::initializeGL()
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_BACK);
     //glDisable(GL_DITHER);
-    glShadeModel(GL_FLAT);
-    //glEnable(GL_COLOR_MATERIAL);
-    //glShadeModel(GL_SMOOTH);
+    //glShadeModel(GL_FLAT);
+
+
+    glEnable(GL_COLOR_MATERIAL);
+    glShadeModel(GL_SMOOTH);
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
     glEnable(GL_DEPTH_TEST);
@@ -303,8 +305,8 @@ void View::setupLights()
 
     // Set up GL_LIGHT0 with a position and lighting properties
     GLfloat ambientLight[] = {0.1f, 0.1f, 0.1f, 1.0f};
-    GLfloat diffuseLight[] = { 0.1f, 0.1f, 0.1f, 0.4f };
-    GLfloat specularLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
+    GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat position[] = { 5.0f, 5.5f, 5.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);

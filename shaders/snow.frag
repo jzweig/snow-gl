@@ -59,10 +59,11 @@ void main()
 
 
 
-    vec3 e = normalize(eye);
     vec3 n = normalize(normal);
-    vec3 i = normalize(vertex - eye);
     vec3 l = normalize(light);
+
+    vec3 e = normalize(eye);
+    vec3 i = normalize(vertex - eye);
     vec3 h = normalize(l+e);
 /*
     float ms = m*m;
@@ -88,10 +89,10 @@ void main()
     float g = min(1,min(g1,g2));
 
     float speccof = (max((d*f*g)/en,0));*/
-    float diffcof = dot(n,l);
+    col = col*gl_LightSource[0].diffuse;
+    float diffcof = max(dot(n,l),0.0);
 
-    col = ambient+(diffcof*col);//+speccof*specular);
-    gl_FragColor = col;//(1.0-f)*col+(f)*tc;
+    gl_FragColor = gl_LightSource[0].ambient +diffcof*col;//+speccof*specular);//(1.0-f)*col+(f)*tc;
 
 
 
