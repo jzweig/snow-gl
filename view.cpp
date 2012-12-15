@@ -134,6 +134,7 @@ void View::setupScene()
 
     // Make a smaller box
     m_factory.setTesselationParameter(32);
+    m_factory.setBumpResolution(64);
     SceneObject *smallBox = m_factory.constructCube();
     smallBox->setColor(0.2, 0.2, 0.45, 1.0);
     smallBox->scale(0.5, 0.5, 0.5);
