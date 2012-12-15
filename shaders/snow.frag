@@ -27,10 +27,10 @@ void main()
     for( int i = 0; i < arraySize; i++ )
     {
         vec4 sample = texture2D(snowTexture, gl_TexCoord[0].st + offsets[i]);
-        float r = sample.r * 128;
-        float g = sample.g * 128;
-        float b = sample.b * 128;
-        float height = r + g * 255 + b * 255 * 255;
+        float r = sample.r*128;
+        float g = sample.g*128;
+        float b = sample.b*128;
+        float height = r + g * 255.0 + b * 255.0 * 255.0;
         heightsSum += kernel[i] * height;
         weightSum += kernel[i];
     }
