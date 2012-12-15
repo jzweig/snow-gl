@@ -57,9 +57,11 @@ void main()
 
     vec3 positive = vec3(1.0, 1.0, 1.0);
 
-    gl_FragColor = gl_Color * diffcof;
+    vec4 color = gl_Color * diffcof;
+    color.w = 1.0;
+
+    gl_FragColor = color;
     //gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
-    //gl_FragColor = gl_Color * diffcoff;
     //gl_FragColor = vec4((n + positive)*0.5, 1);
     //gl_FragColor = vec4(vertex_to_light, 1);
 }
