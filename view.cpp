@@ -432,7 +432,7 @@ void View::renderScene()
 
                 // Bump
                 glActiveTexture(GL_TEXTURE1);
-                QImage img = QGLWidget::convertToGLFormat((* obj->getBumpMap()).mirrored(false,true));
+                //QImage img = QGLWidget::convertToGLFormat((* obj->getBumpMap()).mirrored(false,true));
                 if(!m_usePbo){
                     ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
                     glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
@@ -444,9 +444,11 @@ void View::renderScene()
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
 
                     //PBO -> Texture
-                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_RGBA, GL_UNSIGNED_BYTE, 0);
+                    int width = obj->getBumpMap()->width();
+                    int height = obj->getBumpMap()->height();
+                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, height, width, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
-                    int imgSize = img.width() * img.height() * sizeof(BGRA);
+                    int imgSize = width * height* sizeof(BGRA);
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
                     glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, imgSize, 0, GL_STREAM_DRAW_ARB);
                     GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
@@ -456,7 +458,7 @@ void View::renderScene()
                             memcpy(pixel, img.scanLine(i), img.bytesPerLine());
                             pixel += img.bytesPerLine();
                         }*/
-                        memcpy(pixel, img.bits(), img.byteCount());
+                        memcpy(pixel, obj->getBumpMap()->bits(), obj->getBumpMap()->byteCount());
                         glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
                     }
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);

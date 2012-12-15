@@ -207,9 +207,8 @@ int SceneObject::getBumpIndex(Vector4 objPosition)
     Vector texCoord = m_shape->getTexCoords(objPosition);
 
     // bump map
-    int bx = texCoord.x()*m_bumpResolution;
-    int by = texCoord.y()*m_bumpResolution;
-
+    int bx = (texCoord.x())*m_bumpResolution;
+    int by = (texCoord.y())*m_bumpResolution;
     int bindex = by*m_bumpResolution+bx;
     return bindex;
 }
@@ -218,6 +217,7 @@ int SceneObject::getDisplacementIndex(Vector4 objPosition)
 {
     Vector texCoord = m_shape->getTexCoords(objPosition);
 
+    // displacement map
     int dx = texCoord.x()*m_displacementResolution;
     int dy = texCoord.y()*m_displacementResolution;
     int dindex = dy*m_displacementResolution+dx;
