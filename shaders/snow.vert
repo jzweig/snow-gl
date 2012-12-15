@@ -9,7 +9,7 @@ uniform sampler2D snowTexture;
     
 float computeOffset(vec4 hVec)
 {
-    return (hVec.x +hVec.y*256.0+hVec.z*256.0*256.0);
+    return (hVec.x+hVec.y*256.0+hVec.z*256.0*256.0);
 }
     
 void main()

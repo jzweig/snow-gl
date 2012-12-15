@@ -295,13 +295,3 @@ bool SceneObject::collide(Vector4 objPos)
     }
 
 }
-
-/**
-  * Returns the bump at the given object position.
-  */
-float SceneObject::getBump(Vector4 objPosition)
-{
-    BGRA* data = (BGRA *)m_bumpMap->bits();
-    int index = getBumpIndex(objPosition);
-    return (data[index].r + data[index].g*256 + data[index].b*256*256)*0.0001;
-}
