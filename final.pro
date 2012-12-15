@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     shapes/Cube.cpp \
     SceneObject.cpp \
     SceneObjectFactory.cpp \
-    ShaderAssistant.cpp
+    ShaderAssistant.cpp \
+    shapes/Plane.cpp
 
 HEADERS += mainwindow.h \
     view.h \
@@ -55,7 +56,8 @@ HEADERS += mainwindow.h \
     shapes/Cube.h \
     SceneObject.h \
     SceneObjectFactory.h \
-    ShaderAssistant.h
+    ShaderAssistant.h \
+    shapes/Plane.h
 
 FORMS += mainwindow.ui
 

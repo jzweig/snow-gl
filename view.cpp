@@ -118,10 +118,9 @@ void View::setupScene()
     // Make the ground
     m_factory.setTesselationParameter(50);
     m_factory.setBumpResolution(1024);
-    SceneObject *ground = m_factory.constructCube();
+    SceneObject *ground = m_factory.constructPlane();
     ground->setColor(0.2, 0.39, 0.18, 1.0);
-    ground->scale(20.0, 0.2, 20.0);
-    ground->translate(0, -0.5, 0);
+    ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
 
 
