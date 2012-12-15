@@ -240,7 +240,6 @@ void SceneObject::recordSnowfall(Vector4 objPosition){
 }
 
 void SceneObject::incrementEndian(BGRA* color){
-\
     int r = color->r;
     int g = color->g;
     int b = color->b;
@@ -257,9 +256,6 @@ void SceneObject::incrementEndian(BGRA* color){
     g = curNum % 256;
     curNum /= 256;
     b = curNum;
-    if((int)color->r>254 || (int)color->b>0){
-    cout<<"["<<(int)color->r<<":"<<r<<","<<(int)color->g<<":"<<g<<","<<(int)color->b<<":"<<b<<"]"<<endl;
-    }
     color->r = r;
     color->g = g;
     color->b = b;
@@ -272,7 +268,7 @@ float SceneObject::getDisplacement(Vector4 objPosition)
 {
     BGRA* data = (BGRA *)m_displacementMap->bits();
     int index = getDisplacementIndex(objPosition);
-    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.00001;
+    return (data[index].r + data[index].g*256 + data[index].b*256*256)*0.00001;
 }
 
 bool SceneObject::collide(Vector4 objPos)
@@ -307,5 +303,5 @@ float SceneObject::getBump(Vector4 objPosition)
 {
     BGRA* data = (BGRA *)m_bumpMap->bits();
     int index = getBumpIndex(objPosition);
-    return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.0001;
+    return (data[index].r + data[index].g*256 + data[index].b*256*256)*0.0001;
 }
