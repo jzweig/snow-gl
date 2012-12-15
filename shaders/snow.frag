@@ -46,56 +46,20 @@ void main()
     }
     float blurredHeight = float(heightsSum) / float(weightSum);
 
-    col = color + vec4(1.0, 1.0, 1.0, 0.0) * blurredHeight * 0.5;
-
-    //col = color + vec4(1.0, 1.0, 1.0, 0.0) * actualHeight;
-
-    //gl_FragColor = col * intensity;
-
-
-
-
-
-
-
-
     vec3 n = normalize(normal);
     vec3 l = normalize(light);
 
     vec3 e = normalize(eye);
     vec3 i = normalize(vertex - eye);
     vec3 h = normalize(l+e);
-/*
-    float ms = m*m;
 
-    vec3 ve = -reflect(e,n);
-    vec4 p = (gl_ModelViewMatrixInverse*vec4(ve.xyz,0));
-    vec4 tc = textureCube(cubeMap, p.xyz);
-
-
-    float costheta =dot(n,l);
-
-    float f = r0 +(1.0-r0)*pow(1.0-cos(costheta),5);
-
-
-    float nh = dot(n,h);
-    float eh = dot(e,h);
-    float en = dot(e,n);
-
-    float alpha = acos(nh);
-    float d = exp(-(tan(alpha)*tan(alpha))/ms)/(4.0*ms*pow(cos(alpha),4));
-    float g1 = (2*nh*en)/eh;
-    float g2 = (2*nh*dot(l,n))/eh;
-    float g = min(1,min(g1,g2));
-
-    float speccof = (max((d*f*g)/en,0));*/
-    col = col*gl_LightSource[0].diffuse;
     float diffcof = max(dot(n,l),0.0);
 
-    gl_FragColor = gl_LightSource[0].ambient +diffcof*col;//+speccof*specular);//(1.0-f)*col+(f)*tc;
+    vec3 positive = vec3(1.0, 1.0, 1.0);
 
-
-
-
-
+    //gl_FragColor = gl_Color;
+    //gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
+    //gl_FragColor = gl_Color * diffcoff;
+    //gl_FragColor = vec4((n + positive)*0.5, 1);
+    gl_FragColor = vec4(l, 1);
 }

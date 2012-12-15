@@ -525,6 +525,10 @@ void View::renderScene()
 
 void View::paintGL()
 {
+
+    updateCamera();
+    setupLights();
+
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);

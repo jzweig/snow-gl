@@ -30,7 +30,7 @@ Vector Plane::getTexCoords(Vector4 objPos)
 void Plane::drawXZFace(float y)
 {
     float triangleWidth = 1.0f / m_pOne;
-    Vector currentNormal = Vector(0.0f, (y > 0.0 ? +1.0f : -1.0f), 0.0f);
+    Vector currentNormal = Vector(0.0f, 1.0f, 0.0f);
     for(int r = 0; r < m_pOne; r++) {
         for(int c = 0; c < m_pOne; c++) {
             float leftZ = -0.5f + c * triangleWidth;
