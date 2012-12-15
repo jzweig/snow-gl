@@ -12,7 +12,7 @@ uniform sampler2D snowTexture;
 
 float computeOffset(vec4 hVec)
 {
-    return hVec.x + hVec.y*255.0 + hVec.z*255.0*255.0;
+    return hVec.x + hVec.y*256.0 + hVec.z*256.0*256.0;
 }
 void main()
 {
@@ -25,10 +25,10 @@ void main()
     for( int i = 0; i < arraySize; i++ )
     {
         vec4 sample = texture2D(snowTexture, gl_TexCoord[0].st + offsets[i]);
-        float r = sample.r*128.0;
-        float g = sample.g*128.0;
-        float b = sample.b*128.0;
-        float height = r + g*255.0 + b*255.0*255.0;
+        sample.r = sample.r*128.0;
+        sample.g = sample.g*128.0;
+        sample.b = sample.b*128.0;
+        float height = computeOffset(sample);
         heightsSum += kernel[i] * height;
         weightSum += kernel[i];
     }
