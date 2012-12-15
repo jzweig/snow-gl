@@ -37,5 +37,4 @@ void main()
      } else {
          gl_Position = ftransform();
      }
-     gl_Position = ftransform();
 }

@@ -246,18 +246,20 @@ void SceneObject::incrementEndian(BGRA* color){
     int b = color->b;
 
     // Convert rgb value to int
-    int curNum = r + 255*g + 255*255*b;
+    int curNum = r + 256*g + 256*256*b;
 
     // Increment
     curNum++;
 
     // Convert back to rgb value
-    r = curNum % 255;
-    curNum /= 255;
-    g = curNum % 255;
-    curNum /= 255;
+    r = curNum % 256;
+    curNum /= 256;
+    g = curNum % 256;
+    curNum /= 256;
     b = curNum;
-
+    if((int)color->r>254 || (int)color->b>0){
+    cout<<"["<<(int)color->r<<":"<<r<<","<<(int)color->g<<":"<<g<<","<<(int)color->b<<":"<<b<<"]"<<endl;
+    }
     color->r = r;
     color->g = g;
     color->b = b;
@@ -286,7 +288,7 @@ bool SceneObject::collide(Vector4 objPos)
             return true;
         } else
             return false;
-    } else if( m_shapeType == CUBE )
+    } else
     {
         if( objPos.y >= -0.5 && objPos.y <= displacement + 0.5 )
         {
