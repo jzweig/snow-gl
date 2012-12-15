@@ -11,7 +11,7 @@ uniform sampler2D snowTexture;
 
 
 varying vec3 vertex;		// The vector from the eye to the vertex
-varying vec3 light;		// The normalized vector from the vertex to the light
+varying vec3 vertex_to_light;		// The normalized vector from the vertex to the light
 varying vec3 eye;		// The normalized vector from the vertex to the eye
 varying vec3 normal;		// The normal vector of the vertex, in eye space
 
@@ -47,19 +47,19 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     vec3 n = normalize(normal);
-    vec3 l = normalize(light);
+    vec3 l = normalize(vertex_to_light);
 
     vec3 e = normalize(eye);
     vec3 i = normalize(vertex - eye);
-    vec3 h = normalize(l+e);
+    vec3 h = normalize(vertex_to_light+e);
 
-    float diffcof = max(dot(n,l),0.0);
+    float diffcof = clamp(dot(n,vertex_to_light), 0.0, 1.0);
 
     vec3 positive = vec3(1.0, 1.0, 1.0);
 
     //gl_FragColor = gl_Color;
-    //gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
+    gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
     //gl_FragColor = gl_Color * diffcoff;
     //gl_FragColor = vec4((n + positive)*0.5, 1);
-    gl_FragColor = vec4(l, 1);
+    //gl_FragColor = vec4(vertex_to_light, 1);
 }
