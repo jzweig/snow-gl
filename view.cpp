@@ -444,7 +444,7 @@ void View::renderScene()
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
 
                     //PBO -> Texture
-                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, img.width(), img.height(), GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
                     int imgSize = img.width() * img.height() * sizeof(BGRA);
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
@@ -452,10 +452,11 @@ void View::renderScene()
                     GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
                     if(ptr){
                         unsigned char *pixel = (unsigned char *)ptr;
-                        for (int i = 0; i < img.height(); i++) {
+                        /*for (int i = 0; i < img.height(); i++) {
                             memcpy(pixel, img.scanLine(i), img.bytesPerLine());
                             pixel += img.bytesPerLine();
-                        }
+                        }*/
+                        memcpy(pixel, img.bits(), img.byteCount());
                         glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
                     }
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
