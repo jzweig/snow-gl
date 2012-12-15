@@ -7,6 +7,7 @@
 #include <CS123Common.h>
 #include "ShaderAssistant.h"
 
+enum ShapeType { PLANE, CUBE };
 enum TransformationType { ROTATION, TRANSLATION, SCALING };
 
 struct Transformation
@@ -26,7 +27,7 @@ struct Transformation
 class SceneObject
 {
     public:
-        SceneObject(Shape* shape, int gridLength);
+        SceneObject(Shape* shape, ShapeType type, int gridLength);
         virtual ~SceneObject();
         void render(const bool useVbo) const;
         void translate(float x, float y, float z);
@@ -40,6 +41,7 @@ class SceneObject
         GLuint getVboBuffer() const;
         GLuint* getPboBuffers() const;
         void recordSnowfall(Vector4 objPos);
+        bool collide(Vector4 obj);
         Vector4 getPosition();
         Matrix4x4 getTransformationMatrix() const;
         float getDisplacement(Vector4 objPosition);
@@ -57,6 +59,7 @@ class SceneObject
     protected:
         void refreshMatrix();
 
+        ShapeType m_shapeType;
         Shape *m_shape;
         vector<Transformation> m_transformations;
         Vector4 m_color;

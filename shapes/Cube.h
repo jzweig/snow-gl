@@ -11,6 +11,7 @@ class Cube : public Shape
 {
     public:
         Cube();
+        virtual Vector getTexCoords(Vector4 objPos);
         virtual void tesselate();
 
     protected:

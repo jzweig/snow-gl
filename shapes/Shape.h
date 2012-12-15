@@ -32,6 +32,8 @@ class Shape : public Renderable
         //! Tesselates the given shape
         virtual void tesselate() = 0;
 
+        virtual Vector getTexCoords(Vector4 objPos) = 0;
+
         /**
           This renders the shape. Subclasses shouldn't need to
           override this class if they implement tesselate().

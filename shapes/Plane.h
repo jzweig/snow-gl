@@ -8,6 +8,7 @@ class Plane : public Shape
 public:
     Plane();
     virtual void tesselate();
+    virtual Vector getTexCoords(Vector4 objPos);
 protected:
     void drawXZFace(float y);
 };

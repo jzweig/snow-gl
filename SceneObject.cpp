@@ -16,8 +16,9 @@ extern "C" {
 }
 //#endif
 
-SceneObject::SceneObject(Shape* shape, int bumpResolution) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, ShapeType type, int bumpResolution) : m_shape(shape)
 {
+    m_shapeType = type;
     m_displacementResolution = m_shape->getParamOne();
     m_bumpResolution = bumpResolution;
     m_matrix = Matrix4x4::identity();
@@ -203,9 +204,11 @@ void SceneObject::rotate(float angle, float x, float y, float z)
 
 int SceneObject::getBumpIndex(Vector4 objPosition)
 {
+    Vector texCoord = m_shape->getTexCoords(objPosition);
+
     // bump map
-    int bx = (objPosition.x + 0.5)*m_bumpResolution;
-    int by = (objPosition.z + 0.5)*m_bumpResolution;
+    int bx = texCoord.x()*m_bumpResolution;
+    int by = texCoord.y()*m_bumpResolution;
 
     int bindex = by*m_bumpResolution+bx;
     return bindex;
@@ -213,8 +216,10 @@ int SceneObject::getBumpIndex(Vector4 objPosition)
 
 int SceneObject::getDisplacementIndex(Vector4 objPosition)
 {
-    int dx = (objPosition.x + 0.5)*m_displacementResolution;
-    int dy = (objPosition.z + 0.5)*m_displacementResolution;
+    Vector texCoord = m_shape->getTexCoords(objPosition);
+
+    int dx = texCoord.x()*m_displacementResolution;
+    int dy = texCoord.y()*m_displacementResolution;
     int dindex = dy*m_displacementResolution+dx;
     return dindex;
 }
@@ -266,6 +271,31 @@ float SceneObject::getDisplacement(Vector4 objPosition)
     BGRA* data = (BGRA *)m_displacementMap->bits();
     int index = getDisplacementIndex(objPosition);
     return (data[index].r + data[index].g*255 + data[index].b*255*255)*0.00001;
+}
+
+bool SceneObject::collide(Vector4 objPos)
+{
+    // Check y with displacement
+    float displacement = getDisplacement(objPos);
+
+    if( m_shapeType == PLANE )
+    {
+        if( objPos.y <= displacement )
+        {
+            recordSnowfall(objPos);
+            return true;
+        } else
+            return false;
+    } else if( m_shapeType == CUBE )
+    {
+        if( objPos.y >= -0.5 && objPos.y <= displacement + 0.5 )
+        {
+            recordSnowfall(objPos);
+            return true;
+        } else
+            return false;
+    }
+
 }
 
 /**

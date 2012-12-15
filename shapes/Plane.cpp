@@ -22,6 +22,11 @@ void Plane::tesselate()
     drawXZFace( 0.0f );
 }
 
+Vector Plane::getTexCoords(Vector4 objPos)
+{
+    return Vector(objPos.x + 0.5, objPos.z + 0.5, 0);
+}
+
 void Plane::drawXZFace(float y)
 {
     float triangleWidth = 1.0f / m_pOne;
