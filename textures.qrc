@@ -3,5 +3,6 @@
         <file>textures/snowflake_design.png</file>
         <file>textures/snow-surface.jpg</file>
         <file>textures/another-surface.jpg</file>
+        <file>textures/plain-surface.jpg</file>
     </qresource>
 </RCC>

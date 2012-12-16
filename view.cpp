@@ -107,7 +107,7 @@ void View::setupScene()
 {
     // Make the ground
     m_factory.setTesselationParameter(100);
-    m_factory.setBumpResolution(1024);
+    m_factory.setBumpResolution(512);
     SceneObject *ground = m_factory.constructPlane();
     ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
     ground->setColor(1, 0.2, 0.2, 1.0);
@@ -269,7 +269,7 @@ void View::initializeGL()
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
 
-    m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/snow-surface.jpg" );
+    m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/plain-surface.jpg" );
 
     updateCamera();
 
