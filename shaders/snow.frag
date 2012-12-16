@@ -32,6 +32,13 @@ float computeOffset(vec4 hVec)
 }
 void main()
 {
+    // Light vectors
+    vec3 n = normalize(normal);
+    vec3 l = normalize(vertex_to_light);
+    vec3 e = normalize(eye);
+    vec3 i = normalize(vertex - eye);
+    vec3 h = normalize(vertex_to_light+e);
+
     // Sample the snow height at this position. This isn't actually used.
     vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
     float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
@@ -53,15 +60,8 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = min(1.0, actualHeight);
+    float snowIntensity = min(0.9, actualHeight)*dot(n, vec3(0,1.0,0)) + min(0.1,actualHeight);
     vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10));
-
-    // Light vectors
-    vec3 n = normalize(normal);
-    vec3 l = normalize(vertex_to_light);
-    vec3 e = normalize(eye);
-    vec3 i = normalize(vertex - eye);
-    vec3 h = normalize(vertex_to_light+e);
 
     // Calculate the diffuse coefficient
     float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
