@@ -92,7 +92,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     m_homeDir = getpwuid(getuid())->pw_dir;
     m_projDir = m_homeDir+"/course/cs123/snow-gl/";
-    m_projDir = "/Users/jbowens/Documents/School/2012-2013/cs123/snow-gl/";
 }
 
 View::~View()
