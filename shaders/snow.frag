@@ -15,6 +15,7 @@ varying vec3 vertex;		// The vector from the eye to the vertex
 varying vec3 vertex_to_light;		// The normalized vector from the vertex to the light
 varying vec3 eye;		// The normalized vector from the vertex to the eye
 varying vec3 normal;		// The normal vector of the vertex, in eye space
+varying vec3 origNormal;
 
 uniform samplerCube cubeMap;	// The cube map containing the environment to reflect
 uniform vec4 ambient;		// The ambient channel of the color to reflect
@@ -60,7 +61,7 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = min(0.9, actualHeight)*dot(n, vec3(0,1.0,0)) + min(0.1,actualHeight);
+    float snowIntensity = min(0.9, actualHeight)*dot(normalize(origNormal), vec3(0,1.0,0)) + min(0.1,actualHeight);
     vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10));
 
     // Calculate the diffuse coefficient

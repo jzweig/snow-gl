@@ -10,7 +10,7 @@ varying vec3 vertex;	// The position of the vertex, in eye space
 varying vec3 vertex_to_light;	// The normalized vector from the vertex to the light
 varying vec3 eye;	// The normalized vector from the vertex to the eye
 varying vec3 normal;	// The normal vector of the vertex, in eye space
-
+varying vec3 origNormal;
 
 float computeOffset(vec4 hVec)
 {
@@ -31,7 +31,7 @@ void main()
      eye = -vertex;
 
      vertex_to_light = normalize(gl_LightSource[0].position.xyz-vertex);
-     normal = normalize(gl_NormalMatrix * gl_Normal);
+     normal = origNormal = normalize(gl_NormalMatrix * gl_Normal);
 
      gl_FrontColor = gl_Color;
      //gl_Position = gl_ModelViewProjectionMatrix * vertex;
