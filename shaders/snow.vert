@@ -30,7 +30,8 @@ void main()
      //gl_TexCoord[1] = gl_MultiTexCoord1;
      gl_TexCoord[1].st = gl_MultiTexCoord1.st;
 
-     vertex = (gl_ModelViewMatrix * gl_Vertex).xyz;
+     vec4 modelviewVertex = gl_ModelViewMatrix * gl_Vertex;
+     vertex = vec3(modelviewVertex.xyz);
      eye = -vertex;
 
      vertex_to_light = normalize(gl_LightSource[0].position.xyz-vertex);

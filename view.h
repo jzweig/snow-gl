@@ -26,8 +26,8 @@
 #define DEFAULT_SPEED 1.0
 #define FAST_SPEED 20.0
 #define UBER_SPEED 100.0
-#define SPRINT_FACTOR 0.1
-#define WALK_FACTOR 0.01
+#define SPRINT_FACTOR 0.2
+#define WALK_FACTOR 0.1
 
 class View : public QGLWidget
 {
