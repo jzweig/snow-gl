@@ -37,6 +37,8 @@ class SceneObject
         void setColor(Vector4 color);
         void setVboBuffer(GLuint buffer_name);
         void setPboBuffers(GLuint* buffer_name);
+        void setTexture(GLuint colorTextureId);
+        GLuint getColorTexture();
         Shape *getShape();
         GLuint getVboBuffer() const;
         GLuint* getPboBuffers() const;
@@ -64,6 +66,7 @@ class SceneObject
         Vector4 m_color;
         Matrix4x4 m_matrix;
         GLuint m_vbo;
+        GLuint m_colorTexture;
         QImage* m_displacementMap;
         GLuint m_displacementMapId;
         //GLuint m_baseMapId;

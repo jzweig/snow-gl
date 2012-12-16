@@ -26,6 +26,7 @@ SceneObject::SceneObject(Shape* shape, ShapeType type, int bumpResolution) : m_s
     m_pbo = new GLuint[2];
     m_displacementMap = new QImage(m_displacementResolution,m_displacementResolution,QImage::Format_RGB32);
     m_bumpMap = new QImage(m_bumpResolution,m_bumpResolution,QImage::Format_RGB32);
+    m_colorTexture = 0;
 
     // set the new images to black
     memset(m_displacementMap->bits(), 0, m_displacementResolution * m_displacementResolution * sizeof(BGRA));
@@ -142,6 +143,16 @@ void SceneObject::setPboBuffers(GLuint* buffer_name)
 GLuint* SceneObject::getPboBuffers() const
 {
     return m_pbo;
+}
+
+void SceneObject::setTexture(GLuint colorTextureId)
+{
+    m_colorTexture = colorTextureId;
+}
+
+GLuint SceneObject::getColorTexture()
+{
+    return m_colorTexture;
 }
 
 void SceneObject::refreshMatrix()

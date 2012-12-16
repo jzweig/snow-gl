@@ -6,7 +6,9 @@ uniform float kernel[MAX_KERNEL_SIZE];
 
 uniform sampler2D snowDisplacement;
 uniform sampler2D snowTexture;
+uniform sampler2D localTexture;
 
+uniform bool useLocalTexture;
 
 varying vec3 vertex;		// The vector from the eye to the vertex
 varying vec3 vertex_to_light;		// The normalized vector from the vertex to the light
@@ -60,9 +62,17 @@ void main()
     // Calculate the diffuse coefficient
     float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
 
+    // Compute the local color
+    vec4 localColor;
+    if( useLocalTexture ) {
+        localColor = texture2D(localTexture, gl_TexCoord[0].st*10);
+    } else {
+        localColor = gl_Color;
+    }
+
     // Compute the diffuse color from the object's natural color and the
     // snow's contribution
-    vec4 diffuseColor = gl_Color + snowColor;
+    vec4 diffuseColor = localColor + snowColor;
 
     // Compute the final color
     vec4 finalColor = (diffuseColor * diffuseCoefficient);

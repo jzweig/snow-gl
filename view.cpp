@@ -109,6 +109,7 @@ void View::setupScene()
     m_factory.setTesselationParameter(50);
     m_factory.setBumpResolution(1024);
     SceneObject *ground = m_factory.constructPlane();
+    ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
@@ -249,13 +250,6 @@ void View::initializeGL()
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     glClearColor(0.0f,0.0f,0.0f,0.0f);
-
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glDisable(GL_DITHER);
-    //glShadeModel(GL_FLAT);
-
-
     glEnable(GL_COLOR_MATERIAL);
     glShadeModel(GL_SMOOTH);
 
@@ -265,15 +259,15 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
+    // Setup the cube map
     setupCubeMap();
 
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
     setupScene();
-    cout<<"setup scene..."<<endl;
 
-    // Load the texture
+    // Load the snow texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
     updateCamera();
@@ -421,7 +415,6 @@ void View::renderScene()
 
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
 
-            //glActiveTexture(GL_TEXTURE5);
             SceneObject *obj = *it;
 
             if(m_useShader){
@@ -429,9 +422,9 @@ void View::renderScene()
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
                 shader->bind();
-                //shader->setUniformValue("cubeMap", GL_TEXTURE5);
-                shader->setUniformValue("snowTexture",1);
-                shader->setUniformValue("snowDisplacement",2);
+                shader->setUniformValue("snowTexture", 1);
+                shader->setUniformValue("snowDisplacement", 2);
+                shader->setUniformValue("localTexture", 3);
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
@@ -494,8 +487,14 @@ void View::renderScene()
                         glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
                     }
                     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+                }
 
-
+                if( obj->getColorTexture() != 0 ) {
+                    shader->setUniformValue("useLocalTexture", true);
+                    glActiveTexture(GL_TEXTURE3);
+                    glBindTexture(GL_TEXTURE_2D, obj->getColorTexture());
+                } else {
+                    shader->setUniformValue("useLocalTexture", false);
                 }
 
                 glActiveTexture(GL_TEXTURE0);
