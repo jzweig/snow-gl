@@ -79,7 +79,8 @@ void main()
     vec4 diffuseColor = localColor * (1.0 - snowIntensity) + snowColor * snowIntensity;
 
     // Compute the final color
-    vec4 finalColor = (diffuseColor * diffuseCoefficient);
+    vec4 ambientColor = vec4(0.2*diffuseColor.r, 0.2*diffuseColor.g, 0.2*diffuseColor.b, 0);
+    vec4 finalColor = ambientColor + (diffuseColor * diffuseCoefficient);
 
     // Alpha values will have been reduced from multiplying by the diffuse coefficient,
     // so we need to bring them back up to the material's opacity.
