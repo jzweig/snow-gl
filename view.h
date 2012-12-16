@@ -140,6 +140,8 @@ protected:
      int m_pboIndexA;
      int m_pboIndexB;
 
+     GLuint m_snowTextureId;
+
 };
 
 #endif // VIEW_H

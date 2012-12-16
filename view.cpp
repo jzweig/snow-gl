@@ -270,6 +270,9 @@ void View::initializeGL()
     // Load the snow texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
+
+    m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/snow-surface.jpg" );
+
     updateCamera();
 
     cout << "set lights..." << endl;
@@ -435,6 +438,7 @@ void View::renderScene()
                 shader->setUniformValue("snowTexture", 1);
                 shader->setUniformValue("snowDisplacement", 2);
                 shader->setUniformValue("localTexture", 3);
+                shader->setUniformValue("snowSurfaceTexture", 4);
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
@@ -506,6 +510,9 @@ void View::renderScene()
                 } else {
                     shader->setUniformValue("useLocalTexture", false);
                 }
+
+                glActiveTexture(GL_TEXTURE4);
+                glBindTexture(GL_TEXTURE_2D, m_snowTextureId);
 
                 glActiveTexture(GL_TEXTURE0);
             }

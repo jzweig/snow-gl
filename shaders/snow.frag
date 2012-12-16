@@ -7,6 +7,7 @@ uniform float kernel[MAX_KERNEL_SIZE];
 uniform sampler2D snowDisplacement;
 uniform sampler2D snowTexture;
 uniform sampler2D localTexture;
+uniform sampler2D snowSurfaceTexture;
 
 uniform bool useLocalTexture;
 
@@ -49,8 +50,8 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = actualHeight;
-    vec4 snowColor = vec4(1.0, 1.0, 1.0, 0.0) * snowIntensity;
+    float snowIntensity = min(1.0, actualHeight);
+    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*2) * snowIntensity;
 
     // Light vectors
     vec3 n = normalize(normal);
