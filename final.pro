@@ -32,7 +32,9 @@ SOURCES += main.cpp \
     shapes/Renderable.cpp \
     shapes/Cube.cpp \
     SceneObject.cpp \
-    SceneObjectFactory.cpp
+    SceneObjectFactory.cpp \
+    ShaderAssistant.cpp \
+    shapes/Plane.cpp
 
 HEADERS += mainwindow.h \
     view.h \
@@ -53,12 +55,15 @@ HEADERS += mainwindow.h \
     shapes/Renderable.h \
     shapes/Cube.h \
     SceneObject.h \
-    SceneObjectFactory.h
+    SceneObjectFactory.h \
+    ShaderAssistant.h \
+    shapes/Plane.h
 
 FORMS += mainwindow.ui
 
 RESOURCES += textures.qrc \
-    shaders.qrc
+    shaders.qrc \
+    skymaps.qrc
 OTHER_FILES += \
 shaders/terrain.frag \
 shaders/terrain.vars \

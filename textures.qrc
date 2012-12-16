@@ -1,5 +1,13 @@
 <RCC>
     <qresource prefix="/textures">
         <file>textures/snowflake_design.png</file>
+        <file>textures/snow-surface.jpg</file>
+        <file>textures/another-surface.jpg</file>
+        <file>textures/plain-surface.jpg</file>
+        <file>textures/seamless_rock_texture.jpg</file>
+        <file>textures/second-snowflake.png</file>
+        <file>textures/snowball-texture.png</file>
+        <file>textures/snowflake-icon.png</file>
+        <file>textures/actual-snowflake.png</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 
 #include<map>
 #include "shapes/Cube.h"
+#include "shapes/Plane.h"
 #include "SceneObject.h"
 
 class SceneObjectFactory
@@ -12,6 +13,7 @@ public:
     virtual ~SceneObjectFactory();
 
     SceneObject *constructCube();
+    SceneObject *constructPlane();
 
     /**
       * Tells the factory to use the given tesselation parameter when

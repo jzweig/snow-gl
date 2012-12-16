@@ -11,6 +11,7 @@ class Vector
 {
     public:
         Vector();
+        Vector(float oneValue);
         Vector(float x, float y, float z);
         ~Vector();
 
@@ -25,6 +26,9 @@ class Vector
         void z(float z);
 
         Vector4 toVec4() const;
+
+        Vector operator+(const Vector& other);
+        Vector operator*(float other);
 
         float *getData();
 

@@ -16,7 +16,16 @@ SceneObject *SceneObjectFactory::constructCube()
     Cube *cube = new Cube();
     cube->tesselate();
     cube->setParamOne(m_tesselationParameter);
-    SceneObject *obj = new SceneObject(cube,m_BumpResolution);
+    SceneObject *obj = new SceneObject(cube, CUBE, m_BumpResolution);
+    return obj;
+}
+
+SceneObject *SceneObjectFactory::constructPlane()
+{
+    Plane *plane = new Plane();
+    plane->tesselate();
+    plane->setParamOne(m_tesselationParameter);
+    SceneObject *obj = new SceneObject(plane, PLANE, m_BumpResolution);
     return obj;
 }
 

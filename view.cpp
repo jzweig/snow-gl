@@ -11,6 +11,7 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
+#include "GL/glext.h"
 #include <GL/gl.h>
 #include "GL/glut.h"
 #include "GL/glu.h"
@@ -18,20 +19,35 @@
 #endif
 
 static  QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
+
 static const int MAX_FPS = 60;
 
 #ifndef __APPLE__
 extern "C" {
-    GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
-    GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
-    GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
+GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
+GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
+}
+extern "C" {
+GLAPI void APIENTRY glBindBufferARB (GLenum target, GLuint buffer);
+GLAPI void APIENTRY glDeleteBuffersARB (GLsizei n, const GLuint *buffers);
+GLAPI void APIENTRY glGenBuffersARB (GLsizei n, GLuint *buffers);
+GLAPI GLboolean APIENTRY glIsBufferARB (GLuint buffer);
+GLAPI void APIENTRY glBufferDataARB (GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
+GLAPI void APIENTRY glBufferSubDataARB (GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+GLAPI void APIENTRY glGetBufferSubDataARB (GLenum target, GLintptrARB offset, GLsizeiptrARB size, GLvoid *data);
+GLAPI GLvoid* APIENTRY glMapBufferARB (GLenum target, GLenum access);
+GLAPI GLboolean APIENTRY glUnmapBufferARB (GLenum target);
+GLAPI void APIENTRY glGetBufferParameterivARB (GLenum target, GLenum pname, GLint *params);
+GLAPI void APIENTRY glGetBufferPointervARB (GLenum target, GLenum pname, GLvoid* *params);
 }
 #endif
 
 View::View(QWidget *parent) : QGLWidget(parent),
-        m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
+    m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
-    m_useShader = true;
+    m_pboIndexA =0;
+    m_pboIndexB =0;
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
 
@@ -69,18 +85,14 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_isSolid = true;
     m_showUnitAxis = false;
     m_useVbo = true;
+    m_usePbo = true;
     m_useDisplacement = true;
-
-    // Make sure the image file exists
-    QFile file("/course/cs123/data/image/BoneHead.jpg");
-    if (!file.exists())
-        cout<<"/course/cs123/data/image/BoneHead.jpg FILE DOES NOT EXIST"<<endl;
-
-    // Load the file into memory
-    //m_snowHeightMap->load(file.fileName());
+    m_useShader = true;
+    m_showSkybox = true;
 
     m_homeDir = getpwuid(getuid())->pw_dir;
     m_projDir = m_homeDir+"/course/cs123/snow-gl/";
+    m_projDir = "/Users/jbowens/Documents/School/2012-2013/cs123/snow-gl/";
 }
 
 View::~View()
@@ -110,31 +122,55 @@ View::~View()
 void View::setupScene()
 {
     // Make the ground
-    m_factory.setTesselationParameter(50);
-    m_factory.setBumpResolution(1024);
-    SceneObject *ground = m_factory.constructCube();
-    ground->setColor(0.2, 0.39, 0.18, 1.0);
-    ground->scale(20.0, 0.2, 20.0);
-    ground->translate(0, -0.5, 0);
+    m_factory.setTesselationParameter(75);
+    m_factory.setBumpResolution(512);
+    SceneObject *ground = m_factory.constructPlane();
+    ground->setTexture(ResourceLoader::loadTexture( ":/textures/textures/seamless_rock_texture.jpg" ));
+    ground->setColor(1, 0.2, 0.2, 1.0);
+    ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
 
     // Make a demo box
-    m_factory.setTesselationParameter(50);
+    m_factory.setTesselationParameter(32);
     m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
-    demoBox->setColor(0.25, 0.25, 0.25, 1.0);
-    demoBox->translate(-5.0, 0.5, 5.0);
+    demoBox->setColor(0.5, 0.15, 0.15, 1.0);
+    demoBox->translate(-5.0, 0.40, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
-    m_factory.setTesselationParameter(50);
+    m_factory.setTesselationParameter(16);
+    m_factory.setBumpResolution(32);
     SceneObject *smallBox = m_factory.constructCube();
-    smallBox->setColor(0.2, 0.2, 0.45, 0.75);
+    smallBox->setColor(0.2, 0.5, 0.2, 1.0);
     smallBox->scale(0.5, 0.5, 0.5);
     smallBox->translate(-3.0, 0.5, 7.0);
     m_objects.push_back(smallBox);
 
     initSceneVbo();
+    initScenePbo();
+}
+
+void View::initScenePbo()
+{
+    // Iterate through all of the objects
+    for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
+    {
+        int bufferSize = (*it)->m_bumpResolution * (*it)->m_bumpResolution * sizeof(BGRA);
+        GLuint* ids = (*it)->m_pbo;
+        //generate two buffers to alternate between during updating for performance (halting)
+        glGenBuffersARB(2, ids);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, ids[m_pboIndexA]);
+        glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, bufferSize, 0, GL_STREAM_DRAW_ARB);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, ids[m_pboIndexB]);
+        glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, bufferSize, 0, GL_STREAM_DRAW_ARB);
+        glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+        // Tell the scene object its pbo buffer
+        (*it)->setPboBuffers(ids);
+
+    }
 }
 
 void View::initSceneVbo()
@@ -201,14 +237,12 @@ void View::createShaderPrograms()
     m_shaderPrograms["snow"] = ResourceLoader::newShaderProgram(ctx, vShader, fShader);
 }
 
-
 void View::initializeGL()
 {
     cout << "Using OpenGL Version " << glGetString(GL_VERSION) << endl << endl;
 
     glEnable(GL_TEXTURE_2D);
     createShaderPrograms();
-    cout << "initialized shader programs..." << endl;
 
     // Start the drawing timer
     m_timer.start(1000.0f / MAX_FPS);
@@ -226,24 +260,31 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
+    // Setup the cube map
+    setupCubeMap();
+
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
     // Tesselate the scene and setup all of the transformation matrices
     setupScene();
-    cout<<"setup scene..."<<endl;
 
     // Create the frame buffer objects
     createFramebufferObjects(width(), height());
 
-    // Load the texture
-    GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
-    m_snowEmitter.setTextureId( textureId );
     applyProjectionCamera();
-    setupLights();
     glFrontFace(GL_CCW);
     glEnable(GL_TEXTURE_2D);
     createShaderPrograms();
+    // Load the snow texture
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/second-snowflake.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowball-texture.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowflake-icon.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/actual-snowflake.png" ) );
+    m_snowEmitter.setTextures(&m_snowflakeTextures);
+
+    m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/plain-surface.jpg" );
 }
 
 void View::setupLights()
@@ -252,8 +293,8 @@ void View::setupLights()
 
     // Set up GL_LIGHT0 with a position and lighting properties
     GLfloat ambientLight[] = {0.1f, 0.1f, 0.1f, 1.0f};
-    GLfloat diffuseLight[] = { 0.1f, 0.1f, 0.1f, 0.4f };
-    GLfloat specularLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
+    GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat position[] = { 5.0f, 5.5f, 5.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
@@ -261,6 +302,30 @@ void View::setupLights()
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     glEnable(GL_LIGHT0);
+}
+/**
+  Load a cube map for the skybox
+ **/
+void View::setupCubeMap()
+{
+    QList<QFile *> fileList;
+    /*
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posx.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negx.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posy.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negy.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posz.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negz.jpg"));
+    */
+
+    QString skyType = QString::fromStdString("sky32");
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posz.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negz.jpg"));
+    m_cubeMap = ResourceLoader::loadCubeMap(fileList);
 }
 
 /**
@@ -316,22 +381,134 @@ void View::renderScene()
     glClear(GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+    QGLShaderProgram *shader = m_shaderPrograms["snow"];
+
     // Render the wireframes if enabled
     if( m_isWireframe ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-            (*it)->render(m_useVbo,true,m_useDisplacement,m_shaderPrograms["snow"]);
-         }
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+            (*it)->render(m_useVbo);
+        }
     }
 
     // Render the solid scene
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
-                GLuint sky = ResourceLoader::loadSkybox();
-                glCallList(sky);
-                (*it)->render(m_useVbo,m_useShader,m_useDisplacement,m_shaderPrograms["snow"]);
+
+        // Enable cube maps and draw the skybox
+        if( m_showSkybox )
+        {
+            glDisable(GL_LIGHTING);
+            glEnable(GL_TEXTURE_CUBE_MAP);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
+            GLuint sky = ResourceLoader::loadSkybox();
+            glCallList(sky);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glDisable(GL_TEXTURE_CUBE_MAP);
+            glEnable(GL_LIGHTING);
         }
+
+        for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
+
+            SceneObject *obj = *it;
+
+            if(m_useShader){
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+                shader->bind();
+                shader->setUniformValue("snowTexture", 1);
+                shader->setUniformValue("snowDisplacement", 2);
+                shader->setUniformValue("localTexture", 3);
+                shader->setUniformValue("snowSurfaceTexture", 4);
+                shader->setUniformValue("useDisplacement", m_useDisplacement);
+                Vector4 color = obj->getColor();
+                shader->setUniformValue("color",color.x, color.y, color.z, color.w);
+                shader->setUniformValue("tesselationParam", obj->getShape()->getParamOne());
+
+                // Set the blur data
+                int radius = 6;
+                int dim = radius * 2 + 1;
+                GLfloat kernel[dim * dim];
+                GLfloat offsets[dim * dim * 2];
+                GLfloat ambientAry[4] = {0.7, 0.7, 0.7, 1.0};
+                GLfloat diffuseAry[4] = {color.x, color.y, color.z, color.w};
+                GLfloat specularAry[4] = {0.9, 0.9, 0.9, 0.0};
+                GLfloat m = 0.55;
+                GLfloat r0 = 0.7;
+                ShaderAssistant::createBlurKernel(radius, width(), height(), &kernel[0], &offsets[0]);
+                shader->setUniformValue("arraySize", dim * dim);
+                shader->setUniformValueArray("offsets", offsets, 2 * dim * dim, 2);
+                shader->setUniformValueArray("ambient", ambientAry, 1, 4);
+                shader->setUniformValueArray("diffuse", diffuseAry, 1, 4);
+                shader->setUniformValueArray("specular", specularAry, 1, 4);
+                shader->setUniformValue("m", m);
+                shader->setUniformValue("r0", r0);
+
+                // Displacement
+                ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
+                glActiveTexture(GL_TEXTURE2);
+                //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
+                glBindTexture(GL_TEXTURE_2D,obj->getDisplacementMapId());
+
+
+                // Bump
+                glActiveTexture(GL_TEXTURE1);
+                //QImage img = QGLWidget::convertToGLFormat((* obj->getBumpMap()).mirrored(false,true));
+                if(!m_usePbo){
+                    ResourceLoader::reloadHeightMapTexture(obj->getBumpMap(),obj->getBumpMapId());
+                    glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+                }else{
+                    m_pboIndexA = (m_pboIndexA + 1) % 2;
+                    m_pboIndexB = (m_pboIndexA + 1) % 2;
+
+                    glBindTexture(GL_TEXTURE_2D,obj->getBumpMapId());
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexA]);
+
+                    //PBO -> Texture
+                    int width = obj->getBumpMap()->width();
+                    int height = obj->getBumpMap()->height();
+                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, height, width, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+
+                    int imgSize = width * height* sizeof(BGRA);
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, obj->getPboBuffers()[m_pboIndexB]);
+                    glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, imgSize, 0, GL_STREAM_DRAW_ARB);
+                    GLubyte* ptr = (GLubyte*)glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+                    if(ptr){
+                        unsigned char *pixel = (unsigned char *)ptr;
+                        /*for (int i = 0; i < img.height(); i++) {
+                            memcpy(pixel, img.scanLine(i), img.bytesPerLine());
+                            pixel += img.bytesPerLine();
+                        }*/
+                        memcpy(pixel, obj->getBumpMap()->bits(), obj->getBumpMap()->byteCount());
+                        glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
+                    }
+                    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+                }
+
+                if( obj->getColorTexture() != 0 ) {
+                    shader->setUniformValue("useLocalTexture", true);
+                    glActiveTexture(GL_TEXTURE3);
+                    glBindTexture(GL_TEXTURE_2D, obj->getColorTexture());
+                } else {
+                    shader->setUniformValue("useLocalTexture", false);
+                }
+
+                glActiveTexture(GL_TEXTURE4);
+                glBindTexture(GL_TEXTURE_2D, m_snowTextureId);
+
+                glActiveTexture(GL_TEXTURE0);
+            }
+            (*it)->render(m_useVbo);
+            if( m_useShader )
+            {
+                shader->release();
+                glBindTexture(GL_TEXTURE_2D,0);
+                glDisable(GL_BLEND);
+            }
+        }
+
+
     }
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     glPopMatrix();
@@ -341,6 +518,9 @@ void View::paintGL()
 {
     // NOTE: Opaque objects must be rendered before transparent. This means
     //       objects before snowflakes.
+
+    updateCamera();
+    setupLights();
 
     // Update the fps
     int time = m_clock.elapsed();
@@ -381,8 +561,8 @@ void View::paintGL()
     renderFramebuffer(m_fbo_main);
 
     // Display the frame
-    glFlush();
-    swapBuffers();
+    //glFlush();
+    //swapBuffers();
 
     // Paint GUI
     paintUI();
@@ -398,8 +578,8 @@ void View::paintUI()
     // Combine the previous and current framerate
     if (m_fps >= 0 && m_fps < 1000)
     {
-       m_prevFps *= 0.95f;
-       m_prevFps += m_fps * 0.05f;
+        m_prevFps *= 0.95f;
+        m_prevFps += m_fps * 0.05f;
     }
 
     // QGLWidget's renderText takes xy coordinates, a string, and a font
@@ -465,9 +645,15 @@ void View::keyPressEvent(QKeyEvent *event)
         m_useVbo = ! m_useVbo;
     } else if(event->key() == Qt::Key_5) {
         m_useShader = ! m_useShader;
-
     } else if(event->key() == Qt::Key_6) {
         m_useDisplacement = ! m_useDisplacement;
+    } else if(event->key() == Qt::Key_7) {
+        m_usePbo = ! m_usePbo;
+    } else if(event->key() == Qt::Key_8) {
+        m_showSkybox = ! m_showSkybox;
+    } else if(event->key() == Qt::Key_U) {
+        m_useUberMode = ! m_useUberMode;
+        m_speed = m_useUberMode ? UBER_SPEED : DEFAULT_SPEED;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

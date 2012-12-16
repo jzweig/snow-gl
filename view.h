@@ -26,8 +26,9 @@
 // the down arrow.
 #define DEFAULT_SPEED 1.0
 #define FAST_SPEED 20.0
-#define SPRINT_FACTOR 0.1
-#define WALK_FACTOR 0.01
+#define UBER_SPEED 100.0
+#define SPRINT_FACTOR 0.2
+#define WALK_FACTOR 0.1
 
 class View : public QGLWidget
 {
@@ -46,8 +47,7 @@ private:
     int m_prevTime;
     float m_prevFps, m_fps;
     QFont m_font; // font for rendering text
-    Model m_dragon; // dragon model
-
+    GLuint m_cubeMap;
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
@@ -76,7 +76,9 @@ protected:
      void initSceneVbo();
      void applyProjectionCamera();
      void applyOrthogonalCamera();
+     void initScenePbo();
      void setupLights();
+     void setupCubeMap();
      float getMoveFactor();
      void renderScene();
      void createFramebufferObjects(int width, int height);
@@ -112,11 +114,23 @@ protected:
      //! Whether or not to display the unit axis
      bool m_showUnitAxis;
 
+     //! Whether or not to show the skybox
+     bool m_showSkybox;
+
+     //! Is uber mode?
+     bool m_useUberMode;
+
+     //! Snowflake textures
+     vector<GLuint> m_snowflakeTextures;
+
      QImage* m_snowHeightMap;
      BGRA* m_data;
 
      //! Use scene vbo
      bool m_useVbo;
+
+     //! Use scene pbo
+     bool m_usePbo;
 
      //! Use shader displacement mapping
      bool m_useDisplacement;
@@ -135,6 +149,10 @@ protected:
 
      QString m_homeDir;
      QString m_projDir;
+     int m_pboIndexA;
+     int m_pboIndexB;
+
+     GLuint m_snowTextureId;
 
 };
 

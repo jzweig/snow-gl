@@ -11,9 +11,26 @@ Vector::Vector(float x, float y, float z)
     m_z = z;
 }
 
+Vector::Vector(float oneValue)
+{
+    m_x = oneValue;
+    m_y = oneValue;
+    m_z = oneValue;
+}
+
 Vector::~Vector()
 {
 
+}
+
+Vector Vector::operator+(const Vector& other)
+{
+    return Vector(other.x() + x(), other.y() + y(), other.z() + z());
+}
+
+Vector Vector::operator*(float other)
+{
+    return Vector(x() * other, y() * other, z() * other);
 }
 
 float Vector::x() const

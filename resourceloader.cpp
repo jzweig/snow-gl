@@ -8,6 +8,10 @@
 
 using namespace std;
 
+#ifdef __APPLE__
+#include "glut/glut.h"
+#endif
+
 /**
   Loads the cube map into video memory.
 
@@ -74,41 +78,42 @@ GLuint ResourceLoader::loadTexture(const QString &path)
     return textureid;
 }
 
-GLuint ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
+void ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
 {
-    QImage texture = QGLWidget::convertToGLFormat((* heightMap));
+    QImage texture = QGLWidget::convertToGLFormat((* heightMap).mirrored(false,true));
+    //glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, pboIds[index]);
+
     // make texture active (bind)
     glBindTexture(GL_TEXTURE_2D, textureid);
-
-    // Copy the image data into the OpenGL texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     // filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Copy the image data into the OpenGL texture
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+
 
     // deactivate texture (unbind)
     glBindTexture(GL_TEXTURE_2D, 0);
-
 }
 
 GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 {
     //glEnable(GL_TEXTURE_2D);
     GLuint textureid;
-    QImage texture = QGLWidget::convertToGLFormat((* heightMap));//->mirrored(false,true));
+    QImage texture = QGLWidget::convertToGLFormat((* heightMap).mirrored(false,true));
 
     glGenTextures(1, &textureid);
 
     // make texture active (bind)
     glBindTexture(GL_TEXTURE_2D, textureid);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // Copy the image data into the OpenGL texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     //gluBuild2DMipmaps(GL_TEXTURE_2D, 3, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
     // filtering
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -122,8 +127,6 @@ GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 
 }
 
-
-
 /**
     Loads an OBJ models from a file
   **/
@@ -136,7 +139,6 @@ Model ResourceLoader::loadObjModel(QString filePath)
     return m;
 }
 
-
 /**
     Creates a call list for a skybox
   **/
@@ -144,6 +146,9 @@ GLuint ResourceLoader::loadSkybox()
 {
     GLuint id = glGenLists(1);
     glNewList(id, GL_COMPILE);
+
+    glPushMatrix();
+    glTranslatef(0, 10, 0);
 
     // Be glad we wrote this for you...ugh.
     glBegin(GL_QUADS);
@@ -173,6 +178,8 @@ GLuint ResourceLoader::loadSkybox()
     glTexCoord3f( 1.0f, -1.0f,  1.0f); glVertex3f( extent, -extent,  extent);
     glTexCoord3f( 1.0f, -1.0f, -1.0f); glVertex3f( extent, -extent, -extent);
     glEnd();
+
+    glPopMatrix();
     glEndList();
 
     return id;

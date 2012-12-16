@@ -5,7 +5,10 @@ SnowEmitter::SnowEmitter()
     m_snowflakeCount = 0;
     m_activeSnowflakes = 0;
     m_snowflakes = NULL;
-
+    m_directableCounter = 1024*4;
+    m_directableGridSize = 1024;
+    m_directableGridInc = 1;
+    m_isDirectableSnow = !true;
     // Initialize the snow flakes
     initializeSnowflakes(INITIAL_SNOWFLAKE_COUNT);
 }
@@ -20,9 +23,9 @@ SnowEmitter::~SnowEmitter()
     }
 }
 
-void SnowEmitter::setTextureId(GLuint textureId)
+void SnowEmitter::setTextures(vector<GLuint> *textures)
 {
-    m_textureId = textureId;
+    m_flakeTextures = textures;
 }
 
 void SnowEmitter::setCamera(OrbitCamera *camera)
@@ -61,19 +64,33 @@ void SnowEmitter::dropSnowflake(int snowflakeIndex)
 
     // One more active snowflake falling
     m_activeSnowflakes++;
-
     m_snowflakes[snowflakeIndex].active = true;
-    m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
-    m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
-    m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
-    m_snowflakes[snowflakeIndex].pos.w = 0;
-    m_snowflakes[snowflakeIndex].dir.x = 0;
-    m_snowflakes[snowflakeIndex].dir.y = -1;
-    m_snowflakes[snowflakeIndex].dir.z = 0;
-    m_snowflakes[snowflakeIndex].dir.w = 0;
-    m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
     m_snowflakes[snowflakeIndex].isVisible = false;
-    resetWind(snowflakeIndex);
+    if(m_isDirectableSnow){
+
+        m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT;
+        m_snowflakes[snowflakeIndex].pos.x = -10.0f+(((float)(m_directableCounter%m_directableGridSize))/m_directableGridSize)*20.0;
+        m_snowflakes[snowflakeIndex].pos.z = -10.0f+(((float)m_directableCounter/m_directableGridSize))/(m_directableGridSize)*20.0;
+        m_snowflakes[snowflakeIndex].pos.w = 1;
+        m_snowflakes[snowflakeIndex].dir.x = 0;
+        m_snowflakes[snowflakeIndex].dir.y = -1;
+        m_snowflakes[snowflakeIndex].dir.z = 0;
+        m_snowflakes[snowflakeIndex].dir.w = 0;
+        m_snowflakes[snowflakeIndex].size = 0.003;
+        m_directableCounter = (m_directableCounter+1)%(m_directableGridSize*m_directableGridSize);
+    }else{
+        m_snowflakes[snowflakeIndex].pos.y = INITIAL_SNOWFLAKE_HEIGHT + (float)rand()/((float)RAND_MAX/(10.0));
+        m_snowflakes[snowflakeIndex].pos.x = camera_x - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
+        m_snowflakes[snowflakeIndex].pos.z = camera_z - SNOWFALL_RADIUS + (float)rand()/((float)RAND_MAX/(SNOWFALL_RADIUS*2));
+        m_snowflakes[snowflakeIndex].pos.w = 1;
+        m_snowflakes[snowflakeIndex].dir.x = 0;
+        m_snowflakes[snowflakeIndex].dir.y = -1;
+        m_snowflakes[snowflakeIndex].dir.z = 0;
+        m_snowflakes[snowflakeIndex].dir.w = 0;
+        m_snowflakes[snowflakeIndex].size = 0.003 + (float)rand()/((float)RAND_MAX/(0.006));
+        resetWind(snowflakeIndex);
+
+    }
 }
 
 void SnowEmitter::resetWind(int snowflakeIndex)
@@ -115,11 +132,12 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
             m_snowflakes[i].dir = m_snowflakes[i].dir + m_snowflakes[i].windForce + Vector4(0, GRAVITY_Y_CHANGE, 0, 0);
             m_snowflakes[i].pos = (m_snowflakes[i].dir*(BASE_FLAKE_SPEED_FACTOR * (*m_speed))) + m_snowflakes[i].pos;
 
-            if( m_snowflakes[i].windExpire == 0 )
-                resetWind(i);
-            else
+            if( m_snowflakes[i].windExpire == 0 ){
+                if(!m_isDirectableSnow)
+                    resetWind(i);
+            } else {
                 m_snowflakes[i].windExpire--;
-
+            }
             if( m_snowflakes[i].pos.y < SNOWFLAKE_CUTOFF ) {
                 m_snowflakes[i].active = false;
                 m_activeSnowflakes--;
@@ -142,43 +160,58 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
 void SnowEmitter::drawSnowflakes()
 {
     glDisable(GL_LIGHTING);
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glBegin(GL_QUADS);
+
 
     // Calculate the up and right vectors for use in billboarding
     Vector4 up = m_camera->getUp();
     Vector4 right = m_camera->getDirection().cross(up);
 
     glColor3f(1.0f, 1.0f, 1.0f);
-    for(int i = 0; i < m_snowflakeCount; i++)
+
+    int flakesPerTexture = ceil(float(m_snowflakeCount) / float(m_flakeTextures->size()));
+
+    for(int t = 0; t < m_flakeTextures->size(); t++)
     {
-        if( m_snowflakes[i].active && m_snowflakes[i].isVisible )
+        GLuint textureId = m_flakeTextures->at(t);
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glBegin(GL_QUADS);
+
+        int startIndex = flakesPerTexture * t;
+        int endIndex = flakesPerTexture * (t + 1);
+
+        for(int i = startIndex; i < endIndex && m_snowflakeCount; i++)
         {
-            float size = m_snowflakes[i].size;
+            if( m_snowflakes[i].active && m_snowflakes[i].isVisible )
+            {
+                float size = m_snowflakes[i].size;
 
-            Vector4 a = m_snowflakes[i].pos - (right + up) * size;
-            Vector4 b = m_snowflakes[i].pos + (right - up) * size;
-            Vector4 c = m_snowflakes[i].pos + (right + up) * size;
-            Vector4 d = m_snowflakes[i].pos - (right - up) * size;
+                Vector4 a = m_snowflakes[i].pos - (right + up) * size;
+                Vector4 b = m_snowflakes[i].pos + (right - up) * size;
+                Vector4 c = m_snowflakes[i].pos + (right + up) * size;
+                Vector4 d = m_snowflakes[i].pos - (right - up) * size;
 
-            glTexCoord2f(0, 1.0);
-            glVertex3f(d.x, d.y, d.z);
-            glTexCoord2f(0, 0);
-            glVertex3f(a.x, a.y, a.z);
-            glTexCoord2f(1.0, 0);
-            glVertex3f(b.x, b.y, b.z);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(c.x, c.y, c.z);
+                glTexCoord2f(0, 1.0);
+                glVertex3f(d.x, d.y, d.z);
+                glTexCoord2f(0, 0);
+                glVertex3f(a.x, a.y, a.z);
+                glTexCoord2f(1.0, 0);
+                glVertex3f(b.x, b.y, b.z);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f(c.x, c.y, c.z);
+            }
         }
+
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
+
     glEnable(GL_LIGHTING);
 }
 
 void SnowEmitter::collisionDetect(SceneObject* obj)
 {
-    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getInverse();
+    Matrix4x4 inverseTransformationMatrix = obj->getTransformationMatrix().getTranspose().getInverse();
 
     for(int i = 0; i < m_snowflakeCount; i++){
 
@@ -188,17 +221,9 @@ void SnowEmitter::collisionDetect(SceneObject* obj)
 
             // Check for a collision on the unit cube. No support for non-cube objects.
             if((objSnowPos.x <= 0.5 && objSnowPos.x >= -0.5) &&
-               (objSnowPos.y >= -0.5) &&
                (objSnowPos.z <= 0.5 && objSnowPos.z >= -0.5)){
 
-                // Check y with displacement
-                float displacement = obj->getDisplacement(objSnowPos);
-
-                // If contained within the upper y plus displacement, it collided
-                if( objSnowPos.y <= 0.5 + displacement ) {
-                    obj->recordSnowfall(objSnowPos);
-
-                    //reset snowflake that collided.
+                if( obj->collide(objSnowPos) ) {
                     m_snowflakes[i].active = false;
                     m_activeSnowflakes--;
                 }

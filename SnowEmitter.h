@@ -1,15 +1,15 @@
 #ifndef SNOWEMITTER_H
 #define SNOWEMITTER_H
 
-#define SNOWFALL_RADIUS 5
+#define SNOWFALL_RADIUS 3
 #define INITIAL_SNOWFLAKE_COUNT 30000
 #define INITIAL_SNOWFLAKE_HEIGHT 6.0f
-#define SNOWFLAKE_CUTOFF 0
+#define SNOWFLAKE_CUTOFF -1
 #define BASE_FLAKE_SPEED_FACTOR .0025f
 #define SNOWFLAKE_DROP_PROBABILITY .01f
 #define MAX_WIND_EXPIRE 50
 #define MIN_WIND_EXPIRE 5
-#define MAX_WIND_SPEED 0.001
+#define MAX_WIND_SPEED 0.002
 #define WIND_DOWNWARD_BIAS 0
 #define GRAVITY_Y_CHANGE -0.0001
 #define SNOWFLAKE_PROCESSING_BATCH 15000
@@ -87,7 +87,7 @@ class SnowEmitter
         /**
           * Sets the texture id to use for snowflakes.
           */
-        void setTextureId(GLuint textureId);
+        void setTextures(vector<GLuint> *textures);
 
         /**
           * Sets the camera being used with this snow emitter.
@@ -125,6 +125,10 @@ class SnowEmitter
         Snowflake *m_snowflakes;
         int m_snowflakeCount;
         int m_activeSnowflakes;
+        int m_directableCounter;
+        int m_directableGridSize;
+        int m_directableGridInc;
+        bool m_isDirectableSnow;
 
         //! The width of a snowflake
         float m_scale;
@@ -133,7 +137,7 @@ class SnowEmitter
         float *m_speed;
 
         //! The GL texture id for the snowflake texture
-        GLuint m_textureId;
+        vector<GLuint> *m_flakeTextures;
 
         //! Pointer to the camera
         OrbitCamera *m_camera;
