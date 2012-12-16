@@ -106,7 +106,7 @@ View::~View()
 void View::setupScene()
 {
     // Make the ground
-    m_factory.setTesselationParameter(50);
+    m_factory.setTesselationParameter(100);
     m_factory.setBumpResolution(1024);
     SceneObject *ground = m_factory.constructPlane();
     ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
@@ -115,7 +115,7 @@ void View::setupScene()
     m_objects.push_back(ground);
 
     // Make a demo box
-    m_factory.setTesselationParameter(16);
+    m_factory.setTesselationParameter(64);
     m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
