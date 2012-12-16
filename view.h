@@ -29,6 +29,7 @@
 #define UBER_SPEED 100.0
 #define SPRINT_FACTOR 0.2
 #define WALK_FACTOR 0.1
+#define SUPERSAMPLING_SQRT_SAMPLES 4
 
 class View : public QGLWidget
 {
@@ -75,14 +76,14 @@ protected:
      void setupScene();
      void initSceneVbo();
      void applyProjectionCamera();
-     void applyOrthogonalCamera();
+     void applyOrthogonalCamera(int width, int height);
      void initScenePbo();
      void setupLights();
      void setupCubeMap();
      float getMoveFactor();
      void renderScene();
      void createFramebufferObjects(int width, int height);
-     void renderFramebuffer(QGLFramebufferObject *framebufferObj);
+     void renderFramebuffer(QGLFramebufferObject *framebufferObj, int width, int height);
 
      //! The snow emitter responsible for tracking snowflakes
      SnowEmitter m_snowEmitter;
@@ -154,6 +155,10 @@ protected:
 
      GLuint m_snowTextureId;
 
+     // The width at which to render the scene. This might be greater than the width and height
+     // of the window if we're supersampling.
+     int m_width;
+     int m_height;
 };
 
 #endif // VIEW_H

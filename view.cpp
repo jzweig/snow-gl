@@ -241,6 +241,9 @@ void View::initializeGL()
 {
     cout << "Using OpenGL Version " << glGetString(GL_VERSION) << endl << endl;
 
+    m_width = SUPERSAMPLING_SQRT_SAMPLES * width();
+    m_height = SUPERSAMPLING_SQRT_SAMPLES * height();
+
     glEnable(GL_TEXTURE_2D);
     createShaderPrograms();
 
@@ -270,7 +273,7 @@ void View::initializeGL()
     setupScene();
 
     // Create the frame buffer objects
-    createFramebufferObjects(width(), height());
+    createFramebufferObjects(m_width, m_height);
 
     applyProjectionCamera();
     glFrontFace(GL_CCW);
@@ -333,7 +336,7 @@ void View::setupCubeMap()
   */
 void View::applyProjectionCamera()
 {
-    float w = width(), h = height();
+    float w = m_width, h = m_height;
     float ratio = ((float) w) / h;
     Vector4 dir(-Vector4::fromAngles(m_camera->theta, m_camera->phi));
     Vector4 eye = m_camera->eye;
@@ -351,11 +354,11 @@ void View::applyProjectionCamera()
   Called to switch to an orthogonal OpenGL camera.
   Useful for rending a textured quad across the whole screen.
 **/
-void View::applyOrthogonalCamera()
+void View::applyOrthogonalCamera(int width, int height)
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.f, width(), 0.f, height());
+    gluOrtho2D(0.f, width, 0.f, height);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -436,7 +439,7 @@ void View::renderScene()
                 GLfloat specularAry[4] = {0.9, 0.9, 0.9, 0.0};
                 GLfloat m = 0.55;
                 GLfloat r0 = 0.7;
-                ShaderAssistant::createBlurKernel(radius, width(), height(), &kernel[0], &offsets[0]);
+                ShaderAssistant::createBlurKernel(radius, m_width, m_height, &kernel[0], &offsets[0]);
                 shader->setUniformValue("arraySize", dim * dim);
                 shader->setUniformValueArray("offsets", offsets, 2 * dim * dim, 2);
                 shader->setUniformValueArray("ambient", ambientAry, 1, 4);
@@ -519,6 +522,8 @@ void View::paintGL()
     // NOTE: Opaque objects must be rendered before transparent. This means
     //       objects before snowflakes.
 
+    m_fbo_main->bind();
+    glViewport(0, 0, m_width, m_height);
     applyProjectionCamera();
     setupLights();
 
@@ -531,7 +536,6 @@ void View::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Render the scene to a framebuffer
-    m_fbo_main->bind();
     glEnable(GL_LIGHTING);
     renderScene();
 
@@ -554,11 +558,12 @@ void View::paintGL()
 
     /*
     m_fbo_main->blitFramebuffer(m_fbo_buffer,
-                                QRect(0, 0, width(), height()), m_fbo_main,
-                                QRect(0, 0, width(), height()), GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
+                                QRect(0, 0, m_width, m_height), m_fbo_main,
+                                QRect(0, 0, m_width, m_height), GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
 
     // Render the framebuffer to the screen as textured quad.
-    renderFramebuffer(m_fbo_main);
+    glViewport(0, 0, width(), height());
+    renderFramebuffer(m_fbo_main, width(), height());
 
     // Display the frame
     //glFlush();
@@ -588,10 +593,12 @@ void View::paintUI()
 
 void View::resizeGL(int w, int h)
 {
+    m_width = SUPERSAMPLING_SQRT_SAMPLES * w;
+    m_height = SUPERSAMPLING_SQRT_SAMPLES * h;
     glViewport(0, 0, w, h);
     // If the dimensions changed and we have fbo's, we need new fbo's of the right size
     if( m_fbo_main && m_fbo_snow )
-        createFramebufferObjects(w, h);
+        createFramebufferObjects(m_width, m_height);
 }
 
 void View::mousePressEvent(QMouseEvent *event)
@@ -755,16 +762,15 @@ void View::createFramebufferObjects(int width, int height)
   has been bound beforehand.
 
   @param framebufferObj: the framebuffer object to render
+  @param width  the width to render
+  @param height  the height to render
 **/
-void View::renderFramebuffer(QGLFramebufferObject *framebufferObj) {
+void View::renderFramebuffer(QGLFramebufferObject *framebufferObj, int width, int height) {
 
     // We must use the orthogonal camera to render the fbo to the screen
-    applyOrthogonalCamera();
+    applyOrthogonalCamera(width, height);
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST); 
-
-    int width = this->width();
-    int height = this->height();
 
     glColor3f(1.0, 1.0, 1.0);
 
