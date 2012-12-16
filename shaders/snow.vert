@@ -31,12 +31,35 @@ void main()
      eye = -vertex;
 
      vertex_to_light = normalize(gl_LightSource[0].position.xyz-vertex);
+
      normal = normalize(gl_NormalMatrix * gl_Normal);
 
      gl_FrontColor = gl_Color;
      //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vec4 v = vec4(gl_Vertex);
      if(useDisplacement){
+         vec2 texCoords = gl_MultiTexCoord0.st;
+         if(texCoords.s>0.0 && gl_MultiTexCoord0.s <1.0 && gl_MultiTexCoord0.t >0.0 && gl_MultiTexCoord0.t < 1.0){
+             float texOffset = 1.0/50.0;
+             float c1 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t-texOffset)));
+             float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
+             float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
+             float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
+             float deltax = 1.0/20.0;
+             float deltaz = 1.0/20.0;
+             vec3 v1 = normalize(vec3(vertex.x-deltax,c1,vertex.z-deltaz));
+             vec3 v2 = normalize(vec3(vertex.x-deltax,c2,vertex.z+deltaz));
+             vec3 v3 = normalize(vec3(vertex.x+deltax,c3,vertex.z-deltaz));
+             vec3 v4 = normalize(vec3(vertex.x+deltax,c4,vertex.z+deltaz));
+             vec3 v12 = normalize(cross(v1,v2));
+             vec3 v23 = normalize(cross(v2,v3));
+             vec3 v34 = normalize(cross(v3,v4));
+             vec3 v41 = normalize(cross(v4,v1));
+             vec3 vnorm = normalize(v12+v23+v34+v41);
+             normal = normalize(gl_NormalMatrix * vnorm);
+
+         }
+
          vec4 dv =  texture2D( snowDisplacement, gl_MultiTexCoord0.st );
          v.y = v.y+computeOffset(dv);
          gl_Position = gl_ModelViewProjectionMatrix * v;
