@@ -519,7 +519,7 @@ void View::paintGL()
     // NOTE: Opaque objects must be rendered before transparent. This means
     //       objects before snowflakes.
 
-    updateCamera();
+    applyProjectionCamera();
     setupLights();
 
     // Update the fps
