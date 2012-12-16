@@ -109,7 +109,7 @@ void View::setupScene()
     m_factory.setTesselationParameter(75);
     m_factory.setBumpResolution(512);
     SceneObject *ground = m_factory.constructPlane();
-    ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
+    ground->setTexture(ResourceLoader::loadTexture( ":/textures/textures/seamless_rock_texture.jpg" ));
     ground->setColor(1, 0.2, 0.2, 1.0);
     ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);

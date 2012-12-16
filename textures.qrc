@@ -4,5 +4,6 @@
         <file>textures/snow-surface.jpg</file>
         <file>textures/another-surface.jpg</file>
         <file>textures/plain-surface.jpg</file>
+        <file>textures/seamless_rock_texture.jpg</file>
     </qresource>
 </RCC>
