@@ -1,7 +1,5 @@
 const int MAX_KERNEL_SIZE = 128;
-varying float intensity;
 
-uniform vec4 color;
 uniform int arraySize;
 uniform vec2 offsets[MAX_KERNEL_SIZE];
 uniform float kernel[MAX_KERNEL_SIZE];
@@ -28,10 +26,11 @@ float computeOffset(vec4 hVec)
 }
 void main()
 {
-    vec4 col = color;
-    vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
+    // Sample the snow height at this position. This isn't actually used.
+    //vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
     //float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
 
+    // Blur over the surrounding areas
     float heightsSum = 0.0;
     float weightSum = 0.0;
     for( int i = 0; i < arraySize; i++ )
@@ -44,23 +43,36 @@ void main()
         heightsSum += kernel[i] * height;
         weightSum += kernel[i];
     }
+    // Compute the actual blurred height
     float blurredHeight = float(heightsSum) / float(weightSum);
 
+    // From the blurred height, determine the color contribution of the snow
+    float snowIntensity = blurredHeight * 0.5;
+    vec4 snowColor = vec4(snowIntensity, snowIntensity, snowIntensity, 1);
+
+    // Light vectors
     vec3 n = normalize(normal);
     vec3 l = normalize(vertex_to_light);
-
     vec3 e = normalize(eye);
     vec3 i = normalize(vertex - eye);
     vec3 h = normalize(vertex_to_light+e);
 
-    float diffcof = clamp(dot(n,vertex_to_light), 0.0, 1.0);
+    // Calculate the diffuse coefficient
+    float diffcoef = clamp(dot(n,vertex_to_light), 0.0, 1.0);
 
-    vec3 positive = vec3(1.0, 1.0, 1.0);
+    // Compute the final color from the object's natural color, snow's contribution
+    // and the diffuse in the environment.
+    vec4 finalColor = (gl_Color + snowColor) * diffcoef;
 
-    vec4 color = gl_Color * diffcof;
-    color.w = 1.0;
+    // Alpha values will have been reduced from multiplying by the diffuse coefficient,
+    // so we need to bring them back up to the material's opacity.
+    finalColor.w = gl_Color.w;
 
-    gl_FragColor = color;
+    // Set the final color
+    gl_FragColor = finalColor;
+
+    // Useful for debugging lighting:
+    //
     //gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
     //gl_FragColor = vec4((n + positive)*0.5, 1);
     //gl_FragColor = vec4(vertex_to_light, 1);

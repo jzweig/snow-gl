@@ -1,5 +1,4 @@
 //#version 110
-varying float intensity;
 
 uniform float time;
 uniform bool useDisplacement;
@@ -28,15 +27,12 @@ void main()
      //gl_TexCoord[1] = gl_MultiTexCoord1;
      gl_TexCoord[1].st = gl_MultiTexCoord1.st;
 
-     intensity = 1.0;
-
      vertex = (gl_ModelViewMatrix * gl_Vertex).xyz;
      eye = -vertex;
 
      vertex_to_light = normalize(gl_LightSource[0].position.xyz-vertex);
      normal = normalize(gl_NormalMatrix * gl_Normal);
 
-     //gl_FrontColor = vec4(gl_Normal, 1.0);
      gl_FrontColor = gl_Color;
      //gl_Position = gl_ModelViewProjectionMatrix * vertex;
      vec4 v = vec4(gl_Vertex);
