@@ -311,7 +311,7 @@ void View::setupCubeMap()
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negz.jpg"));
     */
 
-    QString skyType = QString::fromStdString("sky26");
+    QString skyType = QString::fromStdString("sky32");
     fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posx.jpg"));
     fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negx.jpg"));
     fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posy.jpg"));
