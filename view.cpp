@@ -123,10 +123,9 @@ void View::setupScene()
     ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
 
-
     // Make a demo box
     m_factory.setTesselationParameter(16);
-    m_factory.setBumpResolution(32);
+    m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.40, 5.0);
@@ -144,8 +143,6 @@ void View::setupScene()
     initSceneVbo();
     initScenePbo();
 }
-
-
 
 void View::initScenePbo()
 {
@@ -169,6 +166,7 @@ void View::initScenePbo()
 
     }
 }
+
 void View::initSceneVbo()
 {
 

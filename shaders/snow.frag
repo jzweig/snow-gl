@@ -27,8 +27,8 @@ float computeOffset(vec4 hVec)
 void main()
 {
     // Sample the snow height at this position. This isn't actually used.
-    //vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
-    //float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
+    vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
+    float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
 
     // Blur over the surrounding areas
     float heightsSum = 0.0;
@@ -47,7 +47,7 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = blurredHeight * 0.5;
+    float snowIntensity = actualHeight;
     vec4 snowColor = vec4(1.0, 1.0, 1.0, 0.0) * snowIntensity;
 
     // Light vectors
