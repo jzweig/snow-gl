@@ -140,7 +140,6 @@ void View::initScenePbo()
     // Iterate through all of the objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
     {
-        cout<<"CREATING PBO"<<endl;
         int bufferSize = (*it)->m_bumpResolution * (*it)->m_bumpResolution * sizeof(BGRA);
         GLuint* ids = (*it)->m_pbo;
         //generate two buffers to alternate between during updating for performance (halting)
@@ -228,7 +227,6 @@ void View::initializeGL()
 
     glEnable(GL_TEXTURE_2D);
     createShaderPrograms();
-    cout << "initialized shader programs..." << endl;
 
     // All OpenGL initialization *MUST* be done during or after this
     // method. Before this method is called, there is no active OpenGL
@@ -339,44 +337,6 @@ void View::updateCamera()
               m_camera->up.x, m_camera->up.y, m_camera->up.z);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
-
-
-void View::drawPlane(float color[], float translate[])
-{
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-
-    glBegin(GL_QUADS);
-    //XY axis
-    glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-    glEnd();
-
-    glPopMatrix();
-}
-
-void View::drawPlane(float color[], float translate[], float scale[], float rotate[],int angle)
-{
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-    glScalef(scale[0],scale[1],scale[2]);
-    glRotatef(angle,rotate[0],rotate[1],rotate[2]);
-
-    glBegin(GL_QUADS);
-    glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 1.0f);
-    glEnd();
-
-    glPopMatrix();
 }
 
 void View::drawUnitAxis(float x, float y, float z){

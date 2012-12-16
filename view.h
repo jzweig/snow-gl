@@ -46,7 +46,6 @@ private:
     int m_prevTime;
     float m_prevFps, m_fps;
     QFont m_font; // font for rendering text
-    Model m_dragon; // dragon model
     GLuint m_cubeMap;
     void initializeGL();
     void paintGL();
@@ -66,8 +65,6 @@ private:
     void keyReleaseEvent(QKeyEvent *event);
 
     void drawUnitAxis(float x, float y, float z);
-    void drawPlane(float color[], float translate[]);
-    void drawPlane(float color[], float translate[], float scale[], float rotate[],int angle);
     // Resources
     QHash<QString, QGLShaderProgram *> m_shaderPrograms; // hash map of all shader programs
 private slots:
