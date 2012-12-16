@@ -112,6 +112,9 @@ protected:
      //! Whether or not to display the unit axis
      bool m_showUnitAxis;
 
+     //! Whether or not to show the skybox
+     bool m_showSkybox;
+
      QImage* m_snowHeightMap;
      BGRA* m_data;
 

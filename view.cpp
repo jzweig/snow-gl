@@ -87,6 +87,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_usePbo = true;
     m_useDisplacement = true;
     m_useShader = true;
+    m_showSkybox = true;
 
     m_homeDir = getpwuid(getuid())->pw_dir;
     m_projDir = m_homeDir+"/course/cs123/snow-gl/";
@@ -406,12 +407,15 @@ void View::renderScene()
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
         // Enable cube maps and draw the skybox
-        glEnable(GL_TEXTURE_CUBE_MAP);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
-        GLuint sky = ResourceLoader::loadSkybox();
-        glCallList(sky);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        glDisable(GL_TEXTURE_CUBE_MAP);
+        if( m_showSkybox )
+        {
+            glEnable(GL_TEXTURE_CUBE_MAP);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
+            GLuint sky = ResourceLoader::loadSkybox();
+            glCallList(sky);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            glDisable(GL_TEXTURE_CUBE_MAP);
+        }
 
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
 
@@ -648,6 +652,8 @@ void View::keyPressEvent(QKeyEvent *event)
         m_useDisplacement = ! m_useDisplacement;
     } else if(event->key() == Qt::Key_7) {
         m_usePbo = ! m_usePbo;
+    } else if(event->key() == Qt::Key_8) {
+        m_showSkybox = ! m_showSkybox;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;
