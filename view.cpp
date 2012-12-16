@@ -308,12 +308,12 @@ void View::setupLights()
 void View::setupCubeMap()
 {
     QList<QFile *> fileList;
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/posx.jpg"));
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/negx.jpg"));
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/posy.jpg"));
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/negy.jpg"));
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/posz.jpg"));
-    fileList.append(new QFile("/course/cs123/bin/textures/astra/negz.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posx.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negx.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posy.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negy.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posz.jpg"));
+    fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negz.jpg"));
     m_cubeMap = ResourceLoader::loadCubeMap(fileList);
 }
 

@@ -62,7 +62,8 @@ HEADERS += mainwindow.h \
 FORMS += mainwindow.ui
 
 RESOURCES += textures.qrc \
-    shaders.qrc
+    shaders.qrc \
+    skymaps.qrc
 OTHER_FILES += \
 shaders/terrain.frag \
 shaders/terrain.vars \

@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/sky11">
+        <file>skymaps/sky11/negx.jpg</file>
+        <file>skymaps/sky11/negy.jpg</file>
+        <file>skymaps/sky11/negz.jpg</file>
+        <file>skymaps/sky11/posx.jpg</file>
+        <file>skymaps/sky11/posy.jpg</file>
+        <file>skymaps/sky11/posz.jpg</file>
+    </qresource>
+</RCC>
