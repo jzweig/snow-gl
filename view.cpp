@@ -109,7 +109,7 @@ void View::setupScene()
     m_factory.setTesselationParameter(50);
     m_factory.setBumpResolution(1024);
     SceneObject *ground = m_factory.constructPlane();
-    ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
+    ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/snow.JPG" ));
     ground->setColor(0.2, 0.39, 0.18, 1.0);
     ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
@@ -302,12 +302,22 @@ void View::setupLights()
 void View::setupCubeMap()
 {
     QList<QFile *> fileList;
+    /*
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posx.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negx.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posy.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negy.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posz.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negz.jpg"));
+    */
+
+    QString skyType = QString::fromStdString("sky26");
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posz.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negz.jpg"));
     m_cubeMap = ResourceLoader::loadCubeMap(fileList);
 }
 
