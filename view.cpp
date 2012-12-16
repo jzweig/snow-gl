@@ -665,6 +665,9 @@ void View::keyPressEvent(QKeyEvent *event)
         m_usePbo = ! m_usePbo;
     } else if(event->key() == Qt::Key_8) {
         m_showSkybox = ! m_showSkybox;
+    } else if(event->key() == Qt::Key_U) {
+        m_useUberMode = ! m_useUberMode;
+        m_speed = m_useUberMode ? UBER_SPEED : DEFAULT_SPEED;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

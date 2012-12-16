@@ -25,6 +25,7 @@
 // the down arrow.
 #define DEFAULT_SPEED 1.0
 #define FAST_SPEED 20.0
+#define UBER_SPEED 100.0
 #define SPRINT_FACTOR 0.1
 #define WALK_FACTOR 0.01
 
@@ -114,6 +115,9 @@ protected:
 
      //! Whether or not to show the skybox
      bool m_showSkybox;
+
+     //! Is uber mode?
+     bool m_useUberMode;
 
      QImage* m_snowHeightMap;
      BGRA* m_data;
