@@ -15,6 +15,7 @@ varying vec3 vertex;		// The vector from the eye to the vertex
 varying vec3 vertex_to_light;		// The normalized vector from the vertex to the light
 varying vec3 eye;		// The normalized vector from the vertex to the eye
 varying vec3 normal;		// The normal vector of the vertex, in eye space
+varying vec3 origNormal;
 
 uniform samplerCube cubeMap;	// The cube map containing the environment to reflect
 uniform vec4 ambient;		// The ambient channel of the color to reflect
@@ -32,6 +33,13 @@ float computeOffset(vec4 hVec)
 }
 void main()
 {
+    // Light vectors
+    vec3 n = normalize(normal);
+    vec3 l = normalize(vertex_to_light);
+    vec3 e = normalize(eye);
+    vec3 i = normalize(vertex - eye);
+    vec3 h = normalize(vertex_to_light+e);
+
     // Sample the snow height at this position. This isn't actually used.
     vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
     float actualHeight = float(snowSample.r)*128.0 + (float(snowSample.g)*128.0)*255.0 + (float(snowSample.b)*128.0)*255.0*255.0;
@@ -53,15 +61,8 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = min(1.0, actualHeight);
-    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10.0));
-
-    // Light vectors
-    vec3 n = normalize(normal);
-    vec3 l = normalize(vertex_to_light);
-    vec3 e = normalize(eye);
-    vec3 i = normalize(vertex - eye);
-    vec3 h = normalize(vertex_to_light+e);
+    float snowIntensity = min(0.9, actualHeight)*dot(normalize(origNormal), vec3(0,1.0,0)) + min(0.1,actualHeight);
+    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10));
 
     // Calculate the diffuse coefficient
     float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
@@ -79,7 +80,8 @@ void main()
     vec4 diffuseColor = localColor * (1.0 - snowIntensity) + snowColor * snowIntensity;
 
     // Compute the final color
-    vec4 finalColor = (diffuseColor * diffuseCoefficient);
+    vec4 ambientColor = vec4(0.2*diffuseColor.r, 0.2*diffuseColor.g, 0.2*diffuseColor.b, 0);
+    vec4 finalColor = ambientColor + (diffuseColor * diffuseCoefficient);
 
     // Alpha values will have been reduced from multiplying by the diffuse coefficient,
     // so we need to bring them back up to the material's opacity.

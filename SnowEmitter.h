@@ -87,7 +87,7 @@ class SnowEmitter
         /**
           * Sets the texture id to use for snowflakes.
           */
-        void setTextureId(GLuint textureId);
+        void setTextures(vector<GLuint> *textures);
 
         /**
           * Sets the camera being used with this snow emitter.
@@ -137,7 +137,7 @@ class SnowEmitter
         float *m_speed;
 
         //! The GL texture id for the snowflake texture
-        GLuint m_textureId;
+        vector<GLuint> *m_flakeTextures;
 
         //! Pointer to the camera
         OrbitCamera *m_camera;

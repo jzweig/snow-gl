@@ -23,9 +23,9 @@ SnowEmitter::~SnowEmitter()
     }
 }
 
-void SnowEmitter::setTextureId(GLuint textureId)
+void SnowEmitter::setTextures(vector<GLuint> *textures)
 {
-    m_textureId = textureId;
+    m_flakeTextures = textures;
 }
 
 void SnowEmitter::setCamera(OrbitCamera *camera)
@@ -160,37 +160,52 @@ void SnowEmitter::rangedTick(int minIndex, int maxIndex)
 void SnowEmitter::drawSnowflakes()
 {
     glDisable(GL_LIGHTING);
-    glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glBegin(GL_QUADS);
+
 
     // Calculate the up and right vectors for use in billboarding
     Vector4 up = m_camera->getUp();
     Vector4 right = m_camera->getDirection().cross(up);
 
     glColor3f(1.0f, 1.0f, 1.0f);
-    for(int i = 0; i < m_snowflakeCount; i++)
+
+    int flakesPerTexture = ceil(float(m_snowflakeCount) / float(m_flakeTextures->size()));
+
+    for(int t = 0; t < m_flakeTextures->size(); t++)
     {
-        if( m_snowflakes[i].active && m_snowflakes[i].isVisible )
+        GLuint textureId = m_flakeTextures->at(t);
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glBegin(GL_QUADS);
+
+        int startIndex = flakesPerTexture * t;
+        int endIndex = flakesPerTexture * (t + 1);
+
+        for(int i = startIndex; i < endIndex && m_snowflakeCount; i++)
         {
-            float size = m_snowflakes[i].size;
+            if( m_snowflakes[i].active && m_snowflakes[i].isVisible )
+            {
+                float size = m_snowflakes[i].size;
 
-            Vector4 a = m_snowflakes[i].pos - (right + up) * size;
-            Vector4 b = m_snowflakes[i].pos + (right - up) * size;
-            Vector4 c = m_snowflakes[i].pos + (right + up) * size;
-            Vector4 d = m_snowflakes[i].pos - (right - up) * size;
+                Vector4 a = m_snowflakes[i].pos - (right + up) * size;
+                Vector4 b = m_snowflakes[i].pos + (right - up) * size;
+                Vector4 c = m_snowflakes[i].pos + (right + up) * size;
+                Vector4 d = m_snowflakes[i].pos - (right - up) * size;
 
-            glTexCoord2f(0, 1.0);
-            glVertex3f(d.x, d.y, d.z);
-            glTexCoord2f(0, 0);
-            glVertex3f(a.x, a.y, a.z);
-            glTexCoord2f(1.0, 0);
-            glVertex3f(b.x, b.y, b.z);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(c.x, c.y, c.z);
+                glTexCoord2f(0, 1.0);
+                glVertex3f(d.x, d.y, d.z);
+                glTexCoord2f(0, 0);
+                glVertex3f(a.x, a.y, a.z);
+                glTexCoord2f(1.0, 0);
+                glVertex3f(b.x, b.y, b.z);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f(c.x, c.y, c.z);
+            }
         }
+
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
+
     glEnable(GL_LIGHTING);
 }
 
