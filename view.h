@@ -29,7 +29,7 @@
 #define UBER_SPEED 100.0
 #define SPRINT_FACTOR 0.2
 #define WALK_FACTOR 0.1
-#define SUPERSAMPLING_SQRT_SAMPLES 4
+#define SUPERSAMPLING_SQRT_SAMPLES 2
 
 class View : public QGLWidget
 {
