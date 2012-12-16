@@ -266,8 +266,12 @@ void View::initializeGL()
     setupScene();
 
     // Load the snow texture
-    GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
-    m_snowEmitter.setTextureId( textureId );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/second-snowflake.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowball-texture.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/snowflake-icon.png" ) );
+    m_snowflakeTextures.push_back( ResourceLoader::loadTexture( ":/textures/textures/actual-snowflake.png" ) );
+    m_snowEmitter.setTextures(&m_snowflakeTextures);
 
     m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/plain-surface.jpg" );
 

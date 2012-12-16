@@ -116,6 +116,9 @@ protected:
      //! Is uber mode?
      bool m_useUberMode;
 
+     //! Snowflake textures
+     vector<GLuint> m_snowflakeTextures;
+
      QImage* m_snowHeightMap;
      BGRA* m_data;
 
