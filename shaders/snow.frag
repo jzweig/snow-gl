@@ -48,7 +48,7 @@ void main()
 
     // From the blurred height, determine the color contribution of the snow
     float snowIntensity = blurredHeight * 0.5;
-    vec4 snowColor = vec4(snowIntensity, snowIntensity, snowIntensity, 1);
+    vec4 snowColor = vec4(1.0, 1.0, 1.0, 0.0) * snowIntensity;
 
     // Light vectors
     vec3 n = normalize(normal);
@@ -58,11 +58,15 @@ void main()
     vec3 h = normalize(vertex_to_light+e);
 
     // Calculate the diffuse coefficient
-    float diffcoef = clamp(dot(n,vertex_to_light), 0.0, 1.0);
+    float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
+
+
 
     // Compute the final color from the object's natural color, snow's contribution
     // and the diffuse in the environment.
-    vec4 finalColor = (gl_Color + snowColor) * diffcoef;
+    vec4 diffuseColor = gl_Color + snowColor;
+
+    vec4 finalColor = (gl_Color * diffuseCoefficient);
 
     // Alpha values will have been reduced from multiplying by the diffuse coefficient,
     // so we need to bring them back up to the material's opacity.
@@ -74,6 +78,6 @@ void main()
     // Useful for debugging lighting:
     //
     //gl_FragColor = vec4(diffcof, diffcof, diffcof, 1);
-    //gl_FragColor = vec4((n + positive)*0.5, 1);
+    //gl_FragColor = vec4((n + vec4(1, 1, 1, 1))*0.5, 1);
     //gl_FragColor = vec4(vertex_to_light, 1);
 }
