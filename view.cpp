@@ -535,8 +535,8 @@ void View::paintGL()
     glPopMatrix();
 
     // Display the frame
-    glFlush();
-    swapBuffers();
+    //glFlush();
+    //swapBuffers();
 
     // Paint GUI
     paintUI();
