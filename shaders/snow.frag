@@ -60,13 +60,12 @@ void main()
     // Calculate the diffuse coefficient
     float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
 
-
-
-    // Compute the final color from the object's natural color, snow's contribution
-    // and the diffuse in the environment.
+    // Compute the diffuse color from the object's natural color and the
+    // snow's contribution
     vec4 diffuseColor = gl_Color + snowColor;
 
-    vec4 finalColor = (gl_Color * diffuseCoefficient);
+    // Compute the final color
+    vec4 finalColor = (diffuseColor * diffuseCoefficient);
 
     // Alpha values will have been reduced from multiplying by the diffuse coefficient,
     // so we need to bring them back up to the material's opacity.
