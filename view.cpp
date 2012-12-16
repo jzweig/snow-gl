@@ -405,12 +405,13 @@ void View::renderScene()
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-
         // Enable cube maps and draw the skybox
-        //glEnable(GL_TEXTURE_CUBE_MAP);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
-        //GLuint sky = ResourceLoader::loadSkybox();
-        //glCallList(sky);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
+        GLuint sky = ResourceLoader::loadSkybox();
+        glCallList(sky);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        glDisable(GL_TEXTURE_CUBE_MAP);
 
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
 
@@ -499,8 +500,6 @@ void View::renderScene()
                 shader->release();
                 glBindTexture(GL_TEXTURE_2D,0);
                 glDisable(GL_BLEND);
-                //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-                //glDisable(GL_TEXTURE_CUBE_MAP);
             }
         }
 
