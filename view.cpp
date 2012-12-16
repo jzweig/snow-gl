@@ -125,8 +125,8 @@ void View::setupScene()
 
 
     // Make a demo box
-    m_factory.setTesselationParameter(50);
-    m_factory.setBumpResolution(128);
+    m_factory.setTesselationParameter(16);
+    m_factory.setBumpResolution(32);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.25, 0.25, 0.25, 1.0);
     demoBox->translate(-5.0, 0.40, 5.0);
@@ -263,6 +263,12 @@ void View::initializeGL()
 
     glClearColor(0.0f,0.0f,0.0f,0.0f);
 
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glDisable(GL_DITHER);
+    //glShadeModel(GL_FLAT);
+
+
     glEnable(GL_COLOR_MATERIAL);
     glShadeModel(GL_SMOOTH);
 
@@ -272,6 +278,8 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
+    cout << "set cube map..." << endl;
+    //setupCubeMap();
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
@@ -282,10 +290,13 @@ void View::initializeGL()
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
     updateCamera();
+
+    cout << "set lights..." << endl;
     setupLights();
     glFrontFace(GL_CCW);
+    cout<<"paint scene..."<<endl;
     paintGL();
-    cout<<"painted scene..."<<endl;
+    cout<<"...painted scene"<<endl;
 }
 
 void View::setupLights()
@@ -294,8 +305,8 @@ void View::setupLights()
 
     // Set up GL_LIGHT0 with a position and lighting properties
     GLfloat ambientLight[] = {0.1f, 0.1f, 0.1f, 1.0f};
-    GLfloat diffuseLight[] = { 0.1f, 0.1f, 0.1f, 0.4f };
-    GLfloat specularLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
+    GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f};
     GLfloat position[] = { 5.0f, 5.5f, 5.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
@@ -303,6 +314,20 @@ void View::setupLights()
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     glEnable(GL_LIGHT0);
+}
+/**
+  Load a cube map for the skybox
+ **/
+void View::setupCubeMap()
+{
+    QList<QFile *> fileList;
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/posx.jpg"));
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/negx.jpg"));
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/posy.jpg"));
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/negy.jpg"));
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/posz.jpg"));
+    fileList.append(new QFile("/course/cs123/bin/textures/astra/negz.jpg"));
+    m_cubeMap = ResourceLoader::loadCubeMap(fileList);
 }
 
 /**
@@ -394,12 +419,16 @@ void View::renderScene()
     if( m_isSolid ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-        GLuint sky = ResourceLoader::loadSkybox();
-        glCallList(sky);
 
+        // Enable cube maps and draw the skybox
+        //glEnable(GL_TEXTURE_CUBE_MAP);
+        //glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
+        //GLuint sky = ResourceLoader::loadSkybox();
+        //glCallList(sky);
 
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {
 
+            //glActiveTexture(GL_TEXTURE5);
             SceneObject *obj = *it;
 
             if(m_useShader){
@@ -407,8 +436,9 @@ void View::renderScene()
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
                 shader->bind();
-                shader->setUniformValue("snowDisplacement",0);
+                //shader->setUniformValue("cubeMap", GL_TEXTURE5);
                 shader->setUniformValue("snowTexture",1);
+                shader->setUniformValue("snowDisplacement",2);
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
@@ -418,15 +448,23 @@ void View::renderScene()
                 int dim = radius * 2 + 1;
                 GLfloat kernel[dim * dim];
                 GLfloat offsets[dim * dim * 2];
+                GLfloat ambientAry[4] = {0.7, 0.7, 0.7, 1.0};
+                GLfloat diffuseAry[4] = {color.x, color.y, color.z, color.w};
+                GLfloat specularAry[4] = {0.9, 0.9, 0.9, 0.0};
+                GLfloat m = 0.55;
+                GLfloat r0 = 0.7;
                 ShaderAssistant::createBlurKernel(radius, width(), height(), &kernel[0], &offsets[0]);
                 shader->setUniformValue("arraySize", dim * dim);
                 shader->setUniformValueArray("offsets", offsets, 2 * dim * dim, 2);
-                shader->setUniformValueArray("kernel", kernel, dim * dim, 1);
-
+                shader->setUniformValueArray("ambient", ambientAry, 1, 4);
+                shader->setUniformValueArray("diffuse", diffuseAry, 1, 4);
+                shader->setUniformValueArray("specular", specularAry, 1, 4);
+                shader->setUniformValue("m", m);
+                shader->setUniformValue("r0", r0);
 
                 // Displacement
                 ResourceLoader::reloadHeightMapTexture(obj->getDisplacementMap(),obj->getDisplacementMapId());
-                glActiveTexture(GL_TEXTURE0);
+                glActiveTexture(GL_TEXTURE2);
                 //glUniform1i(glGetUniformLocation(shader->programId(), "snowDisplacement"), 0);
                 glBindTexture(GL_TEXTURE_2D,obj->getDisplacementMapId());
 
@@ -475,6 +513,8 @@ void View::renderScene()
                 shader->release();
                 glBindTexture(GL_TEXTURE_2D,0);
                 glDisable(GL_BLEND);
+                //glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+                //glDisable(GL_TEXTURE_CUBE_MAP);
             }
         }
 
@@ -485,6 +525,10 @@ void View::renderScene()
 
 void View::paintGL()
 {
+
+    updateCamera();
+    setupLights();
+
     // Update the fps
     int time = m_clock.elapsed();
     m_fps = 1000.f / (time - m_prevTime);

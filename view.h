@@ -46,7 +46,7 @@ private:
     float m_prevFps, m_fps;
     QFont m_font; // font for rendering text
     Model m_dragon; // dragon model
-
+    GLuint m_cubeMap;
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
@@ -78,6 +78,7 @@ protected:
      void initScenePbo();
      void updateCamera();
      void setupLights();
+     void setupCubeMap();
      float getMoveFactor();
      void renderScene();
 
@@ -119,6 +120,7 @@ protected:
 
      //! Use scene pbo
      bool m_usePbo;
+
      //! Use shader displacement mapping
      bool m_useDisplacement;
 
