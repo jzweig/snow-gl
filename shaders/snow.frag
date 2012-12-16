@@ -89,6 +89,7 @@ void main()
 
     // Set the final color
     gl_FragColor = finalColor;
+    //gl_FragColor.a = 1.0;
 
     // Useful for debugging lighting:
     //
