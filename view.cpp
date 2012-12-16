@@ -18,10 +18,7 @@
 #include <GL/freeglut.h>
 #endif
 
-
 static  QString PROJECT_DIR = "/home/jbowens/course/cs123/snow-gl/";
-
-
 
 static const int MAX_FPS = 60;
 
@@ -90,14 +87,6 @@ View::View(QWidget *parent) : QGLWidget(parent),
     m_usePbo = true;
     m_useDisplacement = true;
     m_useShader = true;
-
-    // Make sure the image file exists
-    QFile file("/course/cs123/data/image/BoneHead.jpg");
-    if (!file.exists())
-        cout<<"/course/cs123/data/image/BoneHead.jpg FILE DOES NOT EXIST"<<endl;
-
-    // Load the file into memory
-    //m_snowHeightMap->load(file.fileName());
 
     m_homeDir = getpwuid(getuid())->pw_dir;
     m_projDir = m_homeDir+"/course/cs123/snow-gl/";
@@ -230,7 +219,6 @@ void View::createShaderPrograms()
     QString fShader = m_projDir+"shaders/snow.frag";
     m_shaderPrograms["snow"] = ResourceLoader::newShaderProgram(ctx, vShader, fShader);
 }
-
 
 void View::initializeGL()
 {
@@ -622,7 +610,6 @@ void View::mouseMoveEvent(QMouseEvent *event)
     m_prevMousePos = pos;
 
     updateCamera();
-
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
