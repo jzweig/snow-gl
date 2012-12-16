@@ -170,7 +170,7 @@ void SnowEmitter::drawSnowflakes()
 
     int flakesPerTexture = ceil(float(m_snowflakeCount) / float(m_flakeTextures->size()));
 
-    for(int t = 0; t < m_flakeTextures->size(); t++)
+    for(unsigned int t = 0; t < m_flakeTextures->size(); t++)
     {
         GLuint textureId = m_flakeTextures->at(t);
 
