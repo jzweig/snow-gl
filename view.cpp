@@ -275,12 +275,9 @@ void View::initializeGL()
 
     updateCamera();
 
-    cout << "set lights..." << endl;
     setupLights();
     glFrontFace(GL_CCW);
-    cout<<"paint scene..."<<endl;
     paintGL();
-    cout<<"...painted scene"<<endl;
 }
 
 void View::setupLights()
