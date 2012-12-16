@@ -265,8 +265,8 @@ void View::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
-    cout << "set cube map..." << endl;
-    //setupCubeMap();
+    setupCubeMap();
+
     // Enable alpha
     glEnable(GL_ALPHA_TEST);
 
@@ -409,12 +409,14 @@ void View::renderScene()
         // Enable cube maps and draw the skybox
         if( m_showSkybox )
         {
+            glDisable(GL_LIGHTING);
             glEnable(GL_TEXTURE_CUBE_MAP);
             glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubeMap);
             GLuint sky = ResourceLoader::loadSkybox();
             glCallList(sky);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             glDisable(GL_TEXTURE_CUBE_MAP);
+            glEnable(GL_LIGHTING);
         }
 
         for(vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++) {

@@ -90,7 +90,6 @@ void ResourceLoader::reloadHeightMapTexture(QImage* heightMap, GLuint textureid)
 
     // deactivate texture (unbind)
     glBindTexture(GL_TEXTURE_2D, 0);
-
 }
 
 GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
@@ -124,8 +123,6 @@ GLuint ResourceLoader::loadHeightMapTexture(QImage* heightMap)
 
 }
 
-
-
 /**
     Loads an OBJ models from a file
   **/
@@ -137,7 +134,6 @@ Model ResourceLoader::loadObjModel(QString filePath)
     m.idx = glmList(m.model, GLM_SMOOTH);
     return m;
 }
-
 
 /**
     Creates a call list for a skybox
