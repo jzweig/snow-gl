@@ -116,7 +116,7 @@ void View::setupScene()
 
     // Make a demo box
     m_factory.setTesselationParameter(32);
-    m_factory.setBumpResolution(64);
+    m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.5, 0.15, 0.15, 1.0);
     demoBox->translate(-5.0, 0.40, 5.0);
