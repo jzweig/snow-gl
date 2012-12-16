@@ -16,7 +16,7 @@ extern "C" {
 }
 //#endif
 
-SceneObject::SceneObject(Shape* shape, ShapeType type, int bumpResolution) : m_shape(shape)
+SceneObject::SceneObject(Shape* shape, ShapeType type, Vector3 originalScale, int bumpResolution) : m_shape(shape)
 {
     m_shapeType = type;
     m_displacementResolution = m_shape->getParamOne();
@@ -33,6 +33,10 @@ SceneObject::SceneObject(Shape* shape, ShapeType type, int bumpResolution) : m_s
     memset(m_bumpMap->bits(), 0, m_bumpResolution * m_bumpResolution * sizeof(BGRA));
     m_displacementMapId = ResourceLoader::loadHeightMapTexture(m_displacementMap);
     m_bumpMapId = ResourceLoader::loadHeightMapTexture(m_bumpMap);
+
+
+    m_originalScale = originalScale;
+    this->scale(m_originalScale.x,m_originalScale.y,m_originalScale.z);
 }
 
 SceneObject::~SceneObject()
@@ -106,6 +110,10 @@ Vector4 SceneObject::getPosition()
     return Vector4(m_matrix.d, m_matrix.h, m_matrix.l, 1);
 }
 
+Vector3 SceneObject::getOriginalScale()
+{
+    return m_originalScale;
+}
 
 void SceneObject::setColor(float r, float g, float b, float a)
 {
@@ -178,6 +186,7 @@ void SceneObject::refreshMatrix()
 
     m_matrix = mat;
 }
+
 
 void SceneObject::translate(float x, float y, float z)
 {

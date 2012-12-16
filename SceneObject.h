@@ -27,7 +27,7 @@ struct Transformation
 class SceneObject
 {
     public:
-        SceneObject(Shape* shape, ShapeType type, int gridLength);
+        SceneObject(Shape* shape, ShapeType type, Vector3 originalScale, int gridLength);
         virtual ~SceneObject();
         void render(const bool useVbo) const;
         void translate(float x, float y, float z);
@@ -54,6 +54,7 @@ class SceneObject
         QImage *getBumpMap();
         GLuint getBumpMapId();
         GLuint getDisplacementMapId();
+        Vector3 getOriginalScale();
         Vector4 getColor();
         int m_bumpResolution;
         GLuint* m_pbo;
@@ -64,6 +65,7 @@ class SceneObject
         Shape *m_shape;
         vector<Transformation> m_transformations;
         Vector4 m_color;
+        Vector3 m_originalScale;
         Matrix4x4 m_matrix;
         GLuint m_vbo;
         GLuint m_colorTexture;

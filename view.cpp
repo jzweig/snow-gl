@@ -108,27 +108,29 @@ void View::setupScene()
     // Make the ground
     m_factory.setTesselationParameter(75);
     m_factory.setBumpResolution(512);
+    m_factory.setOriginalScale(20.0, 1.0, 20.0);
+    m_factory.setOriginalTranslation(0.0,0.0,0.0);
     SceneObject *ground = m_factory.constructPlane();
     ground->setTexture(ResourceLoader::loadTexture( ":/textures/textures/seamless_rock_texture.jpg" ));
     ground->setColor(1, 0.2, 0.2, 1.0);
-    ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
 
     // Make a demo box
     m_factory.setTesselationParameter(32);
     m_factory.setBumpResolution(128);
+    m_factory.setOriginalScale(0.5, 0.5, 0.5);
+    m_factory.setOriginalTranslation(-5.0, 0.40, 5.0);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.5, 0.15, 0.15, 1.0);
-    demoBox->translate(-5.0, 0.40, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
     m_factory.setTesselationParameter(16);
     m_factory.setBumpResolution(32);
+    m_factory.setOriginalScale(0.5, 0.5, 0.5);
+    m_factory.setOriginalTranslation(-3.0, 0.5, 7.0);
     SceneObject *smallBox = m_factory.constructCube();
     smallBox->setColor(0.2, 0.5, 0.2, 1.0);
-    smallBox->scale(0.5, 0.5, 0.5);
-    smallBox->translate(-3.0, 0.5, 7.0);
     m_objects.push_back(smallBox);
 
     initSceneVbo();
@@ -403,6 +405,8 @@ void View::renderScene()
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
+                Vector3 scale = obj->getOriginalScale();
+                shader->setUniformValue("scale",scale.x, scale.y, scale.z);
                 shader->setUniformValue("tesselationParam", obj->getShape()->getParamOne());
 
                 // Set the blur data

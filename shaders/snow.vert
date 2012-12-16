@@ -12,7 +12,8 @@ varying vec3 eye;	// The normalized vector from the vertex to the eye
 varying vec3 normal;	// The normal vector of the vertex, in eye space
 varying vec3 origNormal;
 
-uniform int tesselationParam;           // The tesselation parameter for the shape being shaded
+uniform int tesselationParam;     // The tesselation parameter for the shape being shaded
+uniform vec3 scale;           // The scale parameter for the shape being shaded
 
 float computeOffset(vec4 hVec)
 {
@@ -47,8 +48,8 @@ void main()
              float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
              float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
              float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
-             float deltax = 0.001;//20.0/float(tesselationParam);
-             float deltaz = 0.001;//20.0/float(tesselationParam);
+             float deltax = 1.0/(scale.x*float(tesselationParam));//0.001;//20.0/float(tesselationParam);
+             float deltaz = 1.0/(scale.z*float(tesselationParam));//0.001;//20.0/float(tesselationParam);
              vec3 v1 = normalize(vec3(-deltax,c1,-deltaz));
              vec3 v2 = normalize(vec3(-deltax,c2,deltaz));
              vec3 v3 = normalize(vec3(deltax,c3,deltaz));
