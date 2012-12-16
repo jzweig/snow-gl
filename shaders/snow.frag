@@ -7,6 +7,7 @@ uniform float kernel[MAX_KERNEL_SIZE];
 uniform sampler2D snowDisplacement;
 uniform sampler2D snowTexture;
 uniform sampler2D localTexture;
+uniform sampler2D snowSurfaceTexture;
 
 uniform bool useLocalTexture;
 
@@ -22,12 +23,22 @@ uniform vec4 specular;		// The specular channel of the color to reflect
 
 uniform float r0;		// The Fresnel reflectivity when the incident angle is 0
 uniform float m;		// The roughness of the material
+
+uniform int tesselationParam;           // The tesselation parameter for the shape being shaded
+
 float computeOffset(vec4 hVec)
 {
     return hVec.x + hVec.y*256.0 + hVec.z*256.0*256.0;
 }
 void main()
 {
+    // Light vectors
+    vec3 n = normalize(normal);
+    vec3 l = normalize(vertex_to_light);
+    vec3 e = normalize(eye);
+    vec3 i = normalize(vertex - eye);
+    vec3 h = normalize(vertex_to_light+e);
+
     // Sample the snow height at this position. This isn't actually used.
     vec4 snowSample = texture2D(snowTexture, gl_TexCoord[0].st);
     float actualHeight = float(snowSample.r)*128 + (float(snowSample.g)*128)*255 + (float(snowSample.b)*128)*255*255;
@@ -49,15 +60,8 @@ void main()
     float blurredHeight = float(heightsSum) / float(weightSum);
 
     // From the blurred height, determine the color contribution of the snow
-    float snowIntensity = actualHeight;
-    vec4 snowColor = vec4(1.0, 1.0, 1.0, 0.0) * snowIntensity;
-
-    // Light vectors
-    vec3 n = normalize(normal);
-    vec3 l = normalize(vertex_to_light);
-    vec3 e = normalize(eye);
-    vec3 i = normalize(vertex - eye);
-    vec3 h = normalize(vertex_to_light+e);
+    float snowIntensity = min(0.9, actualHeight)*dot(n, vec3(0,1.0,0)) + min(0.1,actualHeight);
+    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10));
 
     // Calculate the diffuse coefficient
     float diffuseCoefficient = clamp(dot(n,vertex_to_light), 0.0, 1.0);
@@ -65,17 +69,18 @@ void main()
     // Compute the local color
     vec4 localColor;
     if( useLocalTexture ) {
-        localColor = texture2D(localTexture, gl_TexCoord[0].st*10);
+        localColor = texture2D(localTexture, gl_TexCoord[0].st * (float(tesselationParam) / 10.0));
     } else {
         localColor = gl_Color;
     }
 
     // Compute the diffuse color from the object's natural color and the
     // snow's contribution
-    vec4 diffuseColor = localColor + snowColor;
+    vec4 diffuseColor = localColor * (1.0 - snowIntensity) + snowColor * snowIntensity;
 
     // Compute the final color
-    vec4 finalColor = (diffuseColor * diffuseCoefficient);
+    vec4 ambientColor = vec4(0.2*diffuseColor.r, 0.2*diffuseColor.g, 0.2*diffuseColor.b, 0);
+    vec4 finalColor = ambientColor + (diffuseColor * diffuseCoefficient);
 
     // Alpha values will have been reduced from multiplying by the diffuse coefficient,
     // so we need to bring them back up to the material's opacity.

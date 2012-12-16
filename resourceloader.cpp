@@ -143,6 +143,9 @@ GLuint ResourceLoader::loadSkybox()
     GLuint id = glGenLists(1);
     glNewList(id, GL_COMPILE);
 
+    glPushMatrix();
+    glTranslatef(0, 10, 0);
+
     // Be glad we wrote this for you...ugh.
     glBegin(GL_QUADS);
     float extent = 100.f;
@@ -171,6 +174,8 @@ GLuint ResourceLoader::loadSkybox()
     glTexCoord3f( 1.0f, -1.0f,  1.0f); glVertex3f( extent, -extent,  extent);
     glTexCoord3f( 1.0f, -1.0f, -1.0f); glVertex3f( extent, -extent, -extent);
     glEnd();
+
+    glPopMatrix();
     glEndList();
 
     return id;

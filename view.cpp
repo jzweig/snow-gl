@@ -106,27 +106,27 @@ View::~View()
 void View::setupScene()
 {
     // Make the ground
-    m_factory.setTesselationParameter(50);
-    m_factory.setBumpResolution(1024);
+    m_factory.setTesselationParameter(75);
+    m_factory.setBumpResolution(512);
     SceneObject *ground = m_factory.constructPlane();
-    ground->setTexture(ResourceLoader::loadTexture( "/course/cs123/data/image/terrain/dirt.JPG" ));
-    ground->setColor(0.2, 0.39, 0.18, 1.0);
+    ground->setTexture(ResourceLoader::loadTexture( ":/textures/textures/seamless_rock_texture.jpg" ));
+    ground->setColor(1, 0.2, 0.2, 1.0);
     ground->scale(20.0, 1.0, 20.0);
     m_objects.push_back(ground);
 
     // Make a demo box
-    m_factory.setTesselationParameter(16);
+    m_factory.setTesselationParameter(32);
     m_factory.setBumpResolution(128);
     SceneObject *demoBox = m_factory.constructCube();
-    demoBox->setColor(0.25, 0.25, 0.25, 1.0);
+    demoBox->setColor(0.5, 0.15, 0.15, 1.0);
     demoBox->translate(-5.0, 0.40, 5.0);
     m_objects.push_back(demoBox);
 
     // Make a smaller box
-    m_factory.setTesselationParameter(32);
-    m_factory.setBumpResolution(64);
+    m_factory.setTesselationParameter(16);
+    m_factory.setBumpResolution(32);
     SceneObject *smallBox = m_factory.constructCube();
-    smallBox->setColor(0.2, 0.2, 0.45, 1.0);
+    smallBox->setColor(0.2, 0.5, 0.2, 1.0);
     smallBox->scale(0.5, 0.5, 0.5);
     smallBox->translate(-3.0, 0.5, 7.0);
     m_objects.push_back(smallBox);
@@ -140,7 +140,6 @@ void View::initScenePbo()
     // Iterate through all of the objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ )
     {
-        cout<<"CREATING PBO"<<endl;
         int bufferSize = (*it)->m_bumpResolution * (*it)->m_bumpResolution * sizeof(BGRA);
         GLuint* ids = (*it)->m_pbo;
         //generate two buffers to alternate between during updating for performance (halting)
@@ -228,7 +227,6 @@ void View::initializeGL()
 
     glEnable(GL_TEXTURE_2D);
     createShaderPrograms();
-    cout << "initialized shader programs..." << endl;
 
     // All OpenGL initialization *MUST* be done during or after this
     // method. Before this method is called, there is no active OpenGL
@@ -270,14 +268,14 @@ void View::initializeGL()
     // Load the snow texture
     GLuint textureId = ResourceLoader::loadTexture( ":/textures/textures/snowflake_design.png" );
     m_snowEmitter.setTextureId( textureId );
+
+    m_snowTextureId = ResourceLoader::loadTexture( ":/textures/textures/plain-surface.jpg" );
+
     updateCamera();
 
-    cout << "set lights..." << endl;
     setupLights();
     glFrontFace(GL_CCW);
-    cout<<"paint scene..."<<endl;
     paintGL();
-    cout<<"...painted scene"<<endl;
 }
 
 void View::setupLights()
@@ -302,12 +300,22 @@ void View::setupLights()
 void View::setupCubeMap()
 {
     QList<QFile *> fileList;
+    /*
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posx.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negx.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posy.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negy.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/posz.jpg"));
     fileList.append(new QFile("/course/cs123/data/image/cubemap/plaza/negz.jpg"));
+    */
+
+    QString skyType = QString::fromStdString("sky32");
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negx.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negy.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/posz.jpg"));
+    fileList.append(new QFile( m_projDir + "/skymaps/" + skyType + "/negz.jpg"));
     m_cubeMap = ResourceLoader::loadCubeMap(fileList);
 }
 
@@ -329,44 +337,6 @@ void View::updateCamera()
               m_camera->up.x, m_camera->up.y, m_camera->up.z);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
-
-
-void View::drawPlane(float color[], float translate[])
-{
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-
-    glBegin(GL_QUADS);
-    //XY axis
-    glNormal3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-    glEnd();
-
-    glPopMatrix();
-}
-
-void View::drawPlane(float color[], float translate[], float scale[], float rotate[],int angle)
-{
-    glColor3f(color[0],color[1],color[2]);
-    glPushMatrix();
-    glTranslatef(translate[0],translate[1],translate[2]);
-    glScalef(scale[0],scale[1],scale[2]);
-    glRotatef(angle,rotate[0],rotate[1],rotate[2]);
-
-    glBegin(GL_QUADS);
-    glNormal3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 1.0f);
-    glEnd();
-
-    glPopMatrix();
 }
 
 void View::drawUnitAxis(float x, float y, float z){
@@ -425,9 +395,11 @@ void View::renderScene()
                 shader->setUniformValue("snowTexture", 1);
                 shader->setUniformValue("snowDisplacement", 2);
                 shader->setUniformValue("localTexture", 3);
+                shader->setUniformValue("snowSurfaceTexture", 4);
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
+                shader->setUniformValue("tesselationParam", obj->getShape()->getParamOne());
 
                 // Set the blur data
                 int radius = 6;
@@ -496,6 +468,9 @@ void View::renderScene()
                 } else {
                     shader->setUniformValue("useLocalTexture", false);
                 }
+
+                glActiveTexture(GL_TEXTURE4);
+                glBindTexture(GL_TEXTURE_2D, m_snowTextureId);
 
                 glActiveTexture(GL_TEXTURE0);
             }
@@ -655,6 +630,9 @@ void View::keyPressEvent(QKeyEvent *event)
         m_usePbo = ! m_usePbo;
     } else if(event->key() == Qt::Key_8) {
         m_showSkybox = ! m_showSkybox;
+    } else if(event->key() == Qt::Key_U) {
+        m_useUberMode = ! m_useUberMode;
+        m_speed = m_useUberMode ? UBER_SPEED : DEFAULT_SPEED;
     } else {
         Vector4 dirVec = m_camera->getDirection();
         dirVec.y = 0;

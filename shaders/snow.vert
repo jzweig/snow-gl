@@ -14,7 +14,7 @@ varying vec3 normal;	// The normal vector of the vertex, in eye space
 
 float computeOffset(vec4 hVec)
 {
-    return (hVec.x+hVec.y*256.0+hVec.z*256.0*256.0);
+    return (hVec.x+hVec.y*256.0+hVec.z*256.0*256.0) * 0.25;
 }
     
 void main()
