@@ -28,7 +28,6 @@ GLAPI void APIENTRY glBindBuffer (GLenum target, GLuint buffer);
 GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
 GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
 }
-#endif
 extern "C" {
 GLAPI void APIENTRY glBindBufferARB (GLenum target, GLuint buffer);
 GLAPI void APIENTRY glDeleteBuffersARB (GLsizei n, const GLuint *buffers);
@@ -42,6 +41,8 @@ GLAPI GLboolean APIENTRY glUnmapBufferARB (GLenum target);
 GLAPI void APIENTRY glGetBufferParameterivARB (GLenum target, GLenum pname, GLint *params);
 GLAPI void APIENTRY glGetBufferPointervARB (GLenum target, GLenum pname, GLvoid* *params);
 }
+#endif
+
 View::View(QWidget *parent) : QGLWidget(parent),
     m_timer(this), m_prevTime(0), m_prevFps(0.f), m_fps(0.f),m_font("Deja Vu Sans Mono", 8, 4)
 {
@@ -91,6 +92,7 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
     m_homeDir = getpwuid(getuid())->pw_dir;
     m_projDir = m_homeDir+"/course/cs123/snow-gl/";
+    m_projDir = "/Users/jbowens/Documents/School/2012-2013/cs123/snow-gl/";
 }
 
 View::~View()

@@ -8,6 +8,10 @@
 
 using namespace std;
 
+#ifdef __APPLE__
+#include "glut/glut.h"
+#endif
+
 /**
   Loads the cube map into video memory.
 

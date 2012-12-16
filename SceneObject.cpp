@@ -2,10 +2,9 @@
 
 #include <CS123Common.h>
 //#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glut.h>
-#include <GL/glext.h>
-//#ifndef __APPLE__
+#include <QtOpenGL>
+
+#ifndef __APPLE__
 extern "C" {
     GLAPI void APIENTRY glUniform1i(GLint location, GLint v0);
     GLAPI GLuint APIENTRY glGetUniformLocation(GLuint program, const GLchar *name);
@@ -14,7 +13,14 @@ extern "C" {
     GLAPI void APIENTRY glGenBuffers (GLsizei n, GLuint *buffers);
     GLAPI void APIENTRY glBufferData (GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage);
 }
-//#endif
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <GL/glext.h>
+#else
+#include <glut/glut.h>
+//#include <GL/glext.h>
+#endif
+
 
 SceneObject::SceneObject(Shape* shape, ShapeType type, int bumpResolution) : m_shape(shape)
 {
