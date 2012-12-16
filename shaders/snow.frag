@@ -23,6 +23,9 @@ uniform vec4 specular;		// The specular channel of the color to reflect
 
 uniform float r0;		// The Fresnel reflectivity when the incident angle is 0
 uniform float m;		// The roughness of the material
+
+uniform int tesselationParam;           // The tesselation parameter for the shape being shaded
+
 float computeOffset(vec4 hVec)
 {
     return hVec.x + hVec.y*256.0 + hVec.z*256.0*256.0;
@@ -51,7 +54,7 @@ void main()
 
     // From the blurred height, determine the color contribution of the snow
     float snowIntensity = min(1.0, actualHeight);
-    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*2) * snowIntensity;
+    vec4 snowColor = texture2D(snowSurfaceTexture, gl_TexCoord[0].st*(float(tesselationParam) / 10));
 
     // Light vectors
     vec3 n = normalize(normal);
@@ -66,14 +69,14 @@ void main()
     // Compute the local color
     vec4 localColor;
     if( useLocalTexture ) {
-        localColor = texture2D(localTexture, gl_TexCoord[0].st*10);
+        localColor = texture2D(localTexture, gl_TexCoord[0].st * (float(tesselationParam) / 10.0));
     } else {
         localColor = gl_Color;
     }
 
     // Compute the diffuse color from the object's natural color and the
     // snow's contribution
-    vec4 diffuseColor = localColor + snowColor;
+    vec4 diffuseColor = localColor * (1.0 - snowIntensity) + snowColor * snowIntensity;
 
     // Compute the final color
     vec4 finalColor = (diffuseColor * diffuseCoefficient);

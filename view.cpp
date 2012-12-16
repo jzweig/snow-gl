@@ -399,6 +399,7 @@ void View::renderScene()
                 shader->setUniformValue("useDisplacement", m_useDisplacement);
                 Vector4 color = obj->getColor();
                 shader->setUniformValue("color",color.x, color.y, color.z, color.w);
+                shader->setUniformValue("tesselationParam", obj->getShape()->getParamOne());
 
                 // Set the blur data
                 int radius = 6;
