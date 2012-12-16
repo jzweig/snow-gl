@@ -11,6 +11,7 @@ varying vec3 vertex_to_light;	// The normalized vector from the vertex to the li
 varying vec3 eye;	// The normalized vector from the vertex to the eye
 varying vec3 normal;	// The normal vector of the vertex, in eye space
 
+uniform int tesselationParam;           // The tesselation parameter for the shape being shaded
 
 float computeOffset(vec4 hVec)
 {
@@ -39,18 +40,18 @@ void main()
      vec4 v = vec4(gl_Vertex);
      if(useDisplacement){
          vec2 texCoords = gl_MultiTexCoord0.st;
-         if(texCoords.s>0.0 && gl_MultiTexCoord0.s <1.0 && gl_MultiTexCoord0.t >0.0 && gl_MultiTexCoord0.t < 1.0){
-             float texOffset = 1.0/50.0;
+         //if(texCoords.s>0.0 && gl_MultiTexCoord0.s <1.0 && gl_MultiTexCoord0.t >0.0 && gl_MultiTexCoord0.t < 1.0){
+             float texOffset = 1.0/float(tesselationParam);
              float c1 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t-texOffset)));
-             float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
-             float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
-             float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
-             float deltax = 1.0;
-             float deltaz = 1.0;
-             vec3 v1 = normalize(vec3(vertex.x-deltax,c1,vertex.z-deltaz));
-             vec3 v2 = normalize(vec3(vertex.x-deltax,c2,vertex.z+deltaz));
-             vec3 v3 = normalize(vec3(vertex.x+deltax,c3,vertex.z-deltaz));
-             vec3 v4 = normalize(vec3(vertex.x+deltax,c4,vertex.z+deltaz));
+             float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
+             float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
+             float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
+             float deltax = 0.001;//20.0/float(tesselationParam);
+             float deltaz = 0.001;//20.0/float(tesselationParam);
+             vec3 v1 = normalize(vec3(-deltax,c1,-deltaz));
+             vec3 v2 = normalize(vec3(-deltax,c2,deltaz));
+             vec3 v3 = normalize(vec3(deltax,c3,deltaz));
+             vec3 v4 = normalize(vec3(deltax,c4,-deltaz));
              vec3 v12 = normalize(cross(v1,v2));
              if(v12.y < 0.0){ v12 = -v12;}
              vec3 v23 = normalize(cross(v2,v3));
@@ -62,7 +63,7 @@ void main()
              vec3 vnorm = normalize(v12+v23+v34+v41);
              normal = normalize(gl_NormalMatrix * vnorm);
 
-         }
+         //}
 
          vec4 dv =  texture2D( snowDisplacement, gl_MultiTexCoord0.st );
          v.y = v.y+computeOffset(dv);
