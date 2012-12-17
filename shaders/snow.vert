@@ -44,13 +44,14 @@ void main()
      if(useDisplacement){
          vec2 texCoords = gl_MultiTexCoord0.st;
          //if(texCoords.s>0.0 && gl_MultiTexCoord0.s <1.0 && gl_MultiTexCoord0.t >0.0 && gl_MultiTexCoord0.t < 1.0){
+         if(origNormal.y > origNormal.x && origNormal.y > origNormal.z){
              float texOffset = 1.0/float(tesselationParam);
              float c1 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t-texOffset)));
              float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
              float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
              float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
-             float deltax = 0.001;//(scale.x/float(tesselationParam));//0.001;//20.0/float(tesselationParam);
-             float deltaz = 0.001;//(scale.z/float(tesselationParam));//0.001;//20.0/float(tesselationParam);
+             float deltax = 0.005;//20.0/float(tesselationParam);
+             float deltaz = 0.005;//scale.z/float(tesselationParam);//1.0/scale.z;//0.002;//(scale.z/float(tesselationParam));//0.001;//20.0/float(tesselationParam);
              vec3 v1 = normalize(vec3(-deltax,c1,-deltaz));
              vec3 v2 = normalize(vec3(-deltax,c2,deltaz));
              vec3 v3 = normalize(vec3(deltax,c3,deltaz));
@@ -64,7 +65,8 @@ void main()
              vec3 v41 = normalize(cross(v4,v1));
              if(v41.y < 0.0){ v41 = -v41;}
              vec3 vnorm = normalize(v12+v23+v34+v41);
-             normal = normalize(gl_NormalMatrix * vnorm);
+                normal = normalize(gl_NormalMatrix * vnorm);
+             }
 
          //}
 
