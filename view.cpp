@@ -115,9 +115,18 @@ View::~View()
     }
     m_snowflakeTextures.clear();
 
+    // Delete the shaders
+    foreach (QGLShaderProgram *sp, m_shaderPrograms)
+        delete sp;
+
     // Delete the snow texture
     glDeleteTextures(1, &m_snowTextureId);
     m_snowTextureId = 0;
+
+    // Delete Skybox
+
+    glDeleteLists(m_cubeMap, 1);
+
 }
 
 void View::setupScene()

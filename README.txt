@@ -1,6 +1,8 @@
 Final
 jmzweig & jbowens
 
+Real time snow accumulation
+
 User Interaction
     We implemented an orbital camera, controlled by the mouse (left mouse button held), and WASD movement.
     Settings are controlled using 1-0 keys
@@ -22,10 +24,13 @@ Displacement mapping
 
 Texture mapping
     In addition to a skybox and mapped cubes and the plane, as snow comes down it maps a snow texture onto the ground at the collision points.
+    (Texture blending)
 
+Lighting
+    Diffuse and Ambient
 
 
 Performance Enhancements:
-VBOs - Vertex Buffer Objects
+VBOs - Vertex Buffer Objects (sends vertices to the GPU for storage)
 PBOs - Pixel Buffer Objects (high resolution heightmap textures are held in buffer objects to stream new collisions onto the GPU at every frame).
 Multithreading - Collision Detection and Particle physics are done on multiple threads.

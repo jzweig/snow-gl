@@ -38,8 +38,6 @@ public:
     ~View();
 
 private:
-    //QTime time;
-    //QTimer timer;
     Vector2 m_prevMousePos;
     QTimer m_timer;
     QTime m_clock;
@@ -47,7 +45,6 @@ private:
     float m_prevFps, m_fps;
     QFont m_font; // font for rendering text
     GLuint m_cubeMap;
-    SceneObject* m_terrain;
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
