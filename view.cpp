@@ -96,12 +96,28 @@ View::View(QWidget *parent) : QGLWidget(parent),
 
 View::~View()
 {
-    safeDelete(m_camera);
     // Delete the scene objects
     for( vector<SceneObject *>::iterator it = m_objects.begin(); it != m_objects.end(); it++ ) {
+        SceneObject *obj = *it;
+
+        // Free the object's texture if it has one
+        GLuint textureId = obj->getColorTexture();
+        if( textureId != 0 )
+            glDeleteTextures(1, &textureId);
         delete *it;
     }
     m_objects.clear();
+
+    // Delete snowflake textures
+    for( vector<GLuint>::iterator it = m_snowflakeTextures.begin(); it != m_snowflakeTextures.end(); it++ ) {
+        GLuint textureId = *it;
+        glDeleteTextures(1, &textureId);
+    }
+    m_snowflakeTextures.clear();
+
+    // Delete the snow texture
+    glDeleteTextures(1, &m_snowTextureId);
+    m_snowTextureId = 0;
 }
 
 void View::setupScene()
