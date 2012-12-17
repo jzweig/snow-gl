@@ -119,7 +119,7 @@ void View::setupScene()
     // Make a demo box
     m_factory.setTesselationParameter(32);
     m_factory.setBumpResolution(128);
-    m_factory.setOriginalScale(0.5, 0.5, 0.5);
+    m_factory.setOriginalScale(1.0, 1.0, 1.0);
     m_factory.setOriginalTranslation(-5.0, 0.40, 5.0);
     SceneObject *demoBox = m_factory.constructCube();
     demoBox->setColor(0.5, 0.15, 0.15, 1.0);
@@ -298,8 +298,8 @@ void View::setupLights()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
-
     glEnable(GL_LIGHT0);
+
 }
 /**
   Load a cube map for the skybox
@@ -348,6 +348,9 @@ void View::updateCamera()
 
 void View::drawUnitAxis(float x, float y, float z){
 
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glTranslatef(x,y,z);
     glBegin(GL_LINES);
     glColor3f(1,0,0); // x - red
     glVertex3f(0,0,0);
@@ -359,6 +362,7 @@ void View::drawUnitAxis(float x, float y, float z){
     glVertex3f(0,0,0);
     glVertex3f(0,0,1);
     glEnd();
+    glPopMatrix();
 }
 
 void View::renderScene()
@@ -525,6 +529,10 @@ void View::paintGL()
     {
         glDisable(GL_LIGHTING);
         drawUnitAxis(0.f,0.f,0.f);
+
+        //draw light
+            GLfloat position[] = { 5.0f, 5.5f, 5.0f, 1.0f };
+            drawUnitAxis(position[0],position[1],position[2]);
         glEnable(GL_LIGHTING);
     }
 

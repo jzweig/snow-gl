@@ -49,8 +49,8 @@ void main()
              float c2 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s-texOffset,texCoords.t+texOffset)));
              float c3 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t+texOffset)));
              float c4 = computeOffset(texture2D( snowDisplacement, vec2(texCoords.s+texOffset,texCoords.t-texOffset)));
-             float deltax = 1.0/(scale.x*float(tesselationParam));//0.001;//20.0/float(tesselationParam);
-             float deltaz = 1.0/(scale.z*float(tesselationParam));//0.001;//20.0/float(tesselationParam);
+             float deltax = 0.001;//(scale.x/float(tesselationParam));//0.001;//20.0/float(tesselationParam);
+             float deltaz = 0.001;//(scale.z/float(tesselationParam));//0.001;//20.0/float(tesselationParam);
              vec3 v1 = normalize(vec3(-deltax,c1,-deltaz));
              vec3 v2 = normalize(vec3(-deltax,c2,deltaz));
              vec3 v3 = normalize(vec3(deltax,c3,deltaz));
